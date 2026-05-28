@@ -1,0 +1,45 @@
+import React from "react";
+import Login from "./pages/Login";
+import { Route, Routes } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Register from "./pages/Register";
+import { ProtectedRoute } from "./utils/ProtectedRoute";
+import { PublicRoute } from "./utils/PublicRoute";
+import Profile from "./pages/Profile";
+import ResetPassword from "./pages/ResetPassword";
+import SendResetOtp from "./pages/SendResetOtp";
+import VerifyEmail from "./pages/VerifyEmail";
+import Dashboard from "./pages/Dashboard";
+import AddAssignment from "./pages/AddAssignment";
+import EditAssignment from "./pages/EditAssignment";
+import StudentList from "./pages/StudentList";
+const App = () => {
+  return (
+    <div>
+      <ToastContainer/>
+      <Routes>
+        {/* public route but restricted when logged in */}
+        <Route element={<PublicRoute />}>
+          <Route path="/" element={<Login />}></Route>
+          <Route path="/register" element={<Register />}></Route>
+        </Route>
+        
+        <Route path="/verify-email" element={<VerifyEmail />}></Route>
+        <Route path="/forgot-password" element={<SendResetOtp />}></Route>
+        <Route path="/reset-password" element={<ResetPassword />}></Route>
+        {/* restricted when logout */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Dashboard />}></Route>
+          <Route path="/dashboard/:assignmentId" element={<StudentList />}></Route>
+          <Route path="/addAssignment" element={<AddAssignment />}></Route>
+          <Route path="/edit-assignment/:id" element={<EditAssignment />}></Route>
+          <Route path="/profile" element={<Profile />}></Route>
+        </Route>
+
+      </Routes>
+    </div>
+  );
+};
+
+export default App;
