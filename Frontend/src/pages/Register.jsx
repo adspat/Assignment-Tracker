@@ -27,6 +27,10 @@ const Register = () => {
       toast.error("All fields are required");
       return;
     }
+    if(formData.password.length < 6){
+      toast.error("Password legth atleat 6 character");
+      return ;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       toast.error("Password does not match");
