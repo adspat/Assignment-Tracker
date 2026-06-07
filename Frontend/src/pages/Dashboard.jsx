@@ -469,7 +469,7 @@ const Dashboard = () => {
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", cursor: "pointer", borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.06)", gap: 8 }}>
           <div
-            onClick={() => { navigate("/profile"); if (!isDesktop) closeSidebar(); }}
+            onClick={() => {  if (!isDesktop) closeSidebar(); }}
             style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", minWidth: 0 }}
           >
             <div style={{ minWidth: 0 }}>

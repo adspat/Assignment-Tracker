@@ -28,7 +28,7 @@ const Register = () => {
       return;
     }
     if(formData.password.length < 6){
-      toast.error("Password legth atleat 6 character");
+      toast.error("Password should be atleat of 6 character");
       return ;
     }
 
