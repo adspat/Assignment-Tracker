@@ -932,20 +932,6 @@ const Dashboard = () => {
                 Show Enrolled Students
               </button>
               <button
-                onClick={handleAddStudentManually}
-                style={{
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  padding: "13px 16px", background: tk.successSoft, color: tk.success,
-                  border: `1.5px solid rgba(48,164,108,0.2)`, borderRadius: 13,
-                  fontSize: "0.82rem", fontWeight: 700, cursor: "pointer", transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(48,164,108,0.18)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = tk.successSoft; }}
-              >
-                <i className="ri-user-add-line" style={{ fontSize: "1rem" }} />
-                Manual Entry
-              </button>
-              <button
                 onClick={closeModal}
                 style={{
                   padding: "11px 16px", background: "rgba(15,15,20,0.04)",

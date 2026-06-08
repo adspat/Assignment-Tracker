@@ -12,26 +12,21 @@ if (!document.getElementById("edu-fonts")) {
   document.head.appendChild(link);
 }
 
-/* ─── Global style injection ─── */
-if (!document.getElementById("student-list-styles")) {
+/* ─── Keyframe animations ─── */
+if (!document.getElementById("student-list-animations")) {
   const s = document.createElement("style");
-  s.id = "student-list-styles";
+  s.id = "student-list-animations";
   s.textContent = `
-    html, body { overflow-x: hidden; }
-    *, *::before, *::after { box-sizing: border-box; }
     @keyframes shimmer { 0%,100%{opacity:.5} 50%{opacity:1} }
     @keyframes rowIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
     @keyframes slideUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes slideUpCenter { from{opacity:0;transform:translate(-50%,-40%)} to{opacity:1;transform:translate(-50%,-50%)} }
     @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+    @keyframes spin { to { transform: rotate(360deg); } }
     .student-row { animation: rowIn 0.35s ease both; }
     .mobile-card { animation: rowIn 0.3s ease both; }
-    .submit-btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
-    .submit-btn:active { transform: scale(0.97); }
-    .submit-btn:disabled { opacity:0.6; cursor:not-allowed; transform:none !important; filter:none !important; }
-    .back-btn:hover { background: rgba(15,15,20,0.07) !important; }
-    .mobile-card-row:active { background: rgba(124,106,247,0.05) !important; }
-    .search-input:focus { outline: none; border-color: rgba(124,106,247,0.5) !important; box-shadow: 0 0 0 3px rgba(124,106,247,0.10) !important; }
-    .search-clear-btn:hover { background: rgba(15,15,20,0.10) !important; }
+    .shimmer-pulse { animation: shimmer 1.4s ease-in-out infinite; }
+    .spin { animation: spin 0.7s linear infinite; }
   `;
   document.head.appendChild(s);
 }
@@ -47,49 +42,24 @@ const useIsMobile = () => {
   return mobile;
 };
 
-/* ─── Palette ─── */
-const tk = {
-  accent: "#7c6af7",
-  accentHover: "#9480f9",
-  accentSoft: "rgba(124,106,247,0.10)",
-  accentBorder: "rgba(124,106,247,0.25)",
-  canvas: "#f5f4f0",
-  card: "#ffffff",
-  cardBorder: "rgba(15,15,20,0.07)",
-  textPrimary: "#12110f",
-  textSecondary: "#6b6762",
-  textMuted: "#aaa8a3",
-  success: "#30a46c",
-  successSoft: "rgba(48,164,108,0.09)",
-  successBorder: "rgba(48,164,108,0.20)",
-  warning: "#c07c1a",
-  warningSoft: "rgba(192,124,26,0.09)",
-  warningBorder: "rgba(192,124,26,0.20)",
-  danger: "#e5484d",
-  dangerSoft: "rgba(229,72,77,0.08)",
-  dangerBorder: "rgba(229,72,77,0.20)",
-  metaBg: "#f9f8f5",
-  metaBorder: "rgba(15,15,20,0.06)",
-  rowHover: "rgba(124,106,247,0.03)",
-  divider: "rgba(15,15,20,0.06)",
-};
-
 /* ─── Avatar ─── */
-const Avatar = ({ name, size = 34 }) => {
+const Avatar = ({ name, size = "md" }) => {
   const initials = (name || "?")
-    .split(" ").slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() || "").join("");
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() || "")
+    .join("");
   const hue = [...(name || "")].reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
+  const sizeClasses = size === "lg" ? "w-12 h-12 text-sm" : "w-9 h-9 text-xs";
   return (
-    <div style={{
-      width: size, height: size, borderRadius: "50%",
-      background: `hsl(${hue},40%,88%)`,
-      border: `1.5px solid hsl(${hue},30%,78%)`,
-      display: "flex", alignItems: "center", justifyContent: "center",
-      fontSize: size < 36 ? "0.7rem" : "0.85rem",
-      fontWeight: 700, color: `hsl(${hue},40%,30%)`,
-      flexShrink: 0, letterSpacing: "0.03em",
-    }}>
+    <div
+      className={`${sizeClasses} rounded-full flex items-center justify-center font-bold flex-shrink-0 tracking-wide border`}
+      style={{
+        background: `hsl(${hue},40%,88%)`,
+        borderColor: `hsl(${hue},30%,78%)`,
+        color: `hsl(${hue},40%,30%)`,
+      }}
+    >
       {initials}
     </div>
   );
@@ -99,16 +69,18 @@ const Avatar = ({ name, size = 34 }) => {
 const StatusBadge = ({ status }) => {
   const submitted = status === "submitted";
   return (
-    <span style={{
-      display: "inline-flex", alignItems: "center", gap: 5,
-      fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.04em",
-      padding: "4px 10px", borderRadius: 999,
-      background: submitted ? tk.successSoft : tk.warningSoft,
-      color: submitted ? tk.success : tk.warning,
-      border: `1px solid ${submitted ? tk.successBorder : tk.warningBorder}`,
-      whiteSpace: "nowrap",
-    }}>
-      <span style={{ width: 6, height: 6, borderRadius: "50%", background: submitted ? tk.success : tk.warning, flexShrink: 0 }} />
+    <span
+      className={`inline-flex items-center gap-1 text-[0.65rem] font-bold tracking-wide px-2.5 py-1 rounded-full border whitespace-nowrap ${
+        submitted
+          ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+          : "bg-amber-50 text-amber-600 border-amber-200"
+      }`}
+    >
+      <span
+        className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+          submitted ? "bg-emerald-500" : "bg-amber-500"
+        }`}
+      />
       {submitted ? "Submitted" : "Pending"}
     </span>
   );
@@ -116,21 +88,21 @@ const StatusBadge = ({ status }) => {
 
 /* ─── Spinner ─── */
 const Spinner = () => (
-  <span style={{
-    width: 11, height: 11,
-    border: "2px solid rgba(255,255,255,0.3)",
-    borderTopColor: "#fff", borderRadius: "50%",
-    animation: "shimmer 0.7s linear infinite",
-    display: "inline-block",
-  }} />
+  <span
+    className="spin inline-block w-3 h-3 rounded-full border-2 border-white/30 border-t-white"
+    style={{ animation: "spin 0.7s linear infinite" }}
+  />
 );
 
 /* ─── Skeleton row (desktop) ─── */
 const SkeletonRow = () => (
   <tr>
     {[44, 28, 16, 16, 14, 18, 14].map((w, i) => (
-      <td key={i} style={{ padding: "14px 20px" }}>
-        <div style={{ height: 12, width: `${w}%`, borderRadius: 6, background: "rgba(15,15,20,0.06)", animation: "shimmer 1.4s ease-in-out infinite" }} />
+      <td key={i} className="px-5 py-4">
+        <div
+          className="shimmer-pulse h-3 rounded-md bg-black/[0.06]"
+          style={{ width: `${w}%` }}
+        />
       </td>
     ))}
   </tr>
@@ -138,13 +110,13 @@ const SkeletonRow = () => (
 
 /* ─── Skeleton card (mobile) ─── */
 const SkeletonCard = () => (
-  <div style={{ background: tk.card, border: `1px solid ${tk.cardBorder}`, borderRadius: 14, padding: "14px 16px", display: "flex", alignItems: "center", gap: 12 }}>
-    <div style={{ width: 42, height: 42, borderRadius: "50%", background: "rgba(15,15,20,0.06)", flexShrink: 0, animation: "shimmer 1.4s ease-in-out infinite" }} />
-    <div style={{ flex: 1 }}>
-      <div style={{ height: 12, width: "55%", borderRadius: 6, background: "rgba(15,15,20,0.06)", marginBottom: 8, animation: "shimmer 1.4s ease-in-out infinite" }} />
-      <div style={{ height: 10, width: "30%", borderRadius: 6, background: "rgba(15,15,20,0.06)", animation: "shimmer 1.4s ease-in-out infinite" }} />
+  <div className="bg-white border border-black/[0.07] rounded-2xl p-4 flex items-center gap-3">
+    <div className="shimmer-pulse w-11 h-11 rounded-full bg-black/[0.06] flex-shrink-0" />
+    <div className="flex-1">
+      <div className="shimmer-pulse h-3 w-[55%] rounded-md bg-black/[0.06] mb-2" />
+      <div className="shimmer-pulse h-2.5 w-[30%] rounded-md bg-black/[0.06]" />
     </div>
-    <div style={{ width: 80, height: 32, borderRadius: 9, background: "rgba(15,15,20,0.06)", animation: "shimmer 1.4s ease-in-out infinite" }} />
+    <div className="shimmer-pulse w-20 h-8 rounded-xl bg-black/[0.06]" />
   </div>
 );
 
@@ -154,73 +126,214 @@ const SearchBar = ({ value, onChange, isMobile, resultCount, totalCount }) => {
   const hasQuery = value.length > 0;
 
   return (
-    <div style={{ marginBottom: isMobile ? 14 : 18 }}>
-      <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
-        {/* Search icon */}
+    <div className={`${isMobile ? "mb-3.5" : "mb-5"}`}>
+      <div className="relative flex items-center">
         <i
-          className="ri-search-line"
-          style={{
-            position: "absolute", left: 14,
-            fontSize: "1rem", color: hasQuery ? tk.accent : tk.textMuted,
-            pointerEvents: "none", transition: "color 0.2s", zIndex: 1,
-          }}
+          className={`ri-search-line absolute left-3.5 text-base pointer-events-none z-10 transition-colors duration-200 ${
+            hasQuery ? "text-violet-500" : "text-stone-400"
+          }`}
         />
-
         <input
           ref={inputRef}
-          className="search-input"
           type="text"
           placeholder="Search by name, enrollment, branch…"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          style={{
-            width: "100%",
-            padding: isMobile ? "10px 40px 10px 40px" : "11px 44px 11px 40px",
-            background: tk.card,
-            border: `1.5px solid ${hasQuery ? tk.accentBorder : tk.cardBorder}`,
-            borderRadius: 12,
-            fontSize: "0.82rem",
-            fontFamily: "'DM Sans', sans-serif",
-            fontWeight: 500,
-            color: tk.textPrimary,
-            transition: "border-color 0.2s, box-shadow 0.2s",
-            boxShadow: hasQuery ? `0 0 0 3px rgba(124,106,247,0.08)` : "0 1px 4px rgba(0,0,0,0.04)",
-          }}
+          className={`w-full ${isMobile ? "py-2.5" : "py-3"} pl-10 pr-10 bg-white rounded-xl text-[0.82rem] font-medium text-stone-900 transition-all duration-200 font-[DM_Sans] focus:outline-none ${
+            hasQuery
+              ? "border-2 border-violet-300 shadow-[0_0_0_3px_rgba(124,106,247,0.08)]"
+              : "border border-black/[0.07] shadow-sm"
+          }`}
+          style={{ fontFamily: "'DM Sans', sans-serif" }}
         />
-
-        {/* Clear button */}
         {hasQuery && (
           <button
-            className="search-clear-btn"
             onClick={() => { onChange(""); inputRef.current?.focus(); }}
-            style={{
-              position: "absolute", right: 10,
-              width: 24, height: 24, borderRadius: "50%",
-              background: "rgba(15,15,20,0.07)", border: "none",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer", color: tk.textMuted, fontSize: "0.85rem",
-              transition: "background 0.15s",
-            }}
+            className="absolute right-2.5 w-6 h-6 rounded-full bg-black/[0.07] border-none flex items-center justify-center cursor-pointer text-stone-400 text-sm hover:bg-black/[0.12] transition-colors duration-150"
           >
             <i className="ri-close-line" />
           </button>
         )}
       </div>
-
-      {/* Result count hint */}
       {hasQuery && (
-        <p style={{
-          margin: "7px 0 0 2px",
-          fontSize: "0.68rem", fontWeight: 600,
-          color: resultCount === 0 ? tk.danger : tk.accent,
-          animation: "fadeIn 0.15s ease",
-        }}>
+        <p
+          className={`mt-1.5 ml-0.5 text-[0.68rem] font-semibold ${
+            resultCount === 0 ? "text-red-500" : "text-violet-500"
+          }`}
+          style={{ animation: "fadeIn 0.15s ease" }}
+        >
           {resultCount === 0
             ? "No students match your search"
             : `${resultCount} of ${totalCount} student${resultCount !== 1 ? "s" : ""} match`}
         </p>
       )}
     </div>
+  );
+};
+
+/* ════════════════════════════════
+   ADD STUDENT MODAL
+════════════════════════════════ */
+const AddStudentModal = ({ onClose, onAdd }) => {
+  const [enrollment, setEnrollment] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    setTimeout(() => inputRef.current?.focus(), 100);
+  }, []);
+
+  const handleAdd = async () => {
+    const trimmed = enrollment.trim();
+    if (!trimmed) {
+      setError("Please enter an enrollment number.");
+      return;
+    }
+    setError("");
+    setLoading(true);
+    try {
+      await onAdd(trimmed);
+      onClose();
+    } catch (err) {
+      setError(
+        err?.response?.data?.message || "Student not found or already added."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") handleAdd();
+    if (e.key === "Escape") onClose();
+  };
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        className="fixed inset-0 bg-black/55 backdrop-blur-sm z-[998]"
+        style={{ animation: "fadeIn 0.2s ease" }}
+      />
+
+      {/* Modal */}
+      <div
+        className="fixed left-1/2 top-1/2 z-[999] bg-white rounded-[22px] shadow-2xl w-[min(420px,calc(100vw-32px))]"
+        style={{
+          animation: "slideUpCenter 0.3s cubic-bezier(0.34,1.3,0.64,1) forwards",
+          padding: "28px 28px 24px",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-violet-50 border border-violet-200 flex items-center justify-center text-violet-500 text-lg flex-shrink-0">
+              <i className="ri-user-add-line" />
+            </div>
+            <div>
+              <h2
+                className="m-0 text-[1.1rem] font-black text-stone-900 tracking-tight"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                Add Student
+              </h2>
+              <p className="mt-0.5 text-[0.68rem] text-stone-400 font-medium">
+                Link student by enrollment number
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-black/[0.06] border-none flex items-center justify-center cursor-pointer text-stone-500 text-base hover:bg-black/10 transition-colors flex-shrink-0"
+          >
+            <i className="ri-close-line" />
+          </button>
+        </div>
+
+        {/* Input */}
+        <div className="mb-2">
+          <label className="block text-[0.62rem] font-bold uppercase tracking-[0.08em] text-stone-400 mb-2">
+            Enrollment Number
+          </label>
+          <div className="relative">
+            <i
+              className={`ri-hashtag absolute left-3.5 top-1/2 -translate-y-1/2 text-[0.9rem] pointer-events-none transition-colors duration-200 ${
+                enrollment ? "text-violet-500" : "text-stone-400"
+              }`}
+            />
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="e.g. 0101CS211001"
+              value={enrollment}
+              onChange={(e) => {
+                setEnrollment(e.target.value);
+                setError("");
+              }}
+              onKeyDown={handleKeyDown}
+              className={`w-full py-3 pl-9 pr-4 bg-stone-50 rounded-xl text-sm font-semibold text-stone-900 transition-all duration-200 focus:outline-none placeholder:text-stone-300 placeholder:font-normal ${
+                error
+                  ? "border-2 border-red-300 shadow-[0_0_0_3px_rgba(229,72,77,0.08)]"
+                  : enrollment
+                  ? "border-2 border-violet-300 shadow-[0_0_0_3px_rgba(124,106,247,0.08)]"
+                  : "border border-black/[0.07]"
+              }`}
+              style={{ fontFamily: "'DM Sans', sans-serif" }}
+            />
+          </div>
+
+          {/* Error */}
+          {error && (
+            <p
+              className="mt-2 text-[0.7rem] font-semibold text-red-500 flex items-center gap-1.5"
+              style={{ animation: "fadeIn 0.15s ease" }}
+            >
+              <i className="ri-error-warning-line text-sm" />
+              {error}
+            </p>
+          )}
+        </div>
+
+        {/* Info hint */}
+        <p className="text-[0.68rem] text-stone-400 mb-5 flex items-center gap-1.5">
+          <i className="ri-information-line text-xs text-violet-400" />
+          The student will be added to this assignment's submission list.
+        </p>
+
+        {/* Actions */}
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 py-3 px-4 bg-black/[0.04] text-stone-500 border border-black/[0.07] rounded-xl text-[0.82rem] font-semibold cursor-pointer hover:bg-black/[0.07] transition-colors duration-150"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleAdd}
+            disabled={loading}
+            className={`flex-1 py-3 px-4 bg-violet-500 text-white border-none rounded-xl text-[0.82rem] font-bold cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 ${
+              loading
+                ? "opacity-70 cursor-not-allowed"
+                : "hover:bg-violet-600 hover:-translate-y-px active:scale-[0.97]"
+            }`}
+          >
+            {loading ? (
+              <>
+                <Spinner /> Adding…
+              </>
+            ) : (
+              <>
+                <i className="ri-user-add-line text-base" />
+                Add Student
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </>
   );
 };
 
@@ -233,16 +346,14 @@ const StudentList = () => {
   const [submittingId, setSubmittingId] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");   // ← NEW
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const location = useLocation();
   const navigate = useNavigate();
   const { semester, classs, branch } = location.state || {};
   const { assignmentId } = useParams();
   const isMobile = useIsMobile();
-
-  const tableRef = useRef(null);
-  const headerRef = useRef(null);
 
   /* ─── Filter logic ─── */
   const filteredStudents = searchQuery.trim()
@@ -292,7 +403,9 @@ const StudentList = () => {
         );
         if (data.success) {
           const sorted = [...data.data].sort((a, b) =>
-            (a.studentId?.name?.toLowerCase() || "").localeCompare(b.studentId?.name?.toLowerCase() || "")
+            (a.studentId?.name?.toLowerCase() || "").localeCompare(
+              b.studentId?.name?.toLowerCase() || ""
+            )
           );
           setStudents(sorted);
         }
@@ -305,19 +418,50 @@ const StudentList = () => {
     fetchStudents();
   }, [assignmentId]);
 
+  /* ── Add Student ── */
+  const handleAddStudent = async (enrollment) => {
+    const { data } = await axios.post(
+      `http://localhost:3000/api/submission/add/${assignmentId}`,
+      { enrollment },
+      { withCredentials: true }
+    );
+    if (data.success) {
+      // Re-fetch or optimistically add the new student
+      const res = await axios.get(
+        `http://localhost:3000/api/submission/${assignmentId}`,
+        { withCredentials: true }
+      );
+      if (res.data.success) {
+        const sorted = [...res.data.data].sort((a, b) =>
+          (a.studentId?.name?.toLowerCase() || "").localeCompare(
+            b.studentId?.name?.toLowerCase() || ""
+          )
+        );
+        setStudents(sorted);
+      }
+    } else {
+      throw new Error(data.message || "Failed to add student");
+    }
+  };
+
   /* ── Submit / Unsubmit ── */
   const handleSubmit = async (submissionId) => {
     setSubmittingId(submissionId);
     try {
       const { data } = await axios.put(
         `http://localhost:3000/api/submission/submit/${submissionId}`,
-        {}, { withCredentials: true }
+        {},
+        { withCredentials: true }
       );
       if (data.success) {
         setStudents((prev) =>
-          prev.map((item) => item._id === submissionId ? { ...item, status: "submitted" } : item)
+          prev.map((item) =>
+            item._id === submissionId ? { ...item, status: "submitted" } : item
+          )
         );
-        setSelectedStudent((prev) => prev && prev._id === submissionId ? { ...prev, status: "submitted" } : prev);
+        setSelectedStudent((prev) =>
+          prev && prev._id === submissionId ? { ...prev, status: "submitted" } : prev
+        );
       }
     } catch (error) {
       console.log(error);
@@ -331,13 +475,18 @@ const StudentList = () => {
     try {
       const { data } = await axios.put(
         `http://localhost:3000/api/submission/unsubmit/${submissionId}`,
-        {}, { withCredentials: true }
+        {},
+        { withCredentials: true }
       );
       if (data.success) {
         setStudents((prev) =>
-          prev.map((item) => item._id === submissionId ? { ...item, status: "pending" } : item)
+          prev.map((item) =>
+            item._id === submissionId ? { ...item, status: "pending" } : item
+          )
         );
-        setSelectedStudent((prev) => prev && prev._id === submissionId ? { ...prev, status: "pending" } : prev);
+        setSelectedStudent((prev) =>
+          prev && prev._id === submissionId ? { ...prev, status: "pending" } : prev
+        );
       }
     } catch (error) {
       console.log(error);
@@ -346,7 +495,7 @@ const StudentList = () => {
     }
   };
 
-  /* ── Stats (based on full list, not filtered) ── */
+  /* ── Stats ── */
   const totalSubmitted = students.filter((s) => s.status === "submitted").length;
   const totalStudents = students.length;
   const pct = totalStudents ? Math.round((totalSubmitted / totalStudents) * 100) : 0;
@@ -364,137 +513,125 @@ const StudentList = () => {
   /* ════════════ RENDER ════════════ */
   return (
     <div
-      style={{
-        minHeight: "100vh",
-        background: tk.canvas,
-        fontFamily: "'DM Sans', sans-serif",
-        color: tk.textPrimary,
-        padding: isMobile ? "20px 14px 32px" : "44px 48px",
-        overflowX: "hidden",
-      }}
+      className="min-h-screen bg-[#f5f4f0] overflow-x-hidden"
+      style={{ fontFamily: "'DM Sans', sans-serif", color: "#12110f", padding: isMobile ? "20px 14px 32px" : "44px 48px" }}
     >
-      <div style={{ maxWidth: isMobile ? "100%" : 1100, margin: "0 auto", width: "100%" }}>
+      <div className="mx-auto w-full" style={{ maxWidth: isMobile ? "100%" : 1100 }}>
 
         {/* ── Back button ── */}
         <button
-          className="back-btn"
           onClick={() => navigate(-1)}
-          style={{
-            display: "inline-flex", alignItems: "center", gap: 7,
-            fontSize: "0.75rem", fontWeight: 600, color: tk.textMuted,
-            background: "transparent", border: `1px solid ${tk.cardBorder}`,
-            borderRadius: 9, padding: "6px 14px", cursor: "pointer",
-            marginBottom: isMobile ? 20 : 28, transition: "background 0.15s",
-          }}
+          className="inline-flex items-center gap-1.5 text-[0.75rem] font-semibold text-stone-400 bg-transparent border border-black/[0.07] rounded-[9px] px-3.5 py-1.5 cursor-pointer mb-7 hover:bg-black/[0.07] transition-colors duration-150"
         >
-          <i className="ri-arrow-left-s-line" style={{ fontSize: "1rem" }} />
+          <i className="ri-arrow-left-s-line text-base" />
           Back to Dashboard
         </button>
 
         {/* ── Page header ── */}
         <header
-          ref={headerRef}
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            flexWrap: "wrap",
-            gap: isMobile ? 14 : 20,
-            marginBottom: isMobile ? 18 : 28,
-            paddingBottom: isMobile ? 18 : 24,
-            borderBottom: `1px solid ${tk.divider}`,
-          }}
+          className={`flex justify-between items-start flex-wrap ${isMobile ? "gap-3.5 mb-4.5 pb-4.5" : "gap-5 mb-7 pb-6"} border-b border-black/[0.06]`}
         >
-          <div style={{ minWidth: 0 }}>
-            <p style={{ fontSize: "0.62rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: tk.accent, marginBottom: 6 }}>
+          <div className="min-w-0">
+            <p className="text-[0.62rem] font-bold tracking-[0.12em] uppercase text-violet-500 mb-1.5">
               Assignment Submissions
             </p>
-            <h1 style={{
-              fontFamily: "'Playfair Display', serif",
-              fontSize: isMobile ? "1.55rem" : "2rem",
-              fontWeight: 900, color: tk.textPrimary,
-              letterSpacing: "-0.03em", lineHeight: 1.1, margin: 0,
-            }}>
-              Student<span style={{ color: tk.accent }}> Records</span>
+            <h1
+              className={`${isMobile ? "text-[1.55rem]" : "text-[2rem]"} font-black text-stone-900 tracking-tight leading-tight m-0`}
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              Student<span className="text-violet-500"> Records</span>
             </h1>
             {branch && (
-              <p style={{ marginTop: 8, fontSize: "0.76rem", color: tk.textMuted, fontWeight: 400, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                <i className="ri-git-branch-line" style={{ fontSize: "0.85rem" }} />{branch}
-                <span style={{ color: tk.metaBorder }}>·</span>
-                <i className="ri-hotel-line" style={{ fontSize: "0.85rem" }} />Class {classs}
-                <span style={{ color: tk.metaBorder }}>·</span>
-                <i className="ri-calendar-event-line" style={{ fontSize: "0.85rem" }} />Semester {semester}
+              <p className="mt-2 text-[0.76rem] text-stone-400 font-normal flex items-center gap-1.5 flex-wrap">
+                <i className="ri-git-branch-line text-[0.85rem]" />{branch}
+                <span className="text-black/10">·</span>
+                <i className="ri-hotel-line text-[0.85rem]" />Class {classs}
+                <span className="text-black/10">·</span>
+                <i className="ri-calendar-event-line text-[0.85rem]" />Semester {semester}
               </p>
             )}
           </div>
 
           {/* Stat pills */}
           {!loading && totalStudents > 0 && (
-            <div style={{ display: "flex", gap: isMobile ? 8 : 10, flexWrap: "wrap", width: isMobile ? "100%" : "auto" }}>
+            <div className={`flex ${isMobile ? "gap-2 w-full" : "gap-2.5"} flex-wrap`}>
               {[
-                { label: "Total", val: totalStudents, color: tk.textPrimary, bg: tk.metaBg, border: tk.cardBorder },
-                { label: "Submitted", val: totalSubmitted, color: tk.success, bg: tk.successSoft, border: tk.successBorder },
-                { label: "Pending", val: totalStudents - totalSubmitted, color: tk.warning, bg: tk.warningSoft, border: tk.warningBorder },
-              ].map(({ label, val, color, bg, border }) => (
-                <div key={label} style={{
-                  padding: isMobile ? "8px 14px" : "10px 18px",
-                  background: bg, border: `1px solid ${border}`, borderRadius: 12,
-                  textAlign: "center", flex: isMobile ? "1" : "0 0 auto",
-                }}>
-                  <p style={{ fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: tk.textMuted, margin: "0 0 3px" }}>{label}</p>
-                  <p style={{ fontSize: isMobile ? "1rem" : "1.2rem", fontWeight: 700, color, margin: 0, fontFamily: "'Playfair Display', serif" }}>{val}</p>
+                { label: "Total", val: totalStudents, colorClass: "text-stone-900", bgClass: "bg-[#f9f8f5]", borderClass: "border-black/[0.07]" },
+                { label: "Submitted", val: totalSubmitted, colorClass: "text-emerald-600", bgClass: "bg-emerald-50", borderClass: "border-emerald-200" },
+                { label: "Pending", val: totalStudents - totalSubmitted, colorClass: "text-amber-600", bgClass: "bg-amber-50", borderClass: "border-amber-200" },
+              ].map(({ label, val, colorClass, bgClass, borderClass }) => (
+                <div
+                  key={label}
+                  className={`${isMobile ? "px-3.5 py-2 flex-1" : "px-4 py-2.5"} ${bgClass} border ${borderClass} rounded-xl text-center`}
+                >
+                  <p className="text-[0.6rem] font-bold uppercase tracking-[0.08em] text-stone-400 m-0 mb-0.5">{label}</p>
+                  <p
+                    className={`${isMobile ? "text-base" : "text-xl"} font-bold ${colorClass} m-0`}
+                    style={{ fontFamily: "'Playfair Display', serif" }}
+                  >
+                    {val}
+                  </p>
                 </div>
               ))}
             </div>
           )}
 
-          {/* Download button */}
-          {!loading && students.length > 0 && (
-            <button
-              onClick={handleDownload}
-              style={{
-                padding: "10px 16px", background: tk.accent, color: "#fff",
-                border: "none", borderRadius: 10, fontSize: "0.75rem", fontWeight: 700,
-                cursor: "pointer", display: "flex", alignItems: "center", gap: 6,
-                width: isMobile ? "100%" : "auto", justifyContent: "center",
-              }}
-            >
-              <i className="ri-download-2-line" />
-              Download CSV
-            </button>
+          {/* Action buttons */}
+          {!loading && (
+            <div className={`flex gap-2 ${isMobile ? "w-full" : ""}`}>
+              {/* Add Student Button */}
+              <button
+                onClick={() => setShowAddModal(true)}
+                className={`flex items-center justify-center gap-1.5 px-4 py-2.5 bg-violet-500 text-white border-none rounded-xl text-[0.75rem] font-bold cursor-pointer hover:bg-violet-600 hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ${isMobile ? "flex-1" : ""}`}
+              >
+                <i className="ri-user-add-line text-base" />
+                Add Student
+              </button>
+
+              {/* Download CSV */}
+              {students.length > 0 && (
+                <button
+                  onClick={handleDownload}
+                  className={`flex items-center justify-center gap-1.5 px-4 py-2.5 bg-stone-900 text-white border-none rounded-xl text-[0.75rem] font-bold cursor-pointer hover:bg-stone-800 hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ${isMobile ? "flex-1" : ""}`}
+                >
+                  <i className="ri-download-2-line" />
+                  CSV
+                </button>
+              )}
+            </div>
           )}
         </header>
 
         {/* ── Progress bar ── */}
         {!loading && totalStudents > 0 && (
-          <div style={{
-            background: tk.card, border: `1px solid ${tk.cardBorder}`,
-            borderRadius: 16, padding: isMobile ? "14px 16px" : "18px 22px",
-            marginBottom: isMobile ? 16 : 20,
-            display: "flex", alignItems: "center", gap: 16,
-          }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <span style={{ fontSize: "0.7rem", fontWeight: 600, color: tk.textMuted, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+          <div
+            className={`bg-white border border-black/[0.07] rounded-2xl ${isMobile ? "p-3.5 mb-4" : "p-5 mb-5"} flex items-center gap-4`}
+          >
+            <div className="flex-1">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-[0.7rem] font-semibold text-stone-400 tracking-[0.05em] uppercase">
                   Completion
                 </span>
-                <span style={{ fontSize: "0.9rem", fontWeight: 700, color: pct === 100 ? tk.success : tk.textPrimary }}>{pct}%</span>
+                <span className={`text-[0.9rem] font-bold ${pct === 100 ? "text-emerald-600" : "text-stone-900"}`}>
+                  {pct}%
+                </span>
               </div>
-              <div style={{ height: 6, background: tk.metaBg, borderRadius: 99, overflow: "hidden", border: `1px solid ${tk.metaBorder}` }}>
-                <div style={{
-                  height: "100%", width: `${pct}%`,
-                  background: pct === 100 ? tk.success : `linear-gradient(90deg, ${tk.accent}, ${tk.accentHover})`,
-                  borderRadius: 99, transition: "width 0.6s cubic-bezier(0.34,1.56,0.64,1)",
-                }} />
+              <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden border border-black/[0.06]">
+                <div
+                  className={`h-full rounded-full transition-all duration-700 ${
+                    pct === 100 ? "bg-emerald-500" : "bg-gradient-to-r from-violet-500 to-violet-400"
+                  }`}
+                  style={{ width: `${pct}%` }}
+                />
               </div>
             </div>
-            <div style={{ fontSize: "0.72rem", fontWeight: 600, color: tk.textMuted, whiteSpace: "nowrap", flexShrink: 0 }}>
+            <div className="text-[0.72rem] font-semibold text-stone-400 whitespace-nowrap flex-shrink-0">
               {totalSubmitted}/{totalStudents}
             </div>
           </div>
         )}
 
-        {/* ════════════ SEARCH BAR ════════════ */}
+        {/* ── Search Bar ── */}
         {!loading && students.length > 0 && (
           <SearchBar
             value={searchQuery}
@@ -508,49 +645,55 @@ const StudentList = () => {
         {/* ════════════ CONTENT AREA ════════════ */}
         {loading ? (
           isMobile ? (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {[1,2,3,4,5].map((n) => <SkeletonCard key={n} />)}
+            <div className="flex flex-col gap-2.5">
+              {[1, 2, 3, 4, 5].map((n) => <SkeletonCard key={n} />)}
             </div>
           ) : (
-            <div style={{ background: tk.card, border: `1px solid ${tk.cardBorder}`, borderRadius: 18, overflow: "hidden" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <div className="bg-white border border-black/[0.07] rounded-[18px] overflow-hidden">
+              <table className="w-full border-collapse">
                 <thead>
-                  <tr style={{ borderBottom: `1px solid ${tk.divider}`, background: tk.metaBg }}>
-                    {["Student","Enrollment","Class","Branch","Semester","Status","Action"].map((h) => (
-                      <th key={h} style={{ padding: "12px 20px", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: tk.textMuted, textAlign: "left" }}>{h}</th>
+                  <tr className="border-b border-black/[0.06] bg-[#f9f8f5]">
+                    {["Student", "Enrollment", "Class", "Branch", "Semester", "Status", "Action"].map((h) => (
+                      <th key={h} className="px-5 py-3 text-[0.6rem] font-bold tracking-[0.1em] uppercase text-stone-400 text-left">
+                        {h}
+                      </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody>{[1,2,3,4,5].map((n) => <SkeletonRow key={n} />)}</tbody>
+                <tbody>{[1, 2, 3, 4, 5].map((n) => <SkeletonRow key={n} />)}</tbody>
               </table>
             </div>
           )
         ) : filteredStudents.length === 0 ? (
-          /* Empty / no-results state */
-          <div style={{ background: tk.card, border: `1.5px dashed rgba(15,15,20,0.10)`, borderRadius: 20, textAlign: "center", padding: "72px 32px" }}>
-            <div style={{ width: 52, height: 52, borderRadius: "50%", background: tk.accentSoft, border: `1px solid ${tk.accentBorder}`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", color: tk.accent }}>
-              <i className={searchQuery ? "ri-search-line" : "ri-user-search-line"} style={{ fontSize: "1.4rem" }} />
+          /* Empty state */
+          <div className="bg-white border-2 border-dashed border-black/[0.10] rounded-[20px] text-center py-20 px-8">
+            <div className="w-14 h-14 rounded-full bg-violet-50 border border-violet-200 flex items-center justify-center mx-auto mb-4 text-violet-500">
+              <i className={`${searchQuery ? "ri-search-line" : "ri-user-search-line"} text-2xl`} />
             </div>
-            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.05rem", fontWeight: 700, color: tk.textPrimary, marginBottom: 6 }}>
+            <h3
+              className="text-[1.05rem] font-bold text-stone-900 mb-1.5"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
               {searchQuery ? "No results found" : "No student records"}
             </h3>
-            <p style={{ fontSize: "0.78rem", color: tk.textMuted }}>
+            <p className="text-[0.78rem] text-stone-400">
               {searchQuery
                 ? `No students match "${searchQuery}". Try a different search.`
                 : "No submissions have been recorded for this assignment yet."}
             </p>
-            {searchQuery && (
+            {searchQuery ? (
               <button
                 onClick={() => setSearchQuery("")}
-                style={{
-                  marginTop: 14, padding: "8px 18px",
-                  background: tk.accentSoft, color: tk.accent,
-                  border: `1px solid ${tk.accentBorder}`, borderRadius: 9,
-                  fontSize: "0.76rem", fontWeight: 700, cursor: "pointer",
-                  display: "inline-flex", alignItems: "center", gap: 6,
-                }}
+                className="mt-3.5 px-4 py-2 bg-violet-50 text-violet-500 border border-violet-200 rounded-[9px] text-[0.76rem] font-bold cursor-pointer inline-flex items-center gap-1.5 hover:bg-violet-100 transition-colors"
               >
                 <i className="ri-close-line" /> Clear search
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="mt-3.5 px-4 py-2 bg-violet-500 text-white border-none rounded-[9px] text-[0.76rem] font-bold cursor-pointer inline-flex items-center gap-1.5 hover:bg-violet-600 transition-colors"
+              >
+                <i className="ri-user-add-line" /> Add First Student
               </button>
             )}
           </div>
@@ -565,9 +708,9 @@ const StudentList = () => {
           />
         ) : (
           /* ══ DESKTOP TABLE ══ */
-          <div ref={tableRef} style={{ background: tk.card, border: `1px solid ${tk.cardBorder}`, borderRadius: 18, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.04)" }}>
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed", minWidth: 760 }}>
+          <div className="bg-white border border-black/[0.07] rounded-[18px] overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse" style={{ tableLayout: "fixed", minWidth: 760 }}>
                 <colgroup>
                   <col style={{ width: "20%" }} />
                   <col style={{ width: "14%" }} />
@@ -578,7 +721,7 @@ const StudentList = () => {
                   <col style={{ width: "19%" }} />
                 </colgroup>
                 <thead>
-                  <tr style={{ background: tk.metaBg, borderBottom: `1px solid ${tk.divider}` }}>
+                  <tr className="bg-[#f9f8f5] border-b border-black/[0.06]">
                     {[
                       { label: "Student", icon: "ri-user-line" },
                       { label: "Enrollment", icon: "ri-hashtag" },
@@ -588,8 +731,11 @@ const StudentList = () => {
                       { label: "Status", icon: "ri-checkbox-circle-line" },
                       { label: "Action", icon: null, align: "right" },
                     ].map(({ label, icon, align }) => (
-                      <th key={label} style={{ padding: "12px 20px", fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.09em", textTransform: "uppercase", color: tk.textMuted, textAlign: align || "left", whiteSpace: "nowrap" }}>
-                        {icon && <i className={icon} style={{ fontSize: "0.82rem", marginRight: 5, verticalAlign: "-1px" }} />}
+                      <th
+                        key={label}
+                        className={`px-5 py-3 text-[0.6rem] font-bold tracking-[0.09em] uppercase text-stone-400 whitespace-nowrap ${align === "right" ? "text-right" : "text-left"}`}
+                      >
+                        {icon && <i className={`${icon} text-[0.82rem] mr-1 align-[-1px]`} />}
                         {label}
                       </th>
                     ))}
@@ -609,9 +755,9 @@ const StudentList = () => {
                 </tbody>
               </table>
             </div>
-            <div style={{ borderTop: `1px solid ${tk.divider}`, padding: "10px 20px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 6 }}>
-              <i className="ri-list-check" style={{ color: tk.textMuted, fontSize: "0.85rem" }} />
-              <span style={{ fontSize: "0.7rem", fontWeight: 600, color: tk.textMuted }}>
+            <div className="border-t border-black/[0.06] px-5 py-2.5 flex justify-end items-center gap-1.5">
+              <i className="ri-list-check text-stone-400 text-[0.85rem]" />
+              <span className="text-[0.7rem] font-semibold text-stone-400">
                 {searchQuery
                   ? `${filteredStudents.length} of ${students.length} records`
                   : `${students.length} records total`}
@@ -631,6 +777,15 @@ const StudentList = () => {
           onClose={closeModal}
         />
       )}
+
+      {/* ════════════ ADD STUDENT MODAL ════════════ */}
+      {showAddModal && (
+        <AddStudentModal
+          onClose={() => setShowAddModal(false)}
+          onAdd={handleAddStudent}
+          assignmentId={assignmentId}
+        />
+      )}
     </div>
   );
 };
@@ -640,17 +795,16 @@ const StudentList = () => {
 ════════════════════════════════ */
 const MobileCardList = ({ students, submittingId, onSubmit, onUnsubmit, onOpenModal }) => {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: 8 }}>
-        <span style={{ fontSize: "0.65rem", fontWeight: 700, color: tk.textMuted, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+    <div className="flex flex-col gap-2.5">
+      <div className="flex items-center justify-between pb-2">
+        <span className="text-[0.65rem] font-bold text-stone-400 uppercase tracking-[0.08em]">
           {students.length} students
         </span>
-        <span style={{ fontSize: "0.65rem", color: tk.textMuted, fontWeight: 500, display: "flex", alignItems: "center", gap: 4 }}>
-          <i className="ri-information-line" style={{ fontSize: "0.8rem" }} />
+        <span className="text-[0.65rem] text-stone-400 font-medium flex items-center gap-1">
+          <i className="ri-information-line text-[0.8rem]" />
           Tap name for full details
         </span>
       </div>
-
       {students.map((item, idx) => (
         <MobileStudentCard
           key={item._id}
@@ -675,94 +829,44 @@ const MobileStudentCard = ({ item, idx, submittingId, onSubmit, onUnsubmit, onOp
 
   return (
     <div
-      className="mobile-card"
-      style={{
-        background: tk.card,
-        border: `1.5px solid ${tk.cardBorder}`,
-        borderRadius: 16,
-        overflow: "hidden",
-        boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
-        animationDelay: `${idx * 0.035}s`,
-        transition: "border-color 0.2s",
-      }}
+      className="mobile-card bg-white border border-black/[0.07] rounded-2xl overflow-hidden shadow-sm"
+      style={{ animationDelay: `${idx * 0.035}s` }}
     >
-      <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
+      <div className="flex items-center">
         <button
-          className="mobile-card-row"
           onClick={() => onOpenModal(item)}
-          style={{
-            flex: 1,
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            padding: "14px 14px",
-            background: "transparent",
-            border: "none",
-            cursor: "pointer",
-            textAlign: "left",
-            minWidth: 0,
-            transition: "background 0.15s",
-            borderRadius: 0,
-          }}
+          className="flex-1 flex items-center gap-3 px-3.5 py-3.5 bg-transparent border-none cursor-pointer text-left min-w-0 active:bg-violet-50/50 transition-colors duration-150"
         >
-          <Avatar name={item.studentId?.name} size={42} />
-          <div style={{ minWidth: 0, flex: 1 }}>
-            <p style={{
-              margin: 0,
-              fontSize: "0.88rem",
-              fontWeight: 700,
-              color: tk.textPrimary,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}>
+          <Avatar name={item.studentId?.name} size="lg" />
+          <div className="min-w-0 flex-1">
+            <p className="m-0 text-[0.88rem] font-bold text-stone-900 truncate">
               {item.studentId?.name || "N/A"}
             </p>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
+            <div className="flex items-center gap-1.5 mt-1">
               <StatusBadge status={item.status} />
             </div>
           </div>
-          <i className="ri-arrow-right-s-line" style={{ fontSize: "1rem", color: tk.textMuted, flexShrink: 0, marginLeft: "auto" }} />
+          <i className="ri-arrow-right-s-line text-base text-stone-400 flex-shrink-0 ml-auto" />
         </button>
 
-        <div style={{ width: 1, height: 52, background: tk.divider, flexShrink: 0 }} />
+        <div className="w-px h-14 bg-black/[0.06] flex-shrink-0" />
 
-        <div style={{ padding: "0 12px", flexShrink: 0 }}>
+        <div className="px-3 flex-shrink-0">
           {!submitted ? (
             <button
-              className="submit-btn"
               onClick={() => onSubmit(item._id)}
               disabled={isLoading}
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 5,
-                padding: "8px 14px",
-                background: tk.accentSoft,
-                color: tk.accent,
-                border: `1.5px solid ${tk.accentBorder}`,
-                borderRadius: 10,
-                fontSize: "0.72rem", fontWeight: 700, cursor: "pointer",
-                transition: "all 0.2s", whiteSpace: "nowrap",
-              }}
+              className="inline-flex items-center gap-1 px-3.5 py-2 bg-violet-50 text-violet-500 border border-violet-200 rounded-xl text-[0.72rem] font-bold cursor-pointer whitespace-nowrap hover:bg-violet-100 active:scale-[0.97] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {isLoading ? <><Spinner /> Saving…</> : <><i className="ri-check-line" style={{ fontSize: "0.9rem" }} />Submit</>}
+              {isLoading ? <><Spinner /> Saving…</> : <><i className="ri-check-line text-[0.9rem]" />Submit</>}
             </button>
           ) : (
             <button
-              className="submit-btn"
               onClick={() => onUnsubmit(item._id)}
               disabled={isLoading}
-              style={{
-                display: "inline-flex", alignItems: "center", gap: 5,
-                padding: "8px 14px",
-                background: tk.successSoft,
-                color: tk.success,
-                border: `1.5px solid ${tk.successBorder}`,
-                borderRadius: 10,
-                fontSize: "0.72rem", fontWeight: 700, cursor: "pointer",
-                transition: "all 0.2s", whiteSpace: "nowrap",
-              }}
+              className="inline-flex items-center gap-1 px-3.5 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl text-[0.72rem] font-bold cursor-pointer whitespace-nowrap hover:bg-emerald-100 active:scale-[0.97] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {isLoading ? <><Spinner /> Saving…</> : <><i className="ri-check-double-line" style={{ fontSize: "0.9rem" }} />Done</>}
+              {isLoading ? <><Spinner /> Saving…</> : <><i className="ri-check-double-line text-[0.9rem]" />Done</>}
             </button>
           )}
         </div>
@@ -782,150 +886,111 @@ const MobileDetailModal = ({ student, submittingId, onSubmit, onUnsubmit, onClos
     <>
       <div
         onClick={onClose}
-        style={{
-          position: "fixed", inset: 0,
-          background: "rgba(10,10,16,0.55)",
-          backdropFilter: "blur(4px)",
-          zIndex: 998,
-          animation: "fadeIn 0.2s ease",
-        }}
+        className="fixed inset-0 bg-black/55 backdrop-blur-[4px] z-[998]"
+        style={{ animation: "fadeIn 0.2s ease" }}
       />
-
       <div
+        className="fixed bottom-0 left-0 right-0 z-[999] bg-white rounded-t-[22px] shadow-[0_-8px_40px_rgba(0,0,0,0.18)] max-h-[88vh] overflow-y-auto overflow-x-hidden"
         style={{
-          position: "fixed",
-          bottom: 0, left: 0, right: 0,
-          zIndex: 999,
-          background: tk.card,
-          borderRadius: "22px 22px 0 0",
-          boxShadow: "0 -8px 40px rgba(0,0,0,0.18)",
-          padding: "0 0 calc(20px + env(safe-area-inset-bottom))",
+          paddingBottom: "calc(20px + env(safe-area-inset-bottom))",
           animation: "slideUp 0.3s cubic-bezier(0.34,1.3,0.64,1)",
-          maxHeight: "88vh",
-          overflowY: "auto",
-          overflowX: "hidden",
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 4px" }}>
-          <div style={{ width: 36, height: 4, borderRadius: 99, background: "rgba(15,15,20,0.12)" }} />
+        {/* Drag handle */}
+        <div className="flex justify-center pt-3 pb-1">
+          <div className="w-9 h-1 rounded-full bg-black/[0.12]" />
         </div>
 
-        <div style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: "12px 20px 16px",
-          borderBottom: `1px solid ${tk.divider}`,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <Avatar name={student.studentId?.name} size={46} />
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-3 pb-4 border-b border-black/[0.06]">
+          <div className="flex items-center gap-3">
+            <Avatar name={student.studentId?.name} size="lg" />
             <div>
-              <p style={{ margin: 0, fontSize: "1rem", fontWeight: 700, color: tk.textPrimary }}>
+              <p className="m-0 text-base font-bold text-stone-900">
                 {student.studentId?.name || "N/A"}
               </p>
-              <p style={{ margin: "2px 0 0", fontSize: "0.68rem", color: tk.textMuted, fontWeight: 500 }}>
-                Student Details
-              </p>
+              <p className="mt-0.5 m-0 text-[0.68rem] text-stone-400 font-medium">Student Details</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            style={{
-              width: 34, height: 34, borderRadius: "50%",
-              background: "rgba(15,15,20,0.06)", border: "none",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer", color: tk.textSecondary, fontSize: "1.1rem",
-            }}
+            className="w-9 h-9 rounded-full bg-black/[0.06] border-none flex items-center justify-center cursor-pointer text-stone-500 text-lg hover:bg-black/10 transition-colors"
           >
             <i className="ri-close-line" />
           </button>
         </div>
 
-        <div style={{ padding: "18px 20px 0", display: "grid", gap: 10 }}>
-          <div style={{
-            background: submitted ? tk.successSoft : tk.warningSoft,
-            border: `1.5px solid ${submitted ? tk.successBorder : tk.warningBorder}`,
-            borderRadius: 14, padding: "14px 16px",
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-          }}>
+        {/* Body */}
+        <div className="px-5 pt-5 grid gap-2.5">
+          <div
+            className={`border-2 rounded-2xl p-4 flex items-center justify-between ${
+              submitted ? "bg-emerald-50 border-emerald-200" : "bg-amber-50 border-amber-200"
+            }`}
+          >
             <div>
-              <p style={{ fontSize: "0.62rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: submitted ? tk.success : tk.warning, margin: "0 0 4px" }}>
+              <p className={`text-[0.62rem] font-bold uppercase tracking-[0.08em] mb-1 ${submitted ? "text-emerald-600" : "text-amber-600"}`}>
                 Submission Status
               </p>
-              <p style={{ margin: 0, fontSize: "1rem", fontWeight: 700, color: submitted ? tk.success : tk.warning }}>
+              <p className={`m-0 text-base font-bold ${submitted ? "text-emerald-600" : "text-amber-600"}`}>
                 {submitted ? "Submitted ✓" : "Pending"}
               </p>
             </div>
-            <div style={{ width: 40, height: 40, borderRadius: "50%", background: submitted ? "rgba(48,164,108,0.15)" : "rgba(192,124,26,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <i className={submitted ? "ri-checkbox-circle-fill" : "ri-time-line"} style={{ fontSize: "1.3rem", color: submitted ? tk.success : tk.warning }} />
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${submitted ? "bg-emerald-200/50" : "bg-amber-200/50"}`}>
+              <i
+                className={`${submitted ? "ri-checkbox-circle-fill" : "ri-time-line"} text-2xl ${submitted ? "text-emerald-500" : "text-amber-500"}`}
+              />
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          <div className="grid grid-cols-2 gap-2.5">
             {[
               { label: "Enrollment", value: student.studentId?.enrollment || "N/A", icon: "ri-hashtag" },
               { label: "Class", value: student.studentId?.classs || "N/A", icon: "ri-hotel-line" },
               { label: "Branch", value: student.studentId?.branch || "N/A", icon: "ri-git-branch-line" },
-              { label: "Semester", value: student.studentId?.semester ? `Semester ${student.studentId.semester}` : "N/A", icon: "ri-calendar-event-line" },
+              {
+                label: "Semester",
+                value: student.studentId?.semester ? `Semester ${student.studentId.semester}` : "N/A",
+                icon: "ri-calendar-event-line",
+              },
             ].map(({ label, value, icon }) => (
-              <div key={label} style={{
-                background: tk.metaBg, border: `1px solid ${tk.metaBorder}`,
-                borderRadius: 12, padding: "12px 14px",
-              }}>
-                <p style={{ fontSize: "0.62rem", fontWeight: 700, textTransform: "uppercase", color: tk.textMuted, letterSpacing: "0.05em", margin: "0 0 5px", display: "flex", alignItems: "center", gap: 5 }}>
-                  <i className={icon} style={{ fontSize: "0.75rem", color: tk.accent }} />
+              <div key={label} className="bg-[#f9f8f5] border border-black/[0.06] rounded-xl p-3.5">
+                <p className="text-[0.62rem] font-bold uppercase tracking-[0.05em] text-stone-400 m-0 mb-1.5 flex items-center gap-1">
+                  <i className={`${icon} text-[0.75rem] text-violet-500`} />
                   {label}
                 </p>
-                <p style={{ fontSize: "0.84rem", fontWeight: 600, color: tk.textPrimary, margin: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {value}
-                </p>
+                <p className="text-[0.84rem] font-semibold text-stone-900 m-0 truncate">{value}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div style={{ padding: "18px 20px 0" }}>
+        {/* Actions */}
+        <div className="px-5 pt-5">
           {!submitted ? (
             <button
               onClick={() => onSubmit(student._id)}
               disabled={isLoading}
-              style={{
-                width: "100%", padding: "14px 16px",
-                background: tk.accent, color: "#fff",
-                border: "none", borderRadius: 14,
-                fontSize: "0.85rem", fontWeight: 700, cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                transition: "background 0.2s", opacity: isLoading ? 0.7 : 1,
-                letterSpacing: "0.02em",
-              }}
+              className={`w-full py-3.5 px-4 bg-violet-500 text-white border-none rounded-2xl text-[0.85rem] font-bold cursor-pointer flex items-center justify-center gap-2 tracking-[0.02em] ${
+                isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-violet-600 transition-colors"
+              }`}
             >
-              {isLoading ? <><Spinner /> Saving…</> : <><i className="ri-check-double-line" style={{ fontSize: "1rem" }} />Mark as Submitted</>}
+              {isLoading ? <><Spinner /> Saving…</> : <><i className="ri-check-double-line text-base" />Mark as Submitted</>}
             </button>
           ) : (
             <button
               onClick={() => onUnsubmit(student._id)}
               disabled={isLoading}
-              style={{
-                width: "100%", padding: "14px 16px",
-                background: "transparent", color: tk.danger,
-                border: `1.5px solid ${tk.dangerBorder}`, borderRadius: 14,
-                fontSize: "0.85rem", fontWeight: 700, cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                transition: "all 0.2s", opacity: isLoading ? 0.7 : 1,
-              }}
+              className={`w-full py-3.5 px-4 bg-transparent text-red-500 border-2 border-red-200 rounded-2xl text-[0.85rem] font-bold cursor-pointer flex items-center justify-center gap-2 ${
+                isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-red-50 transition-colors"
+              }`}
             >
-              {isLoading ? <><Spinner /> Saving…</> : <><i className="ri-close-circle-line" style={{ fontSize: "1rem" }} />Unmark Submitted</>}
+              {isLoading ? <><Spinner /> Saving…</> : <><i className="ri-close-circle-line text-base" />Unmark Submitted</>}
             </button>
           )}
-
           <button
             onClick={onClose}
-            style={{
-              width: "100%", marginTop: 10, padding: "12px 16px",
-              background: "rgba(15,15,20,0.04)", color: tk.textMuted,
-              border: `1px solid ${tk.cardBorder}`, borderRadius: 14,
-              fontSize: "0.82rem", fontWeight: 600, cursor: "pointer",
-              transition: "background 0.2s",
-            }}
+            className="w-full mt-2.5 py-3 px-4 bg-black/[0.04] text-stone-400 border border-black/[0.07] rounded-2xl text-[0.82rem] font-semibold cursor-pointer hover:bg-black/[0.07] transition-colors"
           >
             Close
           </button>
@@ -942,70 +1007,53 @@ const StudentRow = ({ item, idx, onSubmit, onUnsubmit, isSubmitting }) => {
   const [hovered, setHovered] = useState(false);
   const submitted = item.status === "submitted";
 
-  const cellStyle = {
-    padding: "13px 20px", fontSize: "0.78rem", color: tk.textSecondary,
-    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", verticalAlign: "middle",
-  };
-
   return (
     <tr
-      className="student-row"
+      className="student-row border-b border-black/[0.06] transition-colors duration-150"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        borderBottom: `1px solid ${tk.divider}`,
-        background: hovered ? tk.rowHover : "transparent",
-        transition: "background 0.15s",
+        background: hovered ? "rgba(124,106,247,0.03)" : "transparent",
         animationDelay: `${idx * 0.04}s`,
       }}
     >
-      <td style={{ ...cellStyle, padding: "11px 20px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <td className="px-5 py-3">
+        <div className="flex items-center gap-2.5">
           <Avatar name={item.studentId?.name} />
-          <span style={{ fontSize: "0.82rem", fontWeight: 600, color: tk.textPrimary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <span className="text-[0.82rem] font-semibold text-stone-900 truncate">
             {item.studentId?.name || "N/A"}
           </span>
         </div>
       </td>
-      <td style={cellStyle}>
-        <span style={{ fontFamily: "'DM Sans', monospace", fontSize: "0.72rem", fontWeight: 600, color: tk.textMuted, background: tk.metaBg, border: `1px solid ${tk.metaBorder}`, padding: "3px 8px", borderRadius: 6, letterSpacing: "0.03em" }}>
+      <td className="px-5 py-3">
+        <span className="font-mono text-[0.72rem] font-semibold text-stone-400 bg-[#f9f8f5] border border-black/[0.06] px-2 py-0.5 rounded-md tracking-[0.03em]">
           {item.studentId?.enrollment || "—"}
         </span>
       </td>
-      <td style={cellStyle}>{item.studentId?.classs || "—"}</td>
-      <td style={{ ...cellStyle, fontWeight: 500, color: tk.textPrimary }}>{item.studentId?.branch || "—"}</td>
-      <td style={cellStyle}>{item.studentId?.semester ? `Sem ${item.studentId.semester}` : "—"}</td>
-      <td style={cellStyle}><StatusBadge status={item.status} /></td>
-      <td style={{ ...cellStyle, textAlign: "right", overflow: "visible" }}>
+      <td className="px-5 py-3 text-[0.78rem] text-stone-500">{item.studentId?.classs || "—"}</td>
+      <td className="px-5 py-3 text-[0.78rem] font-medium text-stone-900">{item.studentId?.branch || "—"}</td>
+      <td className="px-5 py-3 text-[0.78rem] text-stone-500">
+        {item.studentId?.semester ? `Sem ${item.studentId.semester}` : "—"}
+      </td>
+      <td className="px-5 py-3">
+        <StatusBadge status={item.status} />
+      </td>
+      <td className="px-5 py-3 text-right overflow-visible">
         {!submitted ? (
           <button
-            className="submit-btn"
             onClick={() => onSubmit(item._id)}
             disabled={isSubmitting}
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 6,
-              padding: "7px 16px", background: tk.accent, color: "#fff",
-              border: "none", borderRadius: 9, fontSize: "0.72rem", fontWeight: 700,
-              cursor: "pointer", transition: "background 0.2s, transform 0.15s",
-              letterSpacing: "0.02em", whiteSpace: "nowrap",
-            }}
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-violet-500 text-white border-none rounded-[9px] text-[0.72rem] font-bold cursor-pointer whitespace-nowrap tracking-[0.02em] hover:bg-violet-600 hover:-translate-y-px active:scale-[0.97] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
           >
-            {isSubmitting ? <><Spinner />Saving…</> : <><i className="ri-check-line" style={{ fontSize: "0.85rem" }} />Mark Submitted</>}
+            {isSubmitting ? <><Spinner />Saving…</> : <><i className="ri-check-line text-[0.85rem]" />Mark Submitted</>}
           </button>
         ) : (
           <button
-            className="submit-btn"
             onClick={() => onUnsubmit(item._id)}
             disabled={isSubmitting}
-            style={{
-              display: "inline-flex", alignItems: "center", gap: 6,
-              padding: "7px 16px", background: tk.danger, color: "#fff",
-              border: "none", borderRadius: 9, fontSize: "0.72rem", fontWeight: 700,
-              cursor: "pointer", transition: "background 0.2s, transform 0.15s",
-              letterSpacing: "0.02em", whiteSpace: "nowrap",
-            }}
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-red-500 text-white border-none rounded-[9px] text-[0.72rem] font-bold cursor-pointer whitespace-nowrap tracking-[0.02em] hover:bg-red-600 hover:-translate-y-px active:scale-[0.97] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
           >
-            {isSubmitting ? <><Spinner />Saving…</> : <><i className="ri-close-line" style={{ fontSize: "0.85rem" }} />Unmark</>}
+            {isSubmitting ? <><Spinner />Saving…</> : <><i className="ri-close-line text-[0.85rem]" />Unmark</>}
           </button>
         )}
       </td>

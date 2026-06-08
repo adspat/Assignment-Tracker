@@ -57,8 +57,8 @@ export async function register(req, res) {
     const mailOptions = {
       from: config.SENDER_EMAIL,
       to: email,
-      subject: "Welcome to my website",
-      html: `<h1>Hi ${user.username}, thank you for registering</h1>
+      subject: "WELCOME",
+      html: `<h1>Hi ${user.username}, Thank you for registering</h1>
             <h2>Your Verification OTP is ${otp}</h2>`,
     };
     try {

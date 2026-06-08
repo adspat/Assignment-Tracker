@@ -48,46 +48,32 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex font-sans antialiased bg-[#FFFDF2] text-[#000000]">
+    <div className="h-screen flex flex-col font-sans antialiased bg-[#FFFDF2] text-[#000000] overflow-hidden">
       
-      {/* Left Section: Brutalist Minimalist Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative p-16 flex-col justify-between bg-[#000000] text-[#FFFDF2]">
-        {/* Subtle abstract geometric frame to add high-end texture */}
-        <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#FFFDF2_1px,transparent_1px),linear-gradient(to_bottom,#FFFDF2_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
-        
-        <div className="relative z-10 flex items-center space-x-3">
-          <div className="h-6 w-6 bg-[#FFFDF2] flex items-center justify-center font-bold text-black text-xs tracking-tighter">
-            ■
+      {/* Header with Logo and Assitrack */}
+      <div className="flex items-center justify-between px-8 sm:px-12 md:px-16 py-6 border-b border-black/10">
+        {/* Logo and text on left */}
+        <div className="flex items-center space-x-2">
+          <div className="h-8 w-8 bg-[#000000] flex items-center justify-center font-bold text-[#FFFDF2] text-lg rounded-sm">
+            A
           </div>
-          <span className="text-xs uppercase tracking-[0.3em] font-semibold">Studio.Core</span>
+          <span className="text-lg font-bold tracking-tight text-[#000000]">SSITRACK</span>
         </div>
-
-        <div className="relative z-10 my-auto max-w-md space-y-6">
-          <h1 className="text-6xl font-light tracking-tight leading-[1.1] text-[#FFFDF2]">
-            Simplicity <br />
-            <span className="font-serif italic font-normal text-gray-400">is the ultimate</span> <br />
-            sophistication.
-          </h1>
-          <p className="text-gray-400 text-sm font-light leading-relaxed max-w-xs">
-            Welcome to a streamlined, secure environment engineered for focused productivity.
-          </p>
-        </div>
-
-        <div className="relative z-10 text-xs tracking-widest text-gray-500 uppercase">
-          &copy; {new Date().getFullYear()} INDEX.STUDIO
-        </div>
+        
+        {/* Empty right side - can be used for additional elements if needed */}
+        <div></div>
       </div>
 
-      {/* Right Section: Clean, Editorial Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-16">
-        <div className="w-full max-w-sm space-y-10">
+      {/* Login Form Section - Full width */}
+      <div className="flex-1 flex items-center justify-center  p-8 sm:p-12 md:p-16">
+        <div className="w-full max-w-sm border-2 p-4 space-y-6 rounded-2xl">
           
           {/* Header */}
           <div className="space-y-3">
-            <h2 className="text-3xl font-medium tracking-tight uppercase">
+            <h2 className="text-3xl text-center font-medium tracking-tight uppercase">
               Sign In
             </h2>
-            <p className="text-sm text-gray-600 font-light">
+            <p className="text-sm text-gray-600 text-center font-light">
               Enter your credential profile below to continue.
             </p>
           </div>
@@ -157,7 +143,7 @@ const Login = () => {
               {isSubmitting ? (
                 <div className="h-4 w-4 border-2 border-[#FFFDF2]/30 border-t-[#FFFDF2] rounded-full animate-spin"></div>
               ) : (
-                "Authenticate"
+                "Sign-In"
               )}
             </button>
           </form>

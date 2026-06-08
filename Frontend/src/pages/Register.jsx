@@ -64,67 +64,50 @@ const Register = () => {
   };
 
   return (
-    <div className="h-screen flex bg-slate-50 font-sans antialiased text-slate-800 overflow-hidden">
+    <div className="min-h-screen flex flex-col font-sans antialiased bg-[#FFFDF2] text-[#000000]">
       
-      {/* Left Section: Context / Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative p-16 flex-col justify-between overflow-hidden">
-        {/* Subtle decorative background mesh */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.15),transparent_50%)]"></div>
-        <div className="absolute -top-20 -left-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl"></div>
-        
-        
-
-        {/* Content */}
-        <div className="relative z-10 my-auto max-w-lg space-y-6">
-          <h1 className="text-4xl font-semibold tracking-tight text-white leading-tight">
-            Start your journey with real-time data metrics.
-          </h1>
-          <p className="text-slate-400 text-base leading-relaxed">
-            Create your account today and unlock instantaneous data rendering, personalized configuration environments, and integrated modular controls.
-          </p>
-          <div className="pt-4 flex items-center gap-6">
-            <div className="flex -space-x-2">
-              <span className="inline-block h-8 w-8 rounded-full ring-2 ring-slate-900 bg-slate-700"></span>
-              <span className="inline-block h-8 w-8 rounded-full ring-2 ring-slate-900 bg-slate-600"></span>
-              <span className="inline-block h-8 w-8 rounded-full ring-2 ring-slate-900 bg-slate-500"></span>
-            </div>
-            <p className="text-xs text-slate-400">Join over 14,000+ development squads.</p>
+      {/* Header with Logo and Assitrack */}
+      <div className="flex items-center justify-between px-8 sm:px-12 md:px-16 py-6 border-b border-black/10 flex-shrink-0">
+        {/* Logo and text on left */}
+        <div className="flex items-center space-x-2">
+          <div className="h-8 w-8 bg-[#000000] flex items-center justify-center font-bold text-[#FFFDF2] text-lg rounded-sm">
+            A
           </div>
+          <span className="text-lg font-bold tracking-tight text-[#000000]">SSITRACK</span>
         </div>
-
-        {/* Footer */}
-        <div className="relative z-10 text-xs text-slate-500">
-          &copy; {new Date().getFullYear()} Enterprise Inc. All rights reserved.
-        </div>
+        
+        {/* Empty right side - can be used for additional elements if needed */}
+        <div></div>
       </div>
 
-      {/* Right Section: Form Container */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-16 overflow-hidden">
-        <div className="w-full max-w-md space-y-8 bg-white lg:bg-transparent p-8 lg:p-0 rounded-2xl shadow-sm lg:shadow-none border border-slate-100 lg:border-transparent">
+      {/* Register Form Section - Full width */}
+      <div className="flex-1 flex items-center justify-center p-8 sm:p-12 md:p-16 overflow-y-auto">
+        <div className="w-full max-w-sm border-2 p-4 space-y-6 rounded-2xl">
           
           {/* Header */}
-          <div className="space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900">
+          <div className="space-y-3">
+            <h2 className="text-3xl text-center font-medium tracking-tight uppercase">
               Create Account
             </h2>
-            <p className="text-sm text-slate-500">
-              Register now to configure your system preferences.
+            <p className="text-sm text-gray-600 text-center font-light">
+              Register now to get started.
             </p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleRegister} className="space-y-5">
+          <form onSubmit={handleRegister} className="space-y-6">
             
             {/* Full Name */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700 tracking-wide">
+              <label htmlFor="username" className="text-xs uppercase tracking-widest font-semibold block text-gray-700">
                 Full Name
               </label>
               <input
+                id="username"
                 name="username"
                 type="text"
                 required
-                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 transition shadow-sm"
+                className="w-full bg-[#FFFDF2] border-b-2 border-black/20 px-0 py-3 text-sm rounded-none focus:outline-none focus:border-black transition-colors duration-300 placeholder:text-gray-400 text-[#000000]"
                 placeholder="John Doe"
                 value={formData.username}
                 onChange={handleChange}
@@ -133,15 +116,16 @@ const Register = () => {
 
             {/* Email */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700 tracking-wide">
+              <label htmlFor="email" className="text-xs uppercase tracking-widest font-semibold block text-gray-700">
                 Email Address
               </label>
               <input
+                id="email"
                 name="email"
                 type="email"
                 required
-                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 transition shadow-sm"
-                placeholder="name@company.com"
+                className="w-full bg-[#FFFDF2] border-b-2 border-black/20 px-0 py-3 text-sm rounded-none focus:outline-none focus:border-black transition-colors duration-300 placeholder:text-gray-400 text-[#000000]"
+                placeholder="name@domain.com"
                 value={formData.email}
                 onChange={handleChange}
               />
@@ -149,15 +133,16 @@ const Register = () => {
 
             {/* Password */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700 tracking-wide">
+              <label htmlFor="password" className="text-xs uppercase tracking-widest font-semibold text-gray-700">
                 Password
               </label>
               <div className="relative">
                 <input
+                  id="password"
                   name="password"
                   type={showPassword ? "text" : "password"}
                   required
-                  className="w-full bg-white border border-slate-200 rounded-xl pl-4 pr-12 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 transition shadow-sm"
+                  className="w-full bg-[#FFFDF2] border-b-2 border-black/20 px-0 py-3 text-sm rounded-none focus:outline-none focus:border-black transition-colors duration-300 placeholder:text-gray-400 text-[#000000]"
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={handleChange}
@@ -165,24 +150,25 @@ const Register = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-xs font-medium text-slate-400 hover:text-slate-600 transition"
+                  className="absolute inset-y-0 right-0 pr-1 flex items-center text-xs font-bold tracking-wider text-gray-400 hover:text-black transition focus:outline-none"
                 >
-                  {showPassword ? "Hide" : "Show"}
+                  {showPassword ? "HIDE" : "SHOW"}
                 </button>
               </div>
             </div>
 
             {/* Confirm Password */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700 tracking-wide">
+              <label htmlFor="confirmPassword" className="text-xs uppercase tracking-widest font-semibold text-gray-700">
                 Confirm Password
               </label>
               <div className="relative">
                 <input
+                  id="confirmPassword"
                   name="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   required
-                  className="w-full bg-white border border-slate-200 rounded-xl pl-4 pr-12 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 transition shadow-sm"
+                  className="w-full bg-[#FFFDF2] border-b-2 border-black/20 px-0 py-3 text-sm rounded-none focus:outline-none focus:border-black transition-colors duration-300 placeholder:text-gray-400 text-[#000000]"
                   placeholder="••••••••"
                   value={formData.confirmPassword}
                   onChange={handleChange}
@@ -190,9 +176,9 @@ const Register = () => {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-xs font-medium text-slate-400 hover:text-slate-600 transition"
+                  className="absolute inset-y-0 right-0 pr-1 flex items-center text-xs font-bold tracking-wider text-gray-400 hover:text-black transition focus:outline-none"
                 >
-                  {showConfirmPassword ? "Hide" : "Show"}
+                  {showConfirmPassword ? "HIDE" : "SHOW"}
                 </button>
               </div>
             </div>
@@ -201,24 +187,25 @@ const Register = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-indigo-600 text-white text-sm font-medium py-3 rounded-xl hover:bg-indigo-700 transition flex justify-center items-center disabled:opacity-60 disabled:cursor-not-allowed shadow-sm shadow-indigo-600/10 mt-2"
+              className="w-full bg-[#000000] hover:bg-gray-900 text-[#FFFDF2] text-xs uppercase tracking-widest font-bold py-4 rounded-none transition duration-300 active:bg-gray-800 flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
             >
               {isSubmitting ? (
-                <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <div className="h-4 w-4 border-2 border-[#FFFDF2]/30 border-t-[#FFFDF2] rounded-full animate-spin"></div>
               ) : (
                 "Sign Up"
               )}
             </button>
           </form>
 
-          {/* Footer Link */}
-          <p className="text-center text-sm text-slate-500">
+          {/* Login Link */}
+          <p className="text-center text-xs text-gray-500 tracking-wide">
             Already have an account?{" "}
             <button
+              type="button"
               onClick={() => navigate("/")}
-              className="text-indigo-600 hover:text-indigo-700 font-medium transition"
+              className="font-bold text-black hover:underline uppercase ml-1 focus:outline-none"
             >
-              Log In
+              Login
             </button>
           </p>
           

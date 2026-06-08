@@ -1,10 +1,51 @@
 import submissionModel from "../model/submission.model.js";
+import StudentModel from "../model/student.model.js";
+
+export const addSubmissionByAssignment = async (req, res) => {
+  const { assignmentId } = req.params;
+  const { enrollment } = req.body;``
+  if (!assignmentId || !enrollment) {
+    return res.status(400).json({
+      success: false,
+      message: "Enrollment and AssignmentId required",
+    });
+  }
+  try {
+    const student = await StudentModel.findOne({ enrollment });
+
+    if (!student) {
+      return res.status(400).json({
+        success: false,
+        message: "Student not found",
+      });
+    }
+    
+    const submission = await submissionModel.create({
+      studentId: student._id,
+      assignmentId,
+      status: "submitted",
+    });
+
+    res.status(201).json({
+      success : true,
+      message : "Submission created",
+      submission
+    })
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      sucess : false,
+      message:"Error while creating submission",
+    })
+  }
+};
 
 export const getSubmissionsByAssignment = async (req, res) => {
   try {
     const { assignmentId } = req.params;
 
-    const submissions = await submissionModel.find({ assignmentId })
+    const submissions = await submissionModel
+      .find({ assignmentId })
       .populate("studentId");
 
     res.json({
