@@ -38,6 +38,9 @@ const studentSchema = new mongoose.Schema(
   }
 );
 
+// Compound index for filtering students by class and semester
+studentSchema.index({ classs: 1, semester: 1 });
+
 const StudentModel = mongoose.model("student", studentSchema);
 
 export default StudentModel;

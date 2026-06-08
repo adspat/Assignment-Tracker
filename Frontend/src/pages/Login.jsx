@@ -15,19 +15,16 @@ const Login = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
-    if (!email || !password) {
+    const sanitizedEmail = email.trim();
+    
+    if (!sanitizedEmail || !password) {
       toast.error("All fields are required");
-      return;
-    }
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const formData = { email, password };
+      const formData = { email: sanitizedEmail, password };
       const { data } = await axios.post(
         "http://localhost:3000/auth/login",
         formData,
@@ -35,96 +32,108 @@ const Login = () => {
       );
 
       if (data.success) {
-        toast.success("Login Success");
+        toast.success("Welcome back!");
         await getUserData();
         setIsLoggedIN(true);
         navigate("/dashboard");
       } else {
-        toast.error(data.message);
+        toast.error(data.message || "Invalid credentials");
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || "Server error");
+      toast.error(error.response?.data?.message || "An unexpected error occurred.");
     } finally {
       setIsSubmitting(false);
-      setPassword("");
+      setPassword(""); 
     }
   };
 
   return (
-    <div className="min-h-screen flex bg-slate-50 font-sans antialiased text-slate-800">
+    <div className="min-h-screen flex font-sans antialiased bg-[#FFFDF2] text-[#000000]">
       
-      {/* Left Section: Context / Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative p-16 flex-col justify-between overflow-hidden">
-        {/* Subtle decorative background mesh */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.15),transparent_50%)]"></div>
-        <div className="absolute -top-20 -left-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl"></div>
+      {/* Left Section: Brutalist Minimalist Branding */}
+      <div className="hidden lg:flex lg:w-1/2 relative p-16 flex-col justify-between bg-[#000000] text-[#FFFDF2]">
+        {/* Subtle abstract geometric frame to add high-end texture */}
+        <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#FFFDF2_1px,transparent_1px),linear-gradient(to_bottom,#FFFDF2_1px,transparent_1px)] bg-[size:4rem_4rem]"></div>
         
-
-
-        {/* Content */}
-        <div className="relative z-10 my-auto max-w-lg space-y-6">
-          <h1 className="text-center text-6xl font-semibold tracking-tight text-white leading-tight">
-            Log In Page
-          </h1>
-          
-          
+        <div className="relative z-10 flex items-center space-x-3">
+          <div className="h-6 w-6 bg-[#FFFDF2] flex items-center justify-center font-bold text-black text-xs tracking-tighter">
+            ■
+          </div>
+          <span className="text-xs uppercase tracking-[0.3em] font-semibold">Studio.Core</span>
         </div>
 
-        {/* Footer */}
-        
+        <div className="relative z-10 my-auto max-w-md space-y-6">
+          <h1 className="text-6xl font-light tracking-tight leading-[1.1] text-[#FFFDF2]">
+            Simplicity <br />
+            <span className="font-serif italic font-normal text-gray-400">is the ultimate</span> <br />
+            sophistication.
+          </h1>
+          <p className="text-gray-400 text-sm font-light leading-relaxed max-w-xs">
+            Welcome to a streamlined, secure environment engineered for focused productivity.
+          </p>
+        </div>
+
+        <div className="relative z-10 text-xs tracking-widest text-gray-500 uppercase">
+          &copy; {new Date().getFullYear()} INDEX.STUDIO
+        </div>
       </div>
 
-      {/* Right Section: Form Container */}
+      {/* Right Section: Clean, Editorial Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 md:p-16">
-        <div className="w-full max-w-md space-y-8 bg-white lg:bg-transparent p-8 lg:p-0 rounded-2xl shadow-sm lg:shadow-none border border-slate-100 lg:border-transparent">
+        <div className="w-full max-w-sm space-y-10">
           
           {/* Header */}
-          <div className="space-y-2">
-            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-900">
-              Welcome back
+          <div className="space-y-3">
+            <h2 className="text-3xl font-medium tracking-tight uppercase">
+              Sign In
             </h2>
-            <p className="text-sm text-slate-500">
-              Please enter your credentials to access your account.
+            <p className="text-sm text-gray-600 font-light">
+              Enter your credential profile below to continue.
             </p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleLogin} className="space-y-5">
-            {/* Email */}
+          <form onSubmit={handleLogin} className="space-y-6">
+            
+            {/* Email Field */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-700 tracking-wide">
+              <label htmlFor="email" className="text-xs uppercase tracking-widest font-semibold block text-gray-700">
                 Email Address
               </label>
               <input
+                id="email"
                 type="email"
                 required
-                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 transition shadow-sm"
-                placeholder="name@company.com"
+                autoComplete="email"
+                className="w-full bg-[#FFFDF2] border-b-2 border-black/20 px-0 py-3 text-sm rounded-none focus:outline-none focus:border-black transition-colors duration-300 placeholder:text-gray-400 text-[#000000]"
+                placeholder="name@domain.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
-            {/* Password */}
+            {/* Password Field */}
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <label className="text-xs font-medium text-slate-700 tracking-wide">
+                <label htmlFor="password" className="text-xs uppercase tracking-widest font-semibold text-gray-700">
                   Password
                 </label>
                 <button
                   type="button"
                   onClick={() => navigate("/forgot-password")}
-                  className="text-xs text-indigo-600 hover:text-indigo-700 font-medium transition"
+                  className="text-xs font-medium text-gray-500 hover:text-black transition hover:underline focus:outline-none"
                 >
-                  Forgot password?
+                  Forgot?
                 </button>
               </div>
               
               <div className="relative">
                 <input
+                  id="password"
                   type={showPassword ? "text" : "password"}
                   required
-                  className="w-full bg-white border border-slate-200 rounded-xl pl-4 pr-12 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 transition shadow-sm"
+                  autoComplete="current-password"
+                  className="w-full bg-[#FFFDF2] border-b-2 border-black/20 px-0 py-3 text-sm rounded-none focus:outline-none focus:border-black transition-colors duration-300 placeholder:text-gray-400 text-[#000000]"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -132,9 +141,9 @@ const Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-xs font-medium text-slate-400 hover:text-slate-600 transition"
+                  className="absolute inset-y-0 right-0 pr-1 flex items-center text-xs font-bold tracking-wider text-gray-400 hover:text-black transition focus:outline-none"
                 >
-                  {showPassword ? "Hide" : "Show"}
+                  {showPassword ? "HIDE" : "SHOW"}
                 </button>
               </div>
             </div>
@@ -143,24 +152,25 @@ const Login = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-indigo-600 text-white text-sm font-medium py-3 rounded-xl hover:bg-indigo-700 transition flex justify-center items-center disabled:opacity-60 disabled:cursor-not-allowed shadow-sm shadow-indigo-600/10 mt-2"
+              className="w-full bg-[#000000] hover:bg-gray-900 text-[#FFFDF2] text-xs uppercase tracking-widest font-bold py-4 rounded-none transition duration-300 active:bg-gray-800 flex justify-center items-center disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
             >
               {isSubmitting ? (
-                <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                <div className="h-4 w-4 border-2 border-[#FFFDF2]/30 border-t-[#FFFDF2] rounded-full animate-spin"></div>
               ) : (
-                "Sign In"
+                "Authenticate"
               )}
             </button>
           </form>
 
-          {/* Footer Link */}
-          <p className="text-center text-sm text-slate-500">
+          {/* Registration Link */}
+          <p className="text-center text-xs text-gray-500 tracking-wide">
             Don't have an account?{" "}
             <button
+              type="button"
               onClick={() => navigate("/register")}
-              className="text-indigo-600 hover:text-indigo-700 font-medium transition"
+              className="font-bold text-black hover:underline uppercase ml-1 focus:outline-none"
             >
-              Create an account
+              Register
             </button>
           </p>
           
@@ -171,4 +181,4 @@ const Login = () => {
   );
 };
 
-export default Login; 
+export default Login;

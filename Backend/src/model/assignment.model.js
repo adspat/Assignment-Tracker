@@ -52,7 +52,7 @@ const assignmentSchema = new mongoose.Schema(
     timestamps: true,
   },
 );
-
+assignmentSchema.index({ createdBy: 1 });
 const AssignmentModel = mongoose.model("Assignment", assignmentSchema);
 
 export default AssignmentModel;

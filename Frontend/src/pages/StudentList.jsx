@@ -30,6 +30,8 @@ if (!document.getElementById("student-list-styles")) {
     .submit-btn:disabled { opacity:0.6; cursor:not-allowed; transform:none !important; filter:none !important; }
     .back-btn:hover { background: rgba(15,15,20,0.07) !important; }
     .mobile-card-row:active { background: rgba(124,106,247,0.05) !important; }
+    .search-input:focus { outline: none; border-color: rgba(124,106,247,0.5) !important; box-shadow: 0 0 0 3px rgba(124,106,247,0.10) !important; }
+    .search-clear-btn:hover { background: rgba(15,15,20,0.10) !important; }
   `;
   document.head.appendChild(s);
 }
@@ -146,6 +148,82 @@ const SkeletonCard = () => (
   </div>
 );
 
+/* ─── Search Bar ─── */
+const SearchBar = ({ value, onChange, isMobile, resultCount, totalCount }) => {
+  const inputRef = useRef(null);
+  const hasQuery = value.length > 0;
+
+  return (
+    <div style={{ marginBottom: isMobile ? 14 : 18 }}>
+      <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+        {/* Search icon */}
+        <i
+          className="ri-search-line"
+          style={{
+            position: "absolute", left: 14,
+            fontSize: "1rem", color: hasQuery ? tk.accent : tk.textMuted,
+            pointerEvents: "none", transition: "color 0.2s", zIndex: 1,
+          }}
+        />
+
+        <input
+          ref={inputRef}
+          className="search-input"
+          type="text"
+          placeholder="Search by name, enrollment, branch…"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          style={{
+            width: "100%",
+            padding: isMobile ? "10px 40px 10px 40px" : "11px 44px 11px 40px",
+            background: tk.card,
+            border: `1.5px solid ${hasQuery ? tk.accentBorder : tk.cardBorder}`,
+            borderRadius: 12,
+            fontSize: "0.82rem",
+            fontFamily: "'DM Sans', sans-serif",
+            fontWeight: 500,
+            color: tk.textPrimary,
+            transition: "border-color 0.2s, box-shadow 0.2s",
+            boxShadow: hasQuery ? `0 0 0 3px rgba(124,106,247,0.08)` : "0 1px 4px rgba(0,0,0,0.04)",
+          }}
+        />
+
+        {/* Clear button */}
+        {hasQuery && (
+          <button
+            className="search-clear-btn"
+            onClick={() => { onChange(""); inputRef.current?.focus(); }}
+            style={{
+              position: "absolute", right: 10,
+              width: 24, height: 24, borderRadius: "50%",
+              background: "rgba(15,15,20,0.07)", border: "none",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", color: tk.textMuted, fontSize: "0.85rem",
+              transition: "background 0.15s",
+            }}
+          >
+            <i className="ri-close-line" />
+          </button>
+        )}
+      </div>
+
+      {/* Result count hint */}
+      {hasQuery && (
+        <p style={{
+          margin: "7px 0 0 2px",
+          fontSize: "0.68rem", fontWeight: 600,
+          color: resultCount === 0 ? tk.danger : tk.accent,
+          animation: "fadeIn 0.15s ease",
+        }}>
+          {resultCount === 0
+            ? "No students match your search"
+            : `${resultCount} of ${totalCount} student${resultCount !== 1 ? "s" : ""} match`}
+        </p>
+      )}
+    </div>
+  );
+};
+
 /* ════════════════════════════════
    MAIN COMPONENT
 ════════════════════════════════ */
@@ -155,6 +233,7 @@ const StudentList = () => {
   const [submittingId, setSubmittingId] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");   // ← NEW
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -164,6 +243,21 @@ const StudentList = () => {
 
   const tableRef = useRef(null);
   const headerRef = useRef(null);
+
+  /* ─── Filter logic ─── */
+  const filteredStudents = searchQuery.trim()
+    ? students.filter((item) => {
+        const q = searchQuery.toLowerCase();
+        return (
+          item.studentId?.name?.toLowerCase().includes(q) ||
+          item.studentId?.enrollment?.toLowerCase().includes(q) ||
+          item.studentId?.branch?.toLowerCase().includes(q) ||
+          item.studentId?.classs?.toLowerCase().includes(q) ||
+          item.studentId?.semester?.toString().includes(q) ||
+          item.status?.toLowerCase().includes(q)
+        );
+      })
+    : students;
 
   /* ── Download CSV ── */
   const handleDownload = () => {
@@ -223,7 +317,6 @@ const StudentList = () => {
         setStudents((prev) =>
           prev.map((item) => item._id === submissionId ? { ...item, status: "submitted" } : item)
         );
-        // Update selected student in modal if open
         setSelectedStudent((prev) => prev && prev._id === submissionId ? { ...prev, status: "submitted" } : prev);
       }
     } catch (error) {
@@ -253,7 +346,7 @@ const StudentList = () => {
     }
   };
 
-  /* ── Stats ── */
+  /* ── Stats (based on full list, not filtered) ── */
   const totalSubmitted = students.filter((s) => s.status === "submitted").length;
   const totalStudents = students.length;
   const pct = totalStudents ? Math.round((totalSubmitted / totalStudents) * 100) : 0;
@@ -265,7 +358,6 @@ const StudentList = () => {
 
   const closeModal = () => {
     setShowModal(false);
-    // keep selectedStudent for a moment so close animation is smooth
     setTimeout(() => setSelectedStudent(null), 200);
   };
 
@@ -402,15 +494,24 @@ const StudentList = () => {
           </div>
         )}
 
+        {/* ════════════ SEARCH BAR ════════════ */}
+        {!loading && students.length > 0 && (
+          <SearchBar
+            value={searchQuery}
+            onChange={setSearchQuery}
+            isMobile={isMobile}
+            resultCount={filteredStudents.length}
+            totalCount={totalStudents}
+          />
+        )}
+
         {/* ════════════ CONTENT AREA ════════════ */}
         {loading ? (
           isMobile ? (
-            /* Mobile skeletons */
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {[1,2,3,4,5].map((n) => <SkeletonCard key={n} />)}
             </div>
           ) : (
-            /* Desktop skeleton table */
             <div style={{ background: tk.card, border: `1px solid ${tk.cardBorder}`, borderRadius: 18, overflow: "hidden" }}>
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
@@ -424,19 +525,39 @@ const StudentList = () => {
               </table>
             </div>
           )
-        ) : students.length === 0 ? (
-          /* Empty state */
+        ) : filteredStudents.length === 0 ? (
+          /* Empty / no-results state */
           <div style={{ background: tk.card, border: `1.5px dashed rgba(15,15,20,0.10)`, borderRadius: 20, textAlign: "center", padding: "72px 32px" }}>
             <div style={{ width: 52, height: 52, borderRadius: "50%", background: tk.accentSoft, border: `1px solid ${tk.accentBorder}`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px", color: tk.accent }}>
-              <i className="ri-user-search-line" style={{ fontSize: "1.4rem" }} />
+              <i className={searchQuery ? "ri-search-line" : "ri-user-search-line"} style={{ fontSize: "1.4rem" }} />
             </div>
-            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.05rem", fontWeight: 700, color: tk.textPrimary, marginBottom: 6 }}>No student records</h3>
-            <p style={{ fontSize: "0.78rem", color: tk.textMuted }}>No submissions have been recorded for this assignment yet.</p>
+            <h3 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.05rem", fontWeight: 700, color: tk.textPrimary, marginBottom: 6 }}>
+              {searchQuery ? "No results found" : "No student records"}
+            </h3>
+            <p style={{ fontSize: "0.78rem", color: tk.textMuted }}>
+              {searchQuery
+                ? `No students match "${searchQuery}". Try a different search.`
+                : "No submissions have been recorded for this assignment yet."}
+            </p>
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                style={{
+                  marginTop: 14, padding: "8px 18px",
+                  background: tk.accentSoft, color: tk.accent,
+                  border: `1px solid ${tk.accentBorder}`, borderRadius: 9,
+                  fontSize: "0.76rem", fontWeight: 700, cursor: "pointer",
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                }}
+              >
+                <i className="ri-close-line" /> Clear search
+              </button>
+            )}
           </div>
         ) : isMobile ? (
           /* ══ MOBILE CARD LIST ══ */
           <MobileCardList
-            students={students}
+            students={filteredStudents}
             submittingId={submittingId}
             onSubmit={handleSubmit}
             onUnsubmit={handleUnsubmit}
@@ -475,7 +596,7 @@ const StudentList = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {students.map((item, idx) => (
+                  {filteredStudents.map((item, idx) => (
                     <StudentRow
                       key={item._id}
                       item={item}
@@ -490,7 +611,11 @@ const StudentList = () => {
             </div>
             <div style={{ borderTop: `1px solid ${tk.divider}`, padding: "10px 20px", display: "flex", justifyContent: "flex-end", alignItems: "center", gap: 6 }}>
               <i className="ri-list-check" style={{ color: tk.textMuted, fontSize: "0.85rem" }} />
-              <span style={{ fontSize: "0.7rem", fontWeight: 600, color: tk.textMuted }}>{students.length} records total</span>
+              <span style={{ fontSize: "0.7rem", fontWeight: 600, color: tk.textMuted }}>
+                {searchQuery
+                  ? `${filteredStudents.length} of ${students.length} records`
+                  : `${students.length} records total`}
+              </span>
             </div>
           </div>
         )}
@@ -516,7 +641,6 @@ const StudentList = () => {
 const MobileCardList = ({ students, submittingId, onSubmit, onUnsubmit, onOpenModal }) => {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      {/* List header hint */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingBottom: 8 }}>
         <span style={{ fontSize: "0.65rem", fontWeight: 700, color: tk.textMuted, textTransform: "uppercase", letterSpacing: "0.08em" }}>
           {students.length} students
@@ -563,7 +687,6 @@ const MobileStudentCard = ({ item, idx, submittingId, onSubmit, onUnsubmit, onOp
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 0 }}>
-        {/* ── Left: Avatar + Name (tappable → opens modal) ── */}
         <button
           className="mobile-card-row"
           onClick={() => onOpenModal(item)}
@@ -599,14 +722,11 @@ const MobileStudentCard = ({ item, idx, submittingId, onSubmit, onUnsubmit, onOp
               <StatusBadge status={item.status} />
             </div>
           </div>
-          {/* Chevron hint */}
           <i className="ri-arrow-right-s-line" style={{ fontSize: "1rem", color: tk.textMuted, flexShrink: 0, marginLeft: "auto" }} />
         </button>
 
-        {/* ── Divider ── */}
         <div style={{ width: 1, height: 52, background: tk.divider, flexShrink: 0 }} />
 
-        {/* ── Right: Action button ── */}
         <div style={{ padding: "0 12px", flexShrink: 0 }}>
           {!submitted ? (
             <button
@@ -660,7 +780,6 @@ const MobileDetailModal = ({ student, submittingId, onSubmit, onUnsubmit, onClos
 
   return (
     <>
-      {/* Backdrop */}
       <div
         onClick={onClose}
         style={{
@@ -672,7 +791,6 @@ const MobileDetailModal = ({ student, submittingId, onSubmit, onUnsubmit, onClos
         }}
       />
 
-      {/* Sheet — slides up from bottom */}
       <div
         style={{
           position: "fixed",
@@ -689,12 +807,10 @@ const MobileDetailModal = ({ student, submittingId, onSubmit, onUnsubmit, onClos
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Drag handle */}
         <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 4px" }}>
           <div style={{ width: 36, height: 4, borderRadius: 99, background: "rgba(15,15,20,0.12)" }} />
         </div>
 
-        {/* Header */}
         <div style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "12px 20px 16px",
@@ -724,9 +840,7 @@ const MobileDetailModal = ({ student, submittingId, onSubmit, onUnsubmit, onClos
           </button>
         </div>
 
-        {/* Detail cards */}
         <div style={{ padding: "18px 20px 0", display: "grid", gap: 10 }}>
-          {/* Status — prominent */}
           <div style={{
             background: submitted ? tk.successSoft : tk.warningSoft,
             border: `1.5px solid ${submitted ? tk.successBorder : tk.warningBorder}`,
@@ -746,7 +860,6 @@ const MobileDetailModal = ({ student, submittingId, onSubmit, onUnsubmit, onClos
             </div>
           </div>
 
-          {/* Info grid */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             {[
               { label: "Enrollment", value: student.studentId?.enrollment || "N/A", icon: "ri-hashtag" },
@@ -770,7 +883,6 @@ const MobileDetailModal = ({ student, submittingId, onSubmit, onUnsubmit, onClos
           </div>
         </div>
 
-        {/* Action button */}
         <div style={{ padding: "18px 20px 0" }}>
           {!submitted ? (
             <button
@@ -824,7 +936,7 @@ const MobileDetailModal = ({ student, submittingId, onSubmit, onUnsubmit, onClos
 };
 
 /* ════════════════════════════════
-   DESKTOP STUDENT ROW (unchanged)
+   DESKTOP STUDENT ROW
 ════════════════════════════════ */
 const StudentRow = ({ item, idx, onSubmit, onUnsubmit, isSubmitting }) => {
   const [hovered, setHovered] = useState(false);
@@ -901,4 +1013,4 @@ const StudentRow = ({ item, idx, onSubmit, onUnsubmit, isSubmitting }) => {
   );
 };
 
-export default StudentList; 
+export default StudentList;
