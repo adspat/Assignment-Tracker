@@ -7,9 +7,7 @@ if(!process.env.MONGO_URI){
 if(!process.env.JWT_SECRET){
         throw new Error('JWT_SECRET not found in environment variables');
 }
-if(!process.env.APP_PASS){
-        throw new Error('Google app password is not in environment variables')
-}
+
 if(!process.env.SMTP_USER){
         throw new Error('SMTP USER is not found');
 }
@@ -22,7 +20,6 @@ if(!process.env.SENDER_EMAIL){
 const config = {
         MONGO_URI : process.env.MONGO_URI,
         JWT_SECRET : process.env.JWT_SECRET,
-        APP_PASS : process.env.APP_PASS,
         SMTP_USER : process.env.SMTP_USER,
         SMTP_PASS : process.env.SMTP_PASS,
         SENDER_EMAIL : process.env.SENDER_EMAIL,
