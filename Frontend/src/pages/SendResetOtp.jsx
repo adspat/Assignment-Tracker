@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../api/axios";
 import { toast } from "react-toastify";
 
 const SendResetOtp = () => {
@@ -28,11 +28,7 @@ const SendResetOtp = () => {
     setIsSubmitting(true);
 
     try {
-      const { data } = await axios.post(
-        "http://localhost:3000/auth/send-reset-otp",
-        { email },
-        { withCredentials: true }
-      );
+      const { data } = await API.post("/auth/send-reset-otp", { email });
 
       if (data.success) {
         toast.success("Reset OTP sent to your email!");

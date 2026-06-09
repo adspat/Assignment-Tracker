@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { createContext } from 'react'
-import axios from 'axios'
+import API from '../api/axios'
 export const AppContent = createContext();
 export const AppContextProvider = (props) => {
 
@@ -11,10 +11,7 @@ export const AppContextProvider = (props) => {
 
     const getUserData = async () => {    
       try {
-          const { data } = await axios.get(
-            "http://localhost:3000/user/data",
-            { withCredentials: true }
-          );
+          const { data } = await API.get("/user/data");
     
           if (data.success) {
             setUser(data.userData);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import API from "../api/axios";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 
 const EditAssignment = () => {
@@ -49,14 +49,9 @@ const EditAssignment = () => {
 
     try {
       const token = localStorage.getItem("authToken");
-      const { data } = await axios.put(
-        `http://localhost:3000/api/assignment/${id}`,
-        payload,
-        {
-          withCredentials: true,
-          headers: { Authorization: token ? `Bearer ${token}` : "" },
-        }
-      );
+      const { data } = await API.put(`/api/assignment/${id}`, payload, {
+        headers: { Authorization: token ? `Bearer ${token}` : "" },
+      });
 
       if (data.success) {
         setMessage({ type: "success", text: "Assignment updated successfully." });

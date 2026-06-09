@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "axios";
+import API from "../api/axios";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -49,15 +49,11 @@ const ResetPassword = () => {
     setIsSubmitting(true);
 
     try {
-      const { data } = await axios.post(
-        "http://localhost:3000/auth/reset-password",
-        {
-          email: formData.email,
-          resetOtp: formData.otp,
-          newPassword: formData.newPassword,
-        },
-        { withCredentials: true }
-      );
+      const { data } = await API.post("/auth/reset-password", {
+        email: formData.email,
+        resetOtp: formData.otp,
+        newPassword: formData.newPassword,
+      });
 
       if (data.success) {
         toast.success("Password reset successfully!");

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../api/axios";
 import { toast } from "react-toastify";
 
 const Register = () => {
@@ -39,15 +39,11 @@ const Register = () => {
 
     setIsSubmitting(true);
     try {
-      const { data } = await axios.post(
-        "http://localhost:3000/auth/register",
-        {
-          username: formData.username,
-          email: formData.email,
-          password: formData.password,
-        },
-        { withCredentials: true }
-      );
+      const { data } = await API.post("/auth/register", {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+      });
 
       if (data.success) {
         toast.success("Registered Successfully");

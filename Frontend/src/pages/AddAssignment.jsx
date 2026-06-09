@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import API from "../api/axios";
 import { useNavigate } from "react-router-dom";
 
 const AddAssignment = () => {
@@ -30,11 +30,7 @@ const AddAssignment = () => {
     const payload = { ...formData, semester: Number(formData.semester) };
 
     try {
-      const { data } = await axios.post(
-        "http://localhost:3000/api/assignment",
-        payload,
-        { withCredentials: true }
-      );
+      const { data } = await API.post("/api/assignment", payload);
 
       if (data.success || data._id) {
         setMessage({ type: "success", text: "Assignment record created successfully." });

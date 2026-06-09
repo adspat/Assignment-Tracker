@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import axios from "axios";
+import API from "../api/axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
@@ -46,11 +46,7 @@ const VerifyEmail = () => {
     setIsVerifying(true);
 
     try {
-      const { data } = await axios.post(
-        "http://localhost:3000/auth/verify-account",
-        { otp: otpCode },
-        { withCredentials: true }
-      );
+      const { data } = await API.post("/auth/verify-account", { otp: otpCode });
 
       if (data.success) {
         toast.success("Email Verified Successfully ✅");
@@ -69,11 +65,7 @@ const VerifyEmail = () => {
     setIsResending(true);
 
     try {
-      const { data } = await axios.post(
-        "http://localhost:3000/auth/send-verify-otp",
-        {},
-        { withCredentials: true }
-      );
+      const { data } = await API.post("/auth/send-verify-otp", {});
 
       if (data.success) {
         toast.success("OTP resent successfully 📩");

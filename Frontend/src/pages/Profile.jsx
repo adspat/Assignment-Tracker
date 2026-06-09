@@ -2,7 +2,7 @@ import React, { useContext, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContent } from "../context/AppContext";
 import { toast } from "react-toastify";
-import axios from "axios";
+import API from "../api/axios";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -29,11 +29,7 @@ const Profile = () => {
 
   const handleSendVerification = async () => {
     try {
-      const { data } = await axios.post(
-        "http://localhost:3000/auth/send-verify-otp",
-        {},
-        { withCredentials: true }
-      );
+      const { data } = await API.post("/auth/send-verify-otp", {});
       if (data.success) {
         toast.success(data.message);
         setShowOtpInput(true);
@@ -52,11 +48,7 @@ const Profile = () => {
 
     setIsVerifying(true);
     try {
-      const { data } = await axios.post(
-        "http://localhost:3000/auth/verify-account",
-        { otp: otpCode },
-        { withCredentials: true }
-      );
+      const { data } = await API.post("/auth/verify-account", { otp: otpCode });
 
       if (data.success) {
         toast.success("Email Verified Successfully!");
@@ -75,7 +67,7 @@ const Profile = () => {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      const { data } = await axios.post("http://localhost:3000/auth/logout", {}, { withCredentials: true });
+      const { data } = await API.post("/auth/logout", {});
       if (data.success) {
         toast.success("Logout Success");
         setIsLoggedIN(false);

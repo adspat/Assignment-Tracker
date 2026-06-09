@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useRef, useContext } from "react";
-import axios from "axios";
+import API from "../api/axios";
 import { useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
 import { AppContent } from "../context/AppContext";
@@ -212,8 +212,7 @@ const Dashboard = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("authToken");
-      const { data } = await axios.get("http://localhost:3000/api/assignment", {
-        withCredentials: true,
+      const { data } = await API.get("/api/assignment", {
         headers: { Authorization: token ? `Bearer ${token}` : "" },
       });
       if (Array.isArray(data)) setAssignments(data);
@@ -313,7 +312,7 @@ const Dashboard = () => {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
-      const { data } = await axios.post("http://localhost:3000/auth/logout", {}, { withCredentials: true });
+      const { data } = await API.post("/auth/logout", {});
       if (data.success) {
         toast.success("Logout Success");
         setIsLoggedIN(false);
@@ -331,8 +330,7 @@ const Dashboard = () => {
     if (!confirmed) return;
     try {
       const token = localStorage.getItem("authToken");
-      await axios.delete(`http://localhost:3000/api/assignment/${assignmentId}`, {
-        withCredentials: true,
+      await API.delete(`/api/assignment/${assignmentId}`, {
         headers: { Authorization: token ? `Bearer ${token}` : "" },
       });
       setAssignments(assignments.filter((a) => a._id !== assignmentId));

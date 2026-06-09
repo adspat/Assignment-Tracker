@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppContent } from "../context/AppContext";
-import axios from "axios";
+import API from "../api/axios";
 import { toast } from "react-toastify";
 
 const Login = () => {
@@ -25,11 +25,7 @@ const Login = () => {
     setIsSubmitting(true);
     try {
       const formData = { email: sanitizedEmail, password };
-      const { data } = await axios.post(
-        "http://localhost:3000/auth/login",
-        formData,
-        { withCredentials: true }
-      );
+      const { data } = await API.post("/auth/login", formData);
 
       if (data.success) {
         toast.success("Welcome back!");

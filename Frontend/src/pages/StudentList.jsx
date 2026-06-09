@@ -1,4 +1,4 @@
-import axios from "axios";
+import API from "../api/axios";
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
@@ -397,10 +397,7 @@ const StudentList = () => {
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const { data } = await axios.get(
-          `http://localhost:3000/api/submission/${assignmentId}`,
-          { withCredentials: true }
-        );
+        const { data } = await API.get(`/api/submission/${assignmentId}`);
         if (data.success) {
           const sorted = [...data.data].sort((a, b) =>
             (a.studentId?.name?.toLowerCase() || "").localeCompare(
@@ -420,17 +417,10 @@ const StudentList = () => {
 
   /* ── Add Student ── */
   const handleAddStudent = async (enrollment) => {
-    const { data } = await axios.post(
-      `http://localhost:3000/api/submission/add/${assignmentId}`,
-      { enrollment },
-      { withCredentials: true }
-    );
+    const { data } = await API.post(`/api/submission/add/${assignmentId}`, { enrollment });
     if (data.success) {
       // Re-fetch or optimistically add the new student
-      const res = await axios.get(
-        `http://localhost:3000/api/submission/${assignmentId}`,
-        { withCredentials: true }
-      );
+      const res = await API.get(`/api/submission/${assignmentId}`);
       if (res.data.success) {
         const sorted = [...res.data.data].sort((a, b) =>
           (a.studentId?.name?.toLowerCase() || "").localeCompare(
@@ -448,11 +438,7 @@ const StudentList = () => {
   const handleSubmit = async (submissionId) => {
     setSubmittingId(submissionId);
     try {
-      const { data } = await axios.put(
-        `http://localhost:3000/api/submission/submit/${submissionId}`,
-        {},
-        { withCredentials: true }
-      );
+      const { data } = await API.put(`/api/submission/submit/${submissionId}`, {});
       if (data.success) {
         setStudents((prev) =>
           prev.map((item) =>
@@ -473,11 +459,7 @@ const StudentList = () => {
   const handleUnsubmit = async (submissionId) => {
     setSubmittingId(submissionId);
     try {
-      const { data } = await axios.put(
-        `http://localhost:3000/api/submission/unsubmit/${submissionId}`,
-        {},
-        { withCredentials: true }
-      );
+      const { data } = await API.put(`/api/submission/unsubmit/${submissionId}`, {});
       if (data.success) {
         setStudents((prev) =>
           prev.map((item) =>
