@@ -3,7 +3,8 @@ import StudentModel from "../model/student.model.js";
 
 export const addSubmissionByAssignment = async (req, res) => {
   const { assignmentId } = req.params;
-  const { enrollment } = req.body;``
+  const { enrollment } = req.body;
+  ``;
   if (!assignmentId || !enrollment) {
     return res.status(400).json({
       success: false,
@@ -19,7 +20,7 @@ export const addSubmissionByAssignment = async (req, res) => {
         message: "Student not found",
       });
     }
-    
+
     const submission = await submissionModel.create({
       studentId: student._id,
       assignmentId,
@@ -27,16 +28,21 @@ export const addSubmissionByAssignment = async (req, res) => {
     });
 
     res.status(201).json({
-      success : true,
-      message : "Submission created",
-      submission
-    })
-  } catch (error) {
-    console.log(error);
+      success: true,
+      message: "Submission created",
+      submission,
+    });
+  } catch (error) {  
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "Student already exist!",
+      });
+    }
     res.status(500).json({
-      sucess : false,
-      message:"Error while creating submission",
-    })
+      sucess: false,
+      message: "Error while creating submission",
+    });
   }
 };
 
