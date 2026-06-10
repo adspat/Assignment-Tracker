@@ -23,6 +23,9 @@ const config = {
         SMTP_USER : process.env.SMTP_USER,
         SMTP_PASS : process.env.SMTP_PASS,
         SENDER_EMAIL : process.env.SENDER_EMAIL,
+        ADMIN_EMAIL: process.env.ADMIN_EMAIL || '',
+        ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || '',
+        ADMIN_USERNAME: process.env.ADMIN_USERNAME || 'admin',
 }
 
 export default config ;

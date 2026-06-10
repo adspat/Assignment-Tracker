@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { AppContent } from "../context/AppContext";
 import API from "../api/axios";
 import { toast } from "react-toastify";
+import { getHomeRoute } from "../utils/getHomeRoute";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -28,10 +29,10 @@ const Login = () => {
       const { data } = await API.post("/auth/login", formData);
 
       if (data.success) {
-        toast.success("Welcome back!");
+        toast.success(data.role === "admin" ? "Welcome, Admin!" : "Welcome back!");
         await getUserData();
         setIsLoggedIN(true);
-        navigate("/dashboard");
+        navigate(getHomeRoute(data.role));
       } else {
         toast.error(data.message || "Invalid credentials");
       }

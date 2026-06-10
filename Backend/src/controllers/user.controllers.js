@@ -20,6 +20,7 @@ export async function getUser(req,res){
             userData : {
                 name : user.username ,
                 email : user.email,
+                role: user.role || 'faculty',
                 isAccountVerified : user.isAccountVerified,
                 isLoggedIn : user.isLoggedIn,
             }

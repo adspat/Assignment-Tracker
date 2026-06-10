@@ -6,6 +6,7 @@ import userRouter from './routes/user.route.js';
 import assignmentRouter from './routes/assignment.route.js';
 import studentRouter from './routes/student.route.js';
 import submissionRouter from './routes/submission.route.js';
+import adminRouter from './routes/admin.route.js';
 const app = express();
 
 app.use(express.json());
@@ -17,6 +18,6 @@ app.use('/user',userRouter);
 app.use('/api',assignmentRouter);
 app.use('/api', studentRouter);
 app.use('/api/submission',submissionRouter);
-
+app.use('/admin', adminRouter);
 
 export default app ;

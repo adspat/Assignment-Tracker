@@ -4,7 +4,7 @@ import { Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Register from "./pages/Register";
-import { ProtectedRoute } from "./utils/ProtectedRoute";
+import { FacultyRoute } from "./utils/FacultyRoute";
 import { PublicRoute } from "./utils/PublicRoute";
 import Profile from "./pages/Profile";
 import ResetPassword from "./pages/ResetPassword";
@@ -14,6 +14,8 @@ import Dashboard from "./pages/Dashboard";
 import AddAssignment from "./pages/AddAssignment";
 import EditAssignment from "./pages/EditAssignment";
 import StudentList from "./pages/StudentList";
+import Admin from "./pages/Admin";
+import { AdminRoute } from "./utils/AdminRoute";
 const App = () => {
   return (
     <div>
@@ -28,13 +30,17 @@ const App = () => {
         <Route path="/verify-email" element={<VerifyEmail />}></Route>
         <Route path="/forgot-password" element={<SendResetOtp />}></Route>
         <Route path="/reset-password" element={<ResetPassword />}></Route>
-        {/* restricted when logout */}
-        <Route element={<ProtectedRoute />}>
+        {/* faculty-only routes — admins are redirected to /admin */}
+        <Route element={<FacultyRoute />}>
           <Route path="/dashboard" element={<Dashboard />}></Route>
           <Route path="/dashboard/:assignmentId" element={<StudentList />}></Route>
           <Route path="/addAssignment" element={<AddAssignment />}></Route>
           <Route path="/edit-assignment/:id" element={<EditAssignment />}></Route>
           <Route path="/profile" element={<Profile />}></Route>
+        </Route>
+
+        <Route element={<AdminRoute />}>
+          <Route path="/admin" element={<Admin />}></Route>
         </Route>
 
       </Routes>

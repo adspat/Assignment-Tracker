@@ -68,6 +68,7 @@ export async function createAssignment(req, res) {
     const students = await StudentModel.find({
       classs: cls,
       semester,
+      status: 'active',
     });
     if (students.length === 0) {
       return res.status(404).json({

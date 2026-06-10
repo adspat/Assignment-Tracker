@@ -28,6 +28,7 @@ export async function register(req, res) {
       username,
       email,
       password: hashedPassword,
+      role: 'faculty',
     });
 
     const token = jwt.sign(
@@ -123,11 +124,12 @@ export async function login(req, res) {
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    user.isLoggedIn = true ,
-    user.save();
+    user.isLoggedIn = true;
+    await user.save();
     res.status(200).json({
-      success : true ,
+      success: true,
       message: "Logged in successfully",
+      role: user.role || 'faculty',
     });
   } catch (error) {
     console.log(error);

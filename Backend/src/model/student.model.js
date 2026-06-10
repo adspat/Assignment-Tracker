@@ -32,6 +32,17 @@ const studentSchema = new mongoose.Schema(
       required: true,
       enum: [1, 2, 3, 4, 5, 6, 7, 8],
     },
+
+    status: {
+      type: String,
+      enum: ["active", "graduated"],
+      default: "active",
+    },
+
+    graduatedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -40,6 +51,7 @@ const studentSchema = new mongoose.Schema(
 
 // Compound index for filtering students by class and semester
 studentSchema.index({ classs: 1, semester: 1 });
+studentSchema.index({ status: 1, semester: 1 });
 
 const StudentModel = mongoose.model("student", studentSchema);
 

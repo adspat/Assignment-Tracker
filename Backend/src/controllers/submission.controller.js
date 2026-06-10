@@ -12,12 +12,12 @@ export const addSubmissionByAssignment = async (req, res) => {
     });
   }
   try {
-    const student = await StudentModel.findOne({ enrollment });
+    const student = await StudentModel.findOne({ enrollment, status: 'active' });
 
     if (!student) {
       return res.status(400).json({
         success: false,
-        message: "Student not found",
+        message: "Student not found or has graduated",
       });
     }
 

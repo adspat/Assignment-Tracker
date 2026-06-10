@@ -32,11 +32,13 @@ export const AppContextProvider = (props) => {
       getUserData();
     }, []);
 
+    const isAdmin = user?.role === 'admin';
+
     const value = {
-        isLoggedIN,setIsLoggedIN,
-        user,setUser,
-        getUserData,loading,
-        
+        isLoggedIN, setIsLoggedIN,
+        user, setUser,
+        getUserData, loading,
+        isAdmin,
     }
   return (
     <AppContent.Provider value={value}>

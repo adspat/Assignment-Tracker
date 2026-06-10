@@ -1,9 +1,10 @@
 import React, { useContext } from "react";
 import { AppContent } from "../context/AppContext";
 import { Navigate, Outlet } from "react-router-dom";
+import { getHomeRoute } from "./getHomeRoute";
 
 export const PublicRoute = () => {
-  const { isLoggedIN, loading } = useContext(AppContent);
+  const { isLoggedIN, loading, user } = useContext(AppContent);
 
   if (loading) {
     return (
@@ -23,5 +24,9 @@ export const PublicRoute = () => {
   );
   }
 
-  return !isLoggedIN ? <Outlet /> : <Navigate to="/dashboard" replace />;
+  if (!isLoggedIN) {
+    return <Outlet />;
+  }
+
+  return <Navigate to={getHomeRoute(user?.role)} replace />;
 };
