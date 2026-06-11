@@ -14,6 +14,13 @@ import {
   thStyle,
 } from "./AdminShared";
 
+const EMPTY_FORM = {
+  username: "",
+  email: "",
+  password: "",
+  role: "faculty",
+};
+
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,6 +28,8 @@ const AdminUsers = () => {
   const [roleFilter, setRoleFilter] = useState("");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [form, setForm] = useState(EMPTY_FORM);
   const [resetModal, setResetModal] = useState(null);
   const [newPassword, setNewPassword] = useState("");
   const [saving, setSaving] = useState(false);
@@ -85,6 +94,30 @@ const AdminUsers = () => {
     }
   };
 
+  const openAddModal = () => {
+    setForm(EMPTY_FORM);
+    setAddModalOpen(true);
+  };
+
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const { data } = await API.post("/admin/users", form);
+      if (data.success) {
+        toast.success("User created successfully");
+        setAddModalOpen(false);
+        setForm(EMPTY_FORM);
+        setPage(1);
+        fetchUsers();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to create user");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleResetPassword = async (e) => {
     e.preventDefault();
     if (!resetModal) return;
@@ -106,13 +139,16 @@ const AdminUsers = () => {
 
   return (
     <div>
-      <div style={{ marginBottom: 20 }}>
-        <h2 style={{ margin: 0, fontFamily: "'Playfair Display', serif", fontSize: "1.5rem", color: tk.textPrimary }}>
-          User Management
-        </h2>
-        <p style={{ margin: "6px 0 0", color: tk.textSecondary, fontSize: "0.88rem" }}>
-          Manage faculty and admin accounts, roles, and verification status.
-        </p>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <div>
+          <h2 style={{ margin: 0, fontFamily: "'Playfair Display', serif", fontSize: "1.5rem", color: tk.textPrimary }}>
+            User Management
+          </h2>
+          <p style={{ margin: "6px 0 0", color: tk.textSecondary, fontSize: "0.88rem" }}>
+            Manage faculty and admin accounts, roles, and verification status.
+          </p>
+        </div>
+        <ActionButton onClick={openAddModal}>+ Add User</ActionButton>
       </div>
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 16 }}>
@@ -178,6 +214,62 @@ const AdminUsers = () => {
       </TableWrap>
 
       <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />
+
+      {addModalOpen && (
+        <Modal title="Add User" onClose={() => setAddModalOpen(false)}>
+          <form onSubmit={handleCreateUser} style={{ display: "grid", gap: 14 }}>
+            <div>
+              <label style={labelStyle}>Username</label>
+              <input
+                type="text"
+                style={inputStyle}
+                required
+                value={form.username}
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
+                placeholder="Enter username"
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Email</label>
+              <input
+                type="email"
+                style={inputStyle}
+                required
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                placeholder="Enter email address"
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Password</label>
+              <input
+                type="password"
+                style={inputStyle}
+                required
+                minLength={6}
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                placeholder="Minimum 6 characters"
+              />
+            </div>
+            <div>
+              <label style={labelStyle}>Role</label>
+              <select
+                style={inputStyle}
+                value={form.role}
+                onChange={(e) => setForm({ ...form, role: e.target.value })}
+              >
+                <option value="faculty">Faculty</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
+              <ActionButton variant="ghost" onClick={() => setAddModalOpen(false)}>Cancel</ActionButton>
+              <ActionButton type="submit" disabled={saving}>{saving ? "Creating..." : "Create User"}</ActionButton>
+            </div>
+          </form>
+        </Modal>
+      )}
 
       {resetModal && (
         <Modal title={`Reset Password — ${resetModal.username}`} onClose={() => setResetModal(null)}>

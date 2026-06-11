@@ -8,6 +8,7 @@ import {
     updateStudent,
     deleteStudent,
     getAllUsers,
+    createUser,
     updateUser,
     deleteUser,
     resetUserPassword,
@@ -35,6 +36,7 @@ adminRouter.put('/students/:id', updateStudent);
 adminRouter.delete('/students/:id', deleteStudent);
 
 adminRouter.get('/users', getAllUsers);
+adminRouter.post('/users', createUser);
 adminRouter.put('/users/:id', updateUser);
 adminRouter.delete('/users/:id', deleteUser);
 adminRouter.put('/users/:id/reset-password', resetUserPassword);

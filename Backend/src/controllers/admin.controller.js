@@ -460,6 +460,77 @@ export async function promoteSemesters(req, res) {
     }
 }
 
+export async function createUser(req, res) {
+    const username = req.body.username?.trim();
+    const email = req.body.email?.toLowerCase().trim();
+    const password = req.body.password;
+    const role = req.body.role?.trim() || 'faculty';
+
+    if (!username || !email || !password) {
+        return res.status(400).json({
+            success: false,
+            message: 'Username, email, and password are required',
+        });
+    }
+
+    if (password.length < 6) {
+        return res.status(400).json({
+            success: false,
+            message: 'Password must be at least 6 characters',
+        });
+    }
+
+    if (!VALID_ROLES.includes(role)) {
+        return res.status(400).json({
+            success: false,
+            message: 'Role must be faculty or admin',
+        });
+    }
+
+    try {
+        const existingUser = await userModel.findOne({
+            $or: [{ username }, { email }],
+        });
+
+        if (existingUser) {
+            return res.status(409).json({
+                success: false,
+                message: 'Username or email already exists',
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const user = await userModel.create({
+            username,
+            email,
+            password: hashedPassword,
+            role,
+            isAccountVerified: true,
+            isLoggedIn: false,
+        });
+
+        return res.status(201).json({
+            success: true,
+            message: 'User created successfully',
+            user: {
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+                isAccountVerified: user.isAccountVerified,
+                isLoggedIn: user.isLoggedIn,
+            },
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: 'Failed to create user',
+        });
+    }
+}
+
 export async function getAllUsers(req, res) {
     try {
         const page = Math.max(1, Number(req.query.page) || 1);
