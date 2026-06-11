@@ -2,6 +2,7 @@ import API from "../api/axios";
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Html5Qrcode } from "html5-qrcode";
+import { playScanErrorSound, playScanSuccessSound } from "../utils/scanSounds";
 
 /* ─── Google Fonts injection ─── */
 if (!document.getElementById("edu-fonts")) {
@@ -395,14 +396,21 @@ const AddStudentModal = ({ onClose, onAdd }) => {
 /* ════════════════════════════════
    QR SCANNER MODAL — html5-qrcode
 ════════════════════════════════ */
-const QRScannerModal = ({ onClose, onScan, isScanning, error: externalError }) => {
+const SCAN_COOLDOWN_MS = 2200;
+
+const QRScannerModal = ({ onClose, onScan, isProcessing, error: externalError, successMessage }) => {
   const html5QrRef = useRef(null);
   const scannerStartedRef = useRef(false);
-  const hasScannedRef = useRef(false);
+  const processingRef = useRef(false);
+  const lastScannedRef = useRef(null);
   const SCANNER_ID = "qr-scanner-container";
 
   const [camError, setCamError] = useState("");
   const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    processingRef.current = isProcessing;
+  }, [isProcessing]);
 
   useEffect(() => {
     // Small delay so the DOM element is mounted
@@ -443,12 +451,22 @@ const QRScannerModal = ({ onClose, onScan, isScanning, error: externalError }) =
           disableFlip: false,
         },
         (decodedText) => {
-          // onScanSuccess
-          if (hasScannedRef.current) return;
-          hasScannedRef.current = true;
-          if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-          stopScanner().then(() => {
-            onScan(decodedText.trim());
+          const text = decodedText.trim();
+          if (!text || processingRef.current) return;
+
+          const now = Date.now();
+          const last = lastScannedRef.current;
+          if (last?.text === text && now - last.time < SCAN_COOLDOWN_MS) return;
+
+          lastScannedRef.current = { text, time: now };
+          processingRef.current = true;
+
+          if (navigator.vibrate) navigator.vibrate(100);
+
+          Promise.resolve(onScan(text)).finally(() => {
+            setTimeout(() => {
+              processingRef.current = false;
+            }, 500);
           });
         },
         () => {
@@ -513,7 +531,7 @@ const QRScannerModal = ({ onClose, onScan, isScanning, error: externalError }) =
                 Scan QR Code
               </h2>
               <p className="mt-0.5 text-[0.68rem] text-stone-400 font-medium">
-                Scan student's ID card to submit
+                Scan continuously — camera stays on after each student
               </p>
             </div>
           </div>
@@ -545,16 +563,16 @@ const QRScannerModal = ({ onClose, onScan, isScanning, error: externalError }) =
             </div>
           )}
 
-          {/* Processing overlay — shown while API call is in progress */}
-          {isScanning && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-black/65 backdrop-blur-sm">
+          {/* Processing banner — brief feedback without stopping the camera */}
+          {isProcessing && (
+            <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-center gap-2 py-2.5 bg-black/75 backdrop-blur-sm">
               <Spinner />
-              <p className="mt-3 text-[0.82rem] font-bold text-white">Processing scan…</p>
+              <p className="text-[0.78rem] font-semibold text-white m-0">Updating status…</p>
             </div>
           )}
 
           {/* Corner decorators (shown after camera is ready) */}
-          {ready && !isScanning && (
+          {ready && !isProcessing && (
             <div className="absolute inset-0 pointer-events-none z-10">
               <div className="absolute top-5 left-5 w-7 h-7 border-t-[3px] border-l-[3px] border-violet-400 rounded-tl-lg opacity-80" />
               <div className="absolute top-5 right-5 w-7 h-7 border-t-[3px] border-r-[3px] border-violet-400 rounded-tr-lg opacity-80" />
@@ -580,9 +598,17 @@ const QRScannerModal = ({ onClose, onScan, isScanning, error: externalError }) =
         </div>
 
         {/* ── Status text ── */}
-        {displayError && !camError ? (
+        {successMessage && !camError ? (
           <p
-            className="mb-4 text-[0.7rem] font-semibold text-red-500 flex items-center justify-center gap-1.5"
+            className="mb-4 text-[0.75rem] font-semibold text-emerald-600 flex items-center justify-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-xl py-2.5 px-3"
+            style={{ animation: "fadeIn 0.15s ease" }}
+          >
+            <i className="ri-checkbox-circle-fill text-sm" />
+            {successMessage}
+          </p>
+        ) : displayError && !camError ? (
+          <p
+            className="mb-4 text-[0.75rem] font-semibold text-red-500 flex items-center justify-center gap-1.5 bg-red-50 border border-red-200 rounded-xl py-2.5 px-3"
             style={{ animation: "fadeIn 0.15s ease" }}
           >
             <i className="ri-error-warning-line text-sm" />
@@ -591,7 +617,7 @@ const QRScannerModal = ({ onClose, onScan, isScanning, error: externalError }) =
         ) : !camError ? (
           <p className="text-[0.68rem] text-stone-400 text-center mb-4 flex items-center justify-center gap-1.5">
             <i className="ri-focus-3-line text-violet-400" />
-            Position the QR code within the frame
+            Point at a student QR — scanner stays open for the next scan
           </p>
         ) : (
           <div className="mb-4" />
@@ -601,7 +627,7 @@ const QRScannerModal = ({ onClose, onScan, isScanning, error: externalError }) =
           onClick={handleClose}
           className="w-full py-3 px-4 bg-black/[0.04] text-stone-500 border border-black/[0.07] rounded-xl text-[0.82rem] font-semibold cursor-pointer hover:bg-black/[0.07] transition-colors duration-150"
         >
-          Cancel Scan
+          Done Scanning
         </button>
       </div>
     </>
@@ -620,6 +646,9 @@ const StudentList = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showScannerModal, setShowScannerModal] = useState(false);
   const [scannerError, setScannerError] = useState("");
+  const [scannerSuccess, setScannerSuccess] = useState("");
+  const [qrProcessing, setQrProcessing] = useState(false);
+  const successClearTimerRef = useRef(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
 
@@ -723,7 +752,32 @@ const StudentList = () => {
     }
   };
 
-  /* ── QR Scan handler ── */
+  const showScannerFeedback = (type, message) => {
+    if (successClearTimerRef.current) {
+      clearTimeout(successClearTimerRef.current);
+    }
+
+    if (type === "success") {
+      setScannerError("");
+      setScannerSuccess(message);
+      playScanSuccessSound();
+    } else {
+      setScannerSuccess("");
+      setScannerError(message);
+      playScanErrorSound();
+    }
+
+    successClearTimerRef.current = setTimeout(() => {
+      setScannerSuccess("");
+      setScannerError("");
+    }, 2800);
+  };
+
+  useEffect(() => () => {
+    if (successClearTimerRef.current) clearTimeout(successClearTimerRef.current);
+  }, []);
+
+  /* ── QR Scan handler — keeps scanner open for batch scanning ── */
   const handleQRScan = async (scannedText) => {
     if (!scannedText) return;
 
@@ -734,22 +788,39 @@ const StudentList = () => {
     );
 
     if (!student) {
-      setScannerError(`Enrollment "${scannedText}" not found in this assignment.`);
-      setShowScannerModal(true); // reopen so teacher sees the error
+      showScannerFeedback("error", `Enrollment "${scannedText}" not found in this assignment.`);
       return;
     }
 
     if (student.status === "submitted") {
-      setScannerError(`${student.studentId?.name || scannedText} is already submitted.`);
-      setShowScannerModal(true);
+      showScannerFeedback("error", `${student.studentId?.name || scannedText} is already submitted.`);
       return;
     }
 
-    // All good — close modal then submit
-    setShowScannerModal(false);
-    setScannerError("");
-    await handleSubmit(student._id);
+    setQrProcessing(true);
+    try {
+      const { data } = await API.put(`/api/submission/submit/${student._id}`, {});
+      if (data.success) {
+        setStudents((prev) =>
+          prev.map((item) => (item._id === student._id ? { ...item, status: "submitted" } : item))
+        );
+        setSelectedStudent((prev) =>
+          prev && prev._id === student._id ? { ...prev, status: "submitted" } : prev
+        );
+        showScannerFeedback("success", `${student.studentId?.name || scannedText} marked as submitted`);
+      } else {
+        showScannerFeedback("error", data.message || "Failed to update submission.");
+      }
+    } catch (error) {
+      showScannerFeedback(
+        "error",
+        error.response?.data?.message || "Failed to update submission. Please try again."
+      );
+    } finally {
+      setQrProcessing(false);
+    }
   };
+  
 
   /* ── Stats ── */
   const totalSubmitted = students.filter((s) => s.status === "submitted").length;
@@ -818,7 +889,7 @@ const StudentList = () => {
           {!loading && (
             <div className={`flex flex-wrap gap-2 ${isMobile ? "w-full" : ""}`}>
               <button
-                onClick={() => { setScannerError(""); setShowScannerModal(true); }}
+                onClick={() => { setScannerError(""); setScannerSuccess(""); setShowScannerModal(true); }}
                 className={`flex items-center justify-center gap-1.5 px-4 py-2.5 bg-violet-100 text-violet-700 border border-violet-200 rounded-xl text-[0.75rem] font-bold cursor-pointer hover:bg-violet-200 hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ${isMobile ? "flex-1 min-w-[120px]" : ""}`}
               >
                 <i className="ri-qr-scan-2-line text-base" />Scan QR
@@ -980,10 +1051,11 @@ const StudentList = () => {
       )}
       {showScannerModal && (
         <QRScannerModal
-          onClose={() => { setShowScannerModal(false); setScannerError(""); }}
+          onClose={() => { setShowScannerModal(false); setScannerError(""); setScannerSuccess(""); }}
           onScan={handleQRScan}
-          isScanning={!!submittingId}
+          isProcessing={qrProcessing}
           error={scannerError}
+          successMessage={scannerSuccess}
         />
       )}
     </div>
