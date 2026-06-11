@@ -145,17 +145,7 @@ const Login = () => {
             </button>
           </form>
 
-          {/* Registration Link */}
-          <p className="text-center text-xs text-gray-500 tracking-wide">
-            Don't have an account?{" "}
-            <button
-              type="button"
-              onClick={() => navigate("/register")}
-              className="font-bold text-black hover:underline uppercase ml-1 focus:outline-none"
-            >
-              Register
-            </button>
-          </p>
+        
           
         </div>
       </div>
