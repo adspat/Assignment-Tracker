@@ -13,8 +13,10 @@
     "@tailwindcss/vite": "^4.2.2",
     "axios": "^1.14.0",
     "gsap": "^3.15.0",
+    "html5-qrcode": "^2.3.8",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-qr-reader": "^3.0.0-beta-1",
     "react-router-dom": "^7.14.0",
     "react-toastify": "^11.0.5",
     "remixicon": "^4.9.1"

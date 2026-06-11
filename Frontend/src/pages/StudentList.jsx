@@ -1,6 +1,7 @@
 import API from "../api/axios";
 import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { Html5Qrcode } from "html5-qrcode";
 
 /* ─── Google Fonts injection ─── */
 if (!document.getElementById("edu-fonts")) {
@@ -24,11 +25,34 @@ if (!document.getElementById("student-list-animations")) {
     @keyframes fadeIn { from{opacity:0} to{opacity:1} }
     @keyframes spin { to { transform: rotate(360deg); } }
     @keyframes dropdownIn { from{opacity:0;transform:translateY(-6px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+    @keyframes scanLine {
+      0%, 100% { top: 20%; opacity: 0.5; }
+      50%       { top: 80%; opacity: 1;   }
+    }
     .student-row { animation: rowIn 0.35s ease both; }
     .mobile-card { animation: rowIn 0.3s ease both; }
     .shimmer-pulse { animation: shimmer 1.4s ease-in-out infinite; }
     .spin { animation: spin 0.7s linear infinite; }
     .dropdown-menu { animation: dropdownIn 0.18s cubic-bezier(0.34,1.3,0.64,1) forwards; }
+
+    /* ── html5-qrcode UI overrides ── */
+    #qr-scanner-container video {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      border-radius: 14px !important;
+    }
+    #qr-scanner-container img[alt="Info icon"],
+    #qr-scanner-container img[alt="Camera based scan"],
+    #qr-scanner-container select,
+    #qr-scanner-container button,
+    #qr-scanner-container span {
+      display: none !important;
+    }
+    #qr-scanner-container {
+      border: none !important;
+      padding: 0 !important;
+    }
   `;
   document.head.appendChild(s);
 }
@@ -126,7 +150,6 @@ const SkeletonCard = () => (
 const SearchBar = ({ value, onChange, isMobile, resultCount, totalCount }) => {
   const inputRef = useRef(null);
   const hasQuery = value.length > 0;
-
   return (
     <div className={`${isMobile ? "mb-3" : "mb-4"}`}>
       <div className="relative flex items-center">
@@ -180,28 +203,20 @@ const FilterTabs = ({ activeFilter, onChange, counts, isMobile }) => {
     { key: "submitted", label: "Submitted", count: counts.submitted, icon: "ri-checkbox-circle-line" },
     { key: "pending", label: "Pending", count: counts.pending, icon: "ri-time-line" },
   ];
-
   return (
     <div className={`flex gap-2 ${isMobile ? "mb-3" : "mb-4"}`}>
       {tabs.map(({ key, label, count, icon }) => {
         const isActive = activeFilter === key;
         const colorMap = {
-          all: isActive
-            ? "bg-stone-900 text-white border-stone-900"
-            : "bg-white text-stone-500 border-black/[0.08] hover:border-stone-300 hover:text-stone-700",
-          submitted: isActive
-            ? "bg-emerald-500 text-white border-emerald-500"
-            : "bg-white text-stone-500 border-black/[0.08] hover:border-emerald-300 hover:text-emerald-600",
-          pending: isActive
-            ? "bg-amber-500 text-white border-amber-500"
-            : "bg-white text-stone-500 border-black/[0.08] hover:border-amber-300 hover:text-amber-600",
+          all: isActive ? "bg-stone-900 text-white border-stone-900" : "bg-white text-stone-500 border-black/[0.08] hover:border-stone-300 hover:text-stone-700",
+          submitted: isActive ? "bg-emerald-500 text-white border-emerald-500" : "bg-white text-stone-500 border-black/[0.08] hover:border-emerald-300 hover:text-emerald-600",
+          pending: isActive ? "bg-amber-500 text-white border-amber-500" : "bg-white text-stone-500 border-black/[0.08] hover:border-amber-300 hover:text-amber-600",
         };
         const badgeMap = {
           all: isActive ? "bg-white/20 text-white" : "bg-stone-100 text-stone-500",
           submitted: isActive ? "bg-white/20 text-white" : "bg-emerald-50 text-emerald-600",
           pending: isActive ? "bg-white/20 text-white" : "bg-amber-50 text-amber-600",
         };
-
         return (
           <button
             key={key}
@@ -224,15 +239,11 @@ const FilterTabs = ({ activeFilter, onChange, counts, isMobile }) => {
 const DownloadDropdown = ({ students, assignmentId, isMobile }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
-
   useEffect(() => {
-    const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
-    };
+    const handler = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
-
   const buildCSV = (rows) => {
     const headers = ["Name", "Enrollment", "Class", "Branch", "Semester", "Status"];
     const data = rows.map((item) => [
@@ -245,7 +256,6 @@ const DownloadDropdown = ({ students, assignmentId, isMobile }) => {
     ]);
     return [headers, ...data].map((r) => r.join(",")).join("\n");
   };
-
   const triggerDownload = (csv, suffix) => {
     const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -257,34 +267,11 @@ const DownloadDropdown = ({ students, assignmentId, isMobile }) => {
     document.body.removeChild(a);
     setOpen(false);
   };
-
   const options = [
-    {
-      label: "All Students",
-      icon: "ri-team-line",
-      color: "text-stone-700",
-      bg: "hover:bg-stone-50",
-      action: () => triggerDownload(buildCSV(students), "all"),
-      count: students.length,
-    },
-    {
-      label: "Submitted Only",
-      icon: "ri-checkbox-circle-line",
-      color: "text-emerald-600",
-      bg: "hover:bg-emerald-50",
-      action: () => triggerDownload(buildCSV(students.filter((s) => s.status === "submitted")), "submitted"),
-      count: students.filter((s) => s.status === "submitted").length,
-    },
-    {
-      label: "Pending Only",
-      icon: "ri-time-line",
-      color: "text-amber-600",
-      bg: "hover:bg-amber-50",
-      action: () => triggerDownload(buildCSV(students.filter((s) => s.status !== "submitted")), "pending"),
-      count: students.filter((s) => s.status !== "submitted").length,
-    },
+    { label: "All Students", icon: "ri-team-line", color: "text-stone-700", bg: "hover:bg-stone-50", action: () => triggerDownload(buildCSV(students), "all"), count: students.length },
+    { label: "Submitted Only", icon: "ri-checkbox-circle-line", color: "text-emerald-600", bg: "hover:bg-emerald-50", action: () => triggerDownload(buildCSV(students.filter((s) => s.status === "submitted")), "submitted"), count: students.filter((s) => s.status === "submitted").length },
+    { label: "Pending Only", icon: "ri-time-line", color: "text-amber-600", bg: "hover:bg-amber-50", action: () => triggerDownload(buildCSV(students.filter((s) => s.status !== "submitted")), "pending"), count: students.filter((s) => s.status !== "submitted").length },
   ];
-
   return (
     <div ref={ref} className="relative">
       <button
@@ -295,29 +282,17 @@ const DownloadDropdown = ({ students, assignmentId, isMobile }) => {
         CSV
         <i className={`ri-arrow-down-s-line text-base transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
-
       {open && (
-        <div
-          className="dropdown-menu absolute right-0 top-[calc(100%+6px)] z-50 bg-white border border-black/[0.09] rounded-2xl shadow-xl overflow-hidden"
-          style={{ minWidth: 200 }}
-        >
+        <div className="dropdown-menu absolute right-0 top-[calc(100%+6px)] z-50 bg-white border border-black/[0.09] rounded-2xl shadow-xl overflow-hidden" style={{ minWidth: 200 }}>
           <div className="px-3.5 pt-3 pb-2">
-            <p className="text-[0.58rem] font-bold uppercase tracking-[0.1em] text-stone-400 m-0">
-              Download as CSV
-            </p>
+            <p className="text-[0.58rem] font-bold uppercase tracking-[0.1em] text-stone-400 m-0">Download as CSV</p>
           </div>
           <div className="px-2 pb-2">
             {options.map(({ label, icon, color, bg, action, count }) => (
-              <button
-                key={label}
-                onClick={action}
-                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border-none bg-transparent cursor-pointer text-left transition-colors duration-150 ${bg}`}
-              >
+              <button key={label} onClick={action} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border-none bg-transparent cursor-pointer text-left transition-colors duration-150 ${bg}`}>
                 <i className={`${icon} text-base ${color}`} />
                 <span className={`text-[0.8rem] font-semibold ${color} flex-1`}>{label}</span>
-                <span className="text-[0.65rem] font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded-full">
-                  {count}
-                </span>
+                <span className="text-[0.65rem] font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded-full">{count}</span>
               </button>
             ))}
           </div>
@@ -335,40 +310,187 @@ const AddStudentModal = ({ onClose, onAdd }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const inputRef = useRef(null);
-
-  useEffect(() => {
-    setTimeout(() => inputRef.current?.focus(), 100);
-  }, []);
-
+  useEffect(() => { setTimeout(() => inputRef.current?.focus(), 100); }, []);
   const handleAdd = async () => {
     const trimmed = enrollment.trim();
-    if (!trimmed) {
-      setError("Please enter an enrollment number.");
-      return;
-    }
+    if (!trimmed) { setError("Please enter an enrollment number."); return; }
     setError("");
     setLoading(true);
     try {
       await onAdd(trimmed);
       onClose();
     } catch (err) {
-      setError(
-        err?.response?.data?.message || "Student not found or already added."
-      );
+      setError(err?.response?.data?.message || "Student not found or already added.");
     } finally {
       setLoading(false);
     }
   };
+  const handleKeyDown = (e) => { if (e.key === "Enter") handleAdd(); if (e.key === "Escape") onClose(); };
+  return (
+    <>
+      <div onClick={onClose} className="fixed inset-0 bg-black/55 backdrop-blur-sm z-[998]" style={{ animation: "fadeIn 0.2s ease" }} />
+      <div
+        className="fixed left-1/2 top-1/2 z-[999] bg-white rounded-[22px] shadow-2xl w-[min(420px,calc(100vw-32px))]"
+        style={{ animation: "slideUpCenter 0.3s cubic-bezier(0.34,1.3,0.64,1) forwards", padding: "28px 28px 24px" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-xl bg-violet-50 border border-violet-200 flex items-center justify-center text-violet-500 text-lg flex-shrink-0">
+              <i className="ri-user-add-line" />
+            </div>
+            <div>
+              <h2 className="m-0 text-[1.1rem] font-black text-stone-900 tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>Add Student</h2>
+              <p className="mt-0.5 text-[0.68rem] text-stone-400 font-medium">Link student by enrollment number</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-black/[0.06] border-none flex items-center justify-center cursor-pointer text-stone-500 text-base hover:bg-black/10 transition-colors flex-shrink-0">
+            <i className="ri-close-line" />
+          </button>
+        </div>
+        <div className="mb-2">
+          <label className="block text-[0.62rem] font-bold uppercase tracking-[0.08em] text-stone-400 mb-2">Enrollment Number</label>
+          <div className="relative">
+            <i className={`ri-hashtag absolute left-3.5 top-1/2 -translate-y-1/2 text-[0.9rem] pointer-events-none transition-colors duration-200 ${enrollment ? "text-violet-500" : "text-stone-400"}`} />
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="e.g. 0101CS211001"
+              value={enrollment}
+              onChange={(e) => { setEnrollment(e.target.value); setError(""); }}
+              onKeyDown={handleKeyDown}
+              className={`w-full py-3 pl-9 pr-4 bg-stone-50 rounded-xl text-sm font-semibold text-stone-900 transition-all duration-200 focus:outline-none placeholder:text-stone-300 placeholder:font-normal ${
+                error ? "border-2 border-red-300 shadow-[0_0_0_3px_rgba(229,72,77,0.08)]"
+                : enrollment ? "border-2 border-violet-300 shadow-[0_0_0_3px_rgba(124,106,247,0.08)]"
+                : "border border-black/[0.07]"
+              }`}
+              style={{ fontFamily: "'DM Sans', sans-serif" }}
+            />
+          </div>
+          {error && (
+            <p className="mt-2 text-[0.7rem] font-semibold text-red-500 flex items-center gap-1.5" style={{ animation: "fadeIn 0.15s ease" }}>
+              <i className="ri-error-warning-line text-sm" />{error}
+            </p>
+          )}
+        </div>
+        <p className="text-[0.68rem] text-stone-400 mb-5 flex items-center gap-1.5">
+          <i className="ri-information-line text-xs text-violet-400" />
+          The student will be added to this assignment's submission list.
+        </p>
+        <div className="flex gap-3">
+          <button onClick={onClose} className="flex-1 py-3 px-4 bg-black/[0.04] text-stone-500 border border-black/[0.07] rounded-xl text-[0.82rem] font-semibold cursor-pointer hover:bg-black/[0.07] transition-colors duration-150">Cancel</button>
+          <button
+            onClick={handleAdd}
+            disabled={loading}
+            className={`flex-1 py-3 px-4 bg-violet-500 text-white border-none rounded-xl text-[0.82rem] font-bold cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 ${loading ? "opacity-70 cursor-not-allowed" : "hover:bg-violet-600 hover:-translate-y-px active:scale-[0.97]"}`}
+          >
+            {loading ? <><Spinner /> Adding…</> : <><i className="ri-user-add-line text-base" />Add Student</>}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+};
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") handleAdd();
-    if (e.key === "Escape") onClose();
+/* ════════════════════════════════
+   QR SCANNER MODAL — html5-qrcode
+════════════════════════════════ */
+const QRScannerModal = ({ onClose, onScan, isScanning, error: externalError }) => {
+  const html5QrRef = useRef(null);
+  const scannerStartedRef = useRef(false);
+  const hasScannedRef = useRef(false);
+  const SCANNER_ID = "qr-scanner-container";
+
+  const [camError, setCamError] = useState("");
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    // Small delay so the DOM element is mounted
+    const timer = setTimeout(() => {
+      startScanner();
+    }, 200);
+
+    return () => {
+      clearTimeout(timer);
+      stopScanner();
+    };
+  }, []);
+
+  const startScanner = async () => {
+    try {
+      const html5QrCode = new Html5Qrcode(SCANNER_ID, { verbose: false });
+      html5QrRef.current = html5QrCode;
+
+      const cameras = await Html5Qrcode.getCameras();
+      if (!cameras || cameras.length === 0) {
+        setCamError("No camera found on this device.");
+        return;
+      }
+
+      // Prefer back camera
+      const backCam = cameras.find((c) =>
+        c.label.toLowerCase().includes("back") ||
+        c.label.toLowerCase().includes("rear") ||
+        c.label.toLowerCase().includes("environment")
+      ) || cameras[cameras.length - 1];
+
+      await html5QrCode.start(
+        backCam.id,
+        {
+          fps: 15,
+          qrbox: { width: 220, height: 220 },
+          aspectRatio: 1.0,
+          disableFlip: false,
+        },
+        (decodedText) => {
+          // onScanSuccess
+          if (hasScannedRef.current) return;
+          hasScannedRef.current = true;
+          if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+          stopScanner().then(() => {
+            onScan(decodedText.trim());
+          });
+        },
+        () => {
+          // onScanFailure — called every frame when no QR found, ignore silently
+        }
+      );
+
+      scannerStartedRef.current = true;
+      setReady(true);
+    } catch (err) {
+      console.error("QR Scanner error:", err);
+      if (err?.message?.toLowerCase().includes("permission")) {
+        setCamError("Camera permission denied. Please allow camera access and try again.");
+      } else if (err?.message?.toLowerCase().includes("notfound") || err?.message?.toLowerCase().includes("no camera")) {
+        setCamError("No camera found on this device.");
+      } else {
+        setCamError("Could not start camera. Please try again.");
+      }
+    }
   };
+
+  const stopScanner = async () => {
+    if (html5QrRef.current && scannerStartedRef.current) {
+      try {
+        await html5QrRef.current.stop();
+        html5QrRef.current.clear();
+      } catch (_) {}
+      scannerStartedRef.current = false;
+    }
+  };
+
+  const handleClose = async () => {
+    await stopScanner();
+    onClose();
+  };
+
+  const displayError = externalError || camError;
 
   return (
     <>
       <div
-        onClick={onClose}
+        onClick={handleClose}
         className="fixed inset-0 bg-black/55 backdrop-blur-sm z-[998]"
         style={{ animation: "fadeIn 0.2s ease" }}
       />
@@ -380,100 +502,107 @@ const AddStudentModal = ({ onClose, onAdd }) => {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between mb-6">
+        {/* ── Header ── */}
+        <div className="flex items-start justify-between mb-5">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl bg-violet-50 border border-violet-200 flex items-center justify-center text-violet-500 text-lg flex-shrink-0">
-              <i className="ri-user-add-line" />
+              <i className="ri-qr-scan-2-line" />
             </div>
             <div>
-              <h2
-                className="m-0 text-[1.1rem] font-black text-stone-900 tracking-tight"
-                style={{ fontFamily: "'Playfair Display', serif" }}
-              >
-                Add Student
+              <h2 className="m-0 text-[1.1rem] font-black text-stone-900 tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+                Scan QR Code
               </h2>
               <p className="mt-0.5 text-[0.68rem] text-stone-400 font-medium">
-                Link student by enrollment number
+                Scan student's ID card to submit
               </p>
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="w-8 h-8 rounded-full bg-black/[0.06] border-none flex items-center justify-center cursor-pointer text-stone-500 text-base hover:bg-black/10 transition-colors flex-shrink-0"
           >
             <i className="ri-close-line" />
           </button>
         </div>
 
-        <div className="mb-2">
-          <label className="block text-[0.62rem] font-bold uppercase tracking-[0.08em] text-stone-400 mb-2">
-            Enrollment Number
-          </label>
-          <div className="relative">
-            <i
-              className={`ri-hashtag absolute left-3.5 top-1/2 -translate-y-1/2 text-[0.9rem] pointer-events-none transition-colors duration-200 ${
-                enrollment ? "text-violet-500" : "text-stone-400"
-              }`}
-            />
-            <input
-              ref={inputRef}
-              type="text"
-              placeholder="e.g. 0101CS211001"
-              value={enrollment}
-              onChange={(e) => {
-                setEnrollment(e.target.value);
-                setError("");
-              }}
-              onKeyDown={handleKeyDown}
-              className={`w-full py-3 pl-9 pr-4 bg-stone-50 rounded-xl text-sm font-semibold text-stone-900 transition-all duration-200 focus:outline-none placeholder:text-stone-300 placeholder:font-normal ${
-                error
-                  ? "border-2 border-red-300 shadow-[0_0_0_3px_rgba(229,72,77,0.08)]"
-                  : enrollment
-                  ? "border-2 border-violet-300 shadow-[0_0_0_3px_rgba(124,106,247,0.08)]"
-                  : "border border-black/[0.07]"
-              }`}
-              style={{ fontFamily: "'DM Sans', sans-serif" }}
-            />
-          </div>
-          {error && (
-            <p
-              className="mt-2 text-[0.7rem] font-semibold text-red-500 flex items-center gap-1.5"
-              style={{ animation: "fadeIn 0.15s ease" }}
-            >
-              <i className="ri-error-warning-line text-sm" />
-              {error}
-            </p>
+        {/* ── Camera View ── */}
+        <div
+          className="rounded-2xl overflow-hidden mb-4 border-2 border-black/[0.07] bg-black relative shadow-inner"
+          style={{ aspectRatio: "1/1", minHeight: 260 }}
+        >
+          {/* html5-qrcode mounts video inside this div */}
+          <div
+            id={SCANNER_ID}
+            className="w-full h-full"
+            style={{ width: "100%", height: "100%" }}
+          />
+
+          {/* Loading overlay — shown until camera is ready */}
+          {!ready && !camError && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black z-10">
+              <Spinner />
+              <p className="mt-3 text-[0.78rem] font-semibold text-white/60">Starting camera…</p>
+            </div>
+          )}
+
+          {/* Processing overlay — shown while API call is in progress */}
+          {isScanning && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center z-20 bg-black/65 backdrop-blur-sm">
+              <Spinner />
+              <p className="mt-3 text-[0.82rem] font-bold text-white">Processing scan…</p>
+            </div>
+          )}
+
+          {/* Corner decorators (shown after camera is ready) */}
+          {ready && !isScanning && (
+            <div className="absolute inset-0 pointer-events-none z-10">
+              <div className="absolute top-5 left-5 w-7 h-7 border-t-[3px] border-l-[3px] border-violet-400 rounded-tl-lg opacity-80" />
+              <div className="absolute top-5 right-5 w-7 h-7 border-t-[3px] border-r-[3px] border-violet-400 rounded-tr-lg opacity-80" />
+              <div className="absolute bottom-5 left-5 w-7 h-7 border-b-[3px] border-l-[3px] border-violet-400 rounded-bl-lg opacity-80" />
+              <div className="absolute bottom-5 right-5 w-7 h-7 border-b-[3px] border-r-[3px] border-violet-400 rounded-br-lg opacity-80" />
+              {/* Animated scan line */}
+              <div
+                className="absolute left-8 right-8 h-[2px] bg-gradient-to-r from-transparent via-violet-400 to-transparent rounded-full"
+                style={{ animation: "scanLine 2s ease-in-out infinite" }}
+              />
+            </div>
+          )}
+
+          {/* Camera error state */}
+          {camError && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 z-10 px-6 text-center">
+              <div className="w-12 h-12 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center mb-3">
+                <i className="ri-camera-off-line text-red-400 text-xl" />
+              </div>
+              <p className="text-[0.75rem] font-semibold text-white/80">{camError}</p>
+            </div>
           )}
         </div>
 
-        <p className="text-[0.68rem] text-stone-400 mb-5 flex items-center gap-1.5">
-          <i className="ri-information-line text-xs text-violet-400" />
-          The student will be added to this assignment's submission list.
-        </p>
+        {/* ── Status text ── */}
+        {displayError && !camError ? (
+          <p
+            className="mb-4 text-[0.7rem] font-semibold text-red-500 flex items-center justify-center gap-1.5"
+            style={{ animation: "fadeIn 0.15s ease" }}
+          >
+            <i className="ri-error-warning-line text-sm" />
+            {displayError}
+          </p>
+        ) : !camError ? (
+          <p className="text-[0.68rem] text-stone-400 text-center mb-4 flex items-center justify-center gap-1.5">
+            <i className="ri-focus-3-line text-violet-400" />
+            Position the QR code within the frame
+          </p>
+        ) : (
+          <div className="mb-4" />
+        )}
 
-        <div className="flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 py-3 px-4 bg-black/[0.04] text-stone-500 border border-black/[0.07] rounded-xl text-[0.82rem] font-semibold cursor-pointer hover:bg-black/[0.07] transition-colors duration-150"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleAdd}
-            disabled={loading}
-            className={`flex-1 py-3 px-4 bg-violet-500 text-white border-none rounded-xl text-[0.82rem] font-bold cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 ${
-              loading
-                ? "opacity-70 cursor-not-allowed"
-                : "hover:bg-violet-600 hover:-translate-y-px active:scale-[0.97]"
-            }`}
-          >
-            {loading ? (
-              <><Spinner /> Adding…</>
-            ) : (
-              <><i className="ri-user-add-line text-base" />Add Student</>
-            )}
-          </button>
-        </div>
+        <button
+          onClick={handleClose}
+          className="w-full py-3 px-4 bg-black/[0.04] text-stone-500 border border-black/[0.07] rounded-xl text-[0.82rem] font-semibold cursor-pointer hover:bg-black/[0.07] transition-colors duration-150"
+        >
+          Cancel Scan
+        </button>
       </div>
     </>
   );
@@ -489,8 +618,10 @@ const StudentList = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showScannerModal, setShowScannerModal] = useState(false);
+  const [scannerError, setScannerError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all"); // "all" | "submitted" | "pending"
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -500,11 +631,8 @@ const StudentList = () => {
 
   /* ─── Filter logic ─── */
   const filteredStudents = students.filter((item) => {
-    // Status filter
     if (statusFilter === "submitted" && item.status !== "submitted") return false;
     if (statusFilter === "pending" && item.status === "submitted") return false;
-
-    // Search filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       return (
@@ -526,9 +654,7 @@ const StudentList = () => {
         const { data } = await API.get(`/api/submission/${assignmentId}`);
         if (data.success) {
           const sorted = [...data.data].sort((a, b) =>
-            (a.studentId?.name?.toLowerCase() || "").localeCompare(
-              b.studentId?.name?.toLowerCase() || ""
-            )
+            (a.studentId?.name?.toLowerCase() || "").localeCompare(b.studentId?.name?.toLowerCase() || "")
           );
           setStudents(sorted);
         }
@@ -548,9 +674,7 @@ const StudentList = () => {
       const res = await API.get(`/api/submission/${assignmentId}`);
       if (res.data.success) {
         const sorted = [...res.data.data].sort((a, b) =>
-          (a.studentId?.name?.toLowerCase() || "").localeCompare(
-            b.studentId?.name?.toLowerCase() || ""
-          )
+          (a.studentId?.name?.toLowerCase() || "").localeCompare(b.studentId?.name?.toLowerCase() || "")
         );
         setStudents(sorted);
       }
@@ -559,16 +683,14 @@ const StudentList = () => {
     }
   };
 
-  /* ── Submit / Unsubmit ── */
+  /* ── Submit ── */
   const handleSubmit = async (submissionId) => {
     setSubmittingId(submissionId);
     try {
       const { data } = await API.put(`/api/submission/submit/${submissionId}`, {});
       if (data.success) {
         setStudents((prev) =>
-          prev.map((item) =>
-            item._id === submissionId ? { ...item, status: "submitted" } : item
-          )
+          prev.map((item) => item._id === submissionId ? { ...item, status: "submitted" } : item)
         );
         setSelectedStudent((prev) =>
           prev && prev._id === submissionId ? { ...prev, status: "submitted" } : prev
@@ -581,15 +703,14 @@ const StudentList = () => {
     }
   };
 
+  /* ── Unsubmit ── */
   const handleUnsubmit = async (submissionId) => {
     setSubmittingId(submissionId);
     try {
       const { data } = await API.put(`/api/submission/unsubmit/${submissionId}`, {});
       if (data.success) {
         setStudents((prev) =>
-          prev.map((item) =>
-            item._id === submissionId ? { ...item, status: "pending" } : item
-          )
+          prev.map((item) => item._id === submissionId ? { ...item, status: "pending" } : item)
         );
         setSelectedStudent((prev) =>
           prev && prev._id === submissionId ? { ...prev, status: "pending" } : prev
@@ -602,12 +723,39 @@ const StudentList = () => {
     }
   };
 
+  /* ── QR Scan handler ── */
+  const handleQRScan = async (scannedText) => {
+    if (!scannedText) return;
+
+    const normalised = scannedText.trim().toLowerCase();
+
+    const student = students.find(
+      (s) => s.studentId?.enrollment?.trim().toLowerCase() === normalised
+    );
+
+    if (!student) {
+      setScannerError(`Enrollment "${scannedText}" not found in this assignment.`);
+      setShowScannerModal(true); // reopen so teacher sees the error
+      return;
+    }
+
+    if (student.status === "submitted") {
+      setScannerError(`${student.studentId?.name || scannedText} is already submitted.`);
+      setShowScannerModal(true);
+      return;
+    }
+
+    // All good — close modal then submit
+    setShowScannerModal(false);
+    setScannerError("");
+    await handleSubmit(student._id);
+  };
+
   /* ── Stats ── */
   const totalSubmitted = students.filter((s) => s.status === "submitted").length;
   const totalStudents = students.length;
   const totalPending = totalStudents - totalSubmitted;
   const pct = totalStudents ? Math.round((totalSubmitted / totalStudents) * 100) : 0;
-
   const filterCounts = { all: totalStudents, submitted: totalSubmitted, pending: totalPending };
 
   const openModal = (student) => { setSelectedStudent(student); setShowModal(true); };
@@ -626,18 +774,13 @@ const StudentList = () => {
           onClick={() => navigate(-1)}
           className="inline-flex items-center gap-1.5 text-[0.75rem] font-semibold text-stone-400 bg-transparent border border-black/[0.07] rounded-[9px] px-3.5 py-1.5 cursor-pointer mb-7 hover:bg-black/[0.07] transition-colors duration-150"
         >
-          <i className="ri-arrow-left-s-line text-base" />
-          Back to Dashboard
+          <i className="ri-arrow-left-s-line text-base" />Back to Dashboard
         </button>
 
         {/* ── Page header ── */}
-        <header
-          className={`flex justify-between items-start flex-wrap ${isMobile ? "gap-3.5 mb-4 pb-4" : "gap-5 mb-7 pb-6"} border-b border-black/[0.06]`}
-        >
+        <header className={`flex justify-between items-start flex-wrap ${isMobile ? "gap-3.5 mb-4 pb-4" : "gap-5 mb-7 pb-6"} border-b border-black/[0.06]`}>
           <div className="min-w-0">
-            <p className="text-[0.62rem] font-bold tracking-[0.12em] uppercase text-violet-500 mb-1.5">
-              Assignment Submissions
-            </p>
+            <p className="text-[0.62rem] font-bold tracking-[0.12em] uppercase text-violet-500 mb-1.5">Assignment Submissions</p>
             <h1
               className={`${isMobile ? "text-[1.55rem]" : "text-[2rem]"} font-black text-stone-900 tracking-tight leading-tight m-0`}
               style={{ fontFamily: "'Playfair Display', serif" }}
@@ -663,17 +806,9 @@ const StudentList = () => {
                 { label: "Submitted", val: totalSubmitted, colorClass: "text-emerald-600", bgClass: "bg-emerald-50", borderClass: "border-emerald-200" },
                 { label: "Pending", val: totalPending, colorClass: "text-amber-600", bgClass: "bg-amber-50", borderClass: "border-amber-200" },
               ].map(({ label, val, colorClass, bgClass, borderClass }) => (
-                <div
-                  key={label}
-                  className={`${isMobile ? "px-3.5 py-2 flex-1" : "px-4 py-2.5"} ${bgClass} border ${borderClass} rounded-xl text-center`}
-                >
+                <div key={label} className={`${isMobile ? "px-3.5 py-2 flex-1" : "px-4 py-2.5"} ${bgClass} border ${borderClass} rounded-xl text-center`}>
                   <p className="text-[0.6rem] font-bold uppercase tracking-[0.08em] text-stone-400 m-0 mb-0.5">{label}</p>
-                  <p
-                    className={`${isMobile ? "text-base" : "text-xl"} font-bold ${colorClass} m-0`}
-                    style={{ fontFamily: "'Playfair Display', serif" }}
-                  >
-                    {val}
-                  </p>
+                  <p className={`${isMobile ? "text-base" : "text-xl"} font-bold ${colorClass} m-0`} style={{ fontFamily: "'Playfair Display', serif" }}>{val}</p>
                 </div>
               ))}
             </div>
@@ -681,15 +816,19 @@ const StudentList = () => {
 
           {/* Action buttons */}
           {!loading && (
-            <div className={`flex gap-2 ${isMobile ? "w-full" : ""}`}>
+            <div className={`flex flex-wrap gap-2 ${isMobile ? "w-full" : ""}`}>
+              <button
+                onClick={() => { setScannerError(""); setShowScannerModal(true); }}
+                className={`flex items-center justify-center gap-1.5 px-4 py-2.5 bg-violet-100 text-violet-700 border border-violet-200 rounded-xl text-[0.75rem] font-bold cursor-pointer hover:bg-violet-200 hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ${isMobile ? "flex-1 min-w-[120px]" : ""}`}
+              >
+                <i className="ri-qr-scan-2-line text-base" />Scan QR
+              </button>
               <button
                 onClick={() => setShowAddModal(true)}
-                className={`flex items-center justify-center gap-1.5 px-4 py-2.5 bg-violet-500 text-white border-none rounded-xl text-[0.75rem] font-bold cursor-pointer hover:bg-violet-600 hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ${isMobile ? "flex-1" : ""}`}
+                className={`flex items-center justify-center gap-1.5 px-4 py-2.5 bg-violet-500 text-white border-none rounded-xl text-[0.75rem] font-bold cursor-pointer hover:bg-violet-600 hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ${isMobile ? "flex-1 min-w-[120px]" : ""}`}
               >
-                <i className="ri-user-add-line text-base" />
-                Add Student
+                <i className="ri-user-add-line text-base" />Add Student
               </button>
-
               {students.length > 0 && (
                 <DownloadDropdown students={students} assignmentId={assignmentId} isMobile={isMobile} />
               )}
@@ -712,9 +851,7 @@ const StudentList = () => {
                 />
               </div>
             </div>
-            <div className="text-[0.72rem] font-semibold text-stone-400 whitespace-nowrap flex-shrink-0">
-              {totalSubmitted}/{totalStudents}
-            </div>
+            <div className="text-[0.72rem] font-semibold text-stone-400 whitespace-nowrap flex-shrink-0">{totalSubmitted}/{totalStudents}</div>
           </div>
         )}
 
@@ -740,20 +877,18 @@ const StudentList = () => {
         {/* ════════════ CONTENT AREA ════════════ */}
         {loading ? (
           isMobile ? (
-            <div className="flex flex-col gap-2.5">
-              {[1, 2, 3, 4, 5].map((n) => <SkeletonCard key={n} />)}
-            </div>
+            <div className="flex flex-col gap-2.5">{[1,2,3,4,5].map((n) => <SkeletonCard key={n} />)}</div>
           ) : (
             <div className="bg-white border border-black/[0.07] rounded-[18px] overflow-hidden">
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="border-b border-black/[0.06] bg-[#f9f8f5]">
-                    {["Student", "Enrollment", "Class", "Branch", "Semester", "Status", "Action"].map((h) => (
+                    {["Student","Enrollment","Class","Branch","Semester","Status","Action"].map((h) => (
                       <th key={h} className="px-5 py-3 text-[0.6rem] font-bold tracking-[0.1em] uppercase text-stone-400 text-left">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody>{[1, 2, 3, 4, 5].map((n) => <SkeletonRow key={n} />)}</tbody>
+                <tbody>{[1,2,3,4,5].map((n) => <SkeletonRow key={n} />)}</tbody>
               </table>
             </div>
           )
@@ -768,47 +903,29 @@ const StudentList = () => {
             <p className="text-[0.78rem] text-stone-400">
               {searchQuery
                 ? `No students match "${searchQuery}". Try a different search.`
-                : statusFilter === "submitted"
-                ? "No students have submitted this assignment yet."
-                : statusFilter === "pending"
-                ? "All students have submitted — great work!"
+                : statusFilter === "submitted" ? "No students have submitted this assignment yet."
+                : statusFilter === "pending" ? "All students have submitted — great work!"
                 : "No submissions have been recorded for this assignment yet."}
             </p>
             {(searchQuery || statusFilter !== "all") ? (
-              <button
-                onClick={() => { setSearchQuery(""); setStatusFilter("all"); }}
-                className="mt-3.5 px-4 py-2 bg-violet-50 text-violet-500 border border-violet-200 rounded-[9px] text-[0.76rem] font-bold cursor-pointer inline-flex items-center gap-1.5 hover:bg-violet-100 transition-colors"
-              >
+              <button onClick={() => { setSearchQuery(""); setStatusFilter("all"); }} className="mt-3.5 px-4 py-2 bg-violet-50 text-violet-500 border border-violet-200 rounded-[9px] text-[0.76rem] font-bold cursor-pointer inline-flex items-center gap-1.5 hover:bg-violet-100 transition-colors">
                 <i className="ri-close-line" /> Clear filters
               </button>
             ) : (
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="mt-3.5 px-4 py-2 bg-violet-500 text-white border-none rounded-[9px] text-[0.76rem] font-bold cursor-pointer inline-flex items-center gap-1.5 hover:bg-violet-600 transition-colors"
-              >
+              <button onClick={() => setShowAddModal(true)} className="mt-3.5 px-4 py-2 bg-violet-500 text-white border-none rounded-[9px] text-[0.76rem] font-bold cursor-pointer inline-flex items-center gap-1.5 hover:bg-violet-600 transition-colors">
                 <i className="ri-user-add-line" /> Add First Student
               </button>
             )}
           </div>
         ) : isMobile ? (
-          <MobileCardList
-            students={filteredStudents}
-            submittingId={submittingId}
-            onSubmit={handleSubmit}
-            onUnsubmit={handleUnsubmit}
-            onOpenModal={openModal}
-          />
+          <MobileCardList students={filteredStudents} submittingId={submittingId} onSubmit={handleSubmit} onUnsubmit={handleUnsubmit} onOpenModal={openModal} />
         ) : (
           <div className="bg-white border border-black/[0.07] rounded-[18px] overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full border-collapse" style={{ tableLayout: "fixed", minWidth: 760 }}>
                 <colgroup>
-                  <col style={{ width: "20%" }} />
-                  <col style={{ width: "14%" }} />
-                  <col style={{ width: "10%" }} />
-                  <col style={{ width: "13%" }} />
-                  <col style={{ width: "11%" }} />
-                  <col style={{ width: "13%" }} />
+                  <col style={{ width: "20%" }} /><col style={{ width: "14%" }} /><col style={{ width: "10%" }} />
+                  <col style={{ width: "13%" }} /><col style={{ width: "11%" }} /><col style={{ width: "13%" }} />
                   <col style={{ width: "19%" }} />
                 </colgroup>
                 <thead>
@@ -822,26 +939,15 @@ const StudentList = () => {
                       { label: "Status", icon: "ri-checkbox-circle-line" },
                       { label: "Action", icon: null, align: "right" },
                     ].map(({ label, icon, align }) => (
-                      <th
-                        key={label}
-                        className={`px-5 py-3 text-[0.6rem] font-bold tracking-[0.09em] uppercase text-stone-400 whitespace-nowrap ${align === "right" ? "text-right" : "text-left"}`}
-                      >
-                        {icon && <i className={`${icon} text-[0.82rem] mr-1 align-[-1px]`} />}
-                        {label}
+                      <th key={label} className={`px-5 py-3 text-[0.6rem] font-bold tracking-[0.09em] uppercase text-stone-400 whitespace-nowrap ${align === "right" ? "text-right" : "text-left"}`}>
+                        {icon && <i className={`${icon} text-[0.82rem] mr-1 align-[-1px]`} />}{label}
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {filteredStudents.map((item, idx) => (
-                    <StudentRow
-                      key={item._id}
-                      item={item}
-                      idx={idx}
-                      onSubmit={handleSubmit}
-                      onUnsubmit={handleUnsubmit}
-                      isSubmitting={submittingId === item._id}
-                    />
+                    <StudentRow key={item._id} item={item} idx={idx} onSubmit={handleSubmit} onUnsubmit={handleUnsubmit} isSubmitting={submittingId === item._id} />
                   ))}
                 </tbody>
               </table>
@@ -849,25 +955,16 @@ const StudentList = () => {
             <div className="border-t border-black/[0.06] px-5 py-2.5 flex justify-between items-center gap-1.5">
               {statusFilter !== "all" && (
                 <div className="flex items-center gap-1.5">
-                  <span className={`text-[0.68rem] font-bold px-2 py-0.5 rounded-full ${
-                    statusFilter === "submitted" ? "bg-emerald-50 text-emerald-600 border border-emerald-200" : "bg-amber-50 text-amber-600 border border-amber-200"
-                  }`}>
+                  <span className={`text-[0.68rem] font-bold px-2 py-0.5 rounded-full ${statusFilter === "submitted" ? "bg-emerald-50 text-emerald-600 border border-emerald-200" : "bg-amber-50 text-amber-600 border border-amber-200"}`}>
                     {statusFilter === "submitted" ? "Submitted" : "Pending"} filter active
                   </span>
-                  <button
-                    onClick={() => setStatusFilter("all")}
-                    className="text-[0.68rem] font-semibold text-stone-400 hover:text-stone-600 transition-colors cursor-pointer bg-transparent border-none"
-                  >
-                    Clear
-                  </button>
+                  <button onClick={() => setStatusFilter("all")} className="text-[0.68rem] font-semibold text-stone-400 hover:text-stone-600 transition-colors cursor-pointer bg-transparent border-none">Clear</button>
                 </div>
               )}
               <div className={`flex items-center gap-1.5 ${statusFilter === "all" ? "ml-auto" : ""}`}>
                 <i className="ri-list-check text-stone-400 text-[0.85rem]" />
                 <span className="text-[0.7rem] font-semibold text-stone-400">
-                  {searchQuery || statusFilter !== "all"
-                    ? `${filteredStudents.length} of ${students.length} records`
-                    : `${students.length} records total`}
+                  {searchQuery || statusFilter !== "all" ? `${filteredStudents.length} of ${students.length} records` : `${students.length} records total`}
                 </span>
               </div>
             </div>
@@ -876,20 +973,17 @@ const StudentList = () => {
       </div>
 
       {showModal && selectedStudent && (
-        <MobileDetailModal
-          student={selectedStudent}
-          submittingId={submittingId}
-          onSubmit={handleSubmit}
-          onUnsubmit={handleUnsubmit}
-          onClose={closeModal}
-        />
+        <MobileDetailModal student={selectedStudent} submittingId={submittingId} onSubmit={handleSubmit} onUnsubmit={handleUnsubmit} onClose={closeModal} />
       )}
-
       {showAddModal && (
-        <AddStudentModal
-          onClose={() => setShowAddModal(false)}
-          onAdd={handleAddStudent}
-          assignmentId={assignmentId}
+        <AddStudentModal onClose={() => setShowAddModal(false)} onAdd={handleAddStudent} assignmentId={assignmentId} />
+      )}
+      {showScannerModal && (
+        <QRScannerModal
+          onClose={() => { setShowScannerModal(false); setScannerError(""); }}
+          onScan={handleQRScan}
+          isScanning={!!submittingId}
+          error={scannerError}
         />
       )}
     </div>
@@ -908,15 +1002,7 @@ const MobileCardList = ({ students, submittingId, onSubmit, onUnsubmit, onOpenMo
       </span>
     </div>
     {students.map((item, idx) => (
-      <MobileStudentCard
-        key={item._id}
-        item={item}
-        idx={idx}
-        submittingId={submittingId}
-        onSubmit={onSubmit}
-        onUnsubmit={onUnsubmit}
-        onOpenModal={onOpenModal}
-      />
+      <MobileStudentCard key={item._id} item={item} idx={idx} submittingId={submittingId} onSubmit={onSubmit} onUnsubmit={onUnsubmit} onOpenModal={onOpenModal} />
     ))}
   </div>
 );
@@ -927,14 +1013,10 @@ const MobileCardList = ({ students, submittingId, onSubmit, onUnsubmit, onOpenMo
 const MobileStudentCard = ({ item, idx, submittingId, onSubmit, onUnsubmit, onOpenModal }) => {
   const submitted = item.status === "submitted";
   const isLoading = submittingId === item._id;
-
   return (
     <div className="mobile-card bg-white border border-black/[0.07] rounded-2xl overflow-hidden shadow-sm" style={{ animationDelay: `${idx * 0.035}s` }}>
       <div className="flex items-center">
-        <button
-          onClick={() => onOpenModal(item)}
-          className="flex-1 flex items-center gap-3 px-3.5 py-3.5 bg-transparent border-none cursor-pointer text-left min-w-0 active:bg-violet-50/50 transition-colors duration-150"
-        >
+        <button onClick={() => onOpenModal(item)} className="flex-1 flex items-center gap-3 px-3.5 py-3.5 bg-transparent border-none cursor-pointer text-left min-w-0 active:bg-violet-50/50 transition-colors duration-150">
           <Avatar name={item.studentId?.name} size="lg" />
           <div className="min-w-0 flex-1">
             <p className="m-0 text-[0.88rem] font-bold text-stone-900 truncate">{item.studentId?.name || "N/A"}</p>
@@ -945,19 +1027,11 @@ const MobileStudentCard = ({ item, idx, submittingId, onSubmit, onUnsubmit, onOp
         <div className="w-px h-14 bg-black/[0.06] flex-shrink-0" />
         <div className="px-3 flex-shrink-0">
           {!submitted ? (
-            <button
-              onClick={() => onSubmit(item._id)}
-              disabled={isLoading}
-              className="inline-flex items-center gap-1 px-3.5 py-2 bg-violet-50 text-violet-500 border border-violet-200 rounded-xl text-[0.72rem] font-bold cursor-pointer whitespace-nowrap hover:bg-violet-100 active:scale-[0.97] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
+            <button onClick={() => onSubmit(item._id)} disabled={isLoading} className="inline-flex items-center gap-1 px-3.5 py-2 bg-violet-50 text-violet-500 border border-violet-200 rounded-xl text-[0.72rem] font-bold cursor-pointer whitespace-nowrap hover:bg-violet-100 active:scale-[0.97] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed">
               {isLoading ? <><Spinner /> Saving…</> : <><i className="ri-check-line text-[0.9rem]" />Submit</>}
             </button>
           ) : (
-            <button
-              onClick={() => onUnsubmit(item._id)}
-              disabled={isLoading}
-              className="inline-flex items-center gap-1 px-3.5 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl text-[0.72rem] font-bold cursor-pointer whitespace-nowrap hover:bg-emerald-100 active:scale-[0.97] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
+            <button onClick={() => onUnsubmit(item._id)} disabled={isLoading} className="inline-flex items-center gap-1 px-3.5 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl text-[0.72rem] font-bold cursor-pointer whitespace-nowrap hover:bg-emerald-100 active:scale-[0.97] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed">
               {isLoading ? <><Spinner /> Saving…</> : <><i className="ri-check-double-line text-[0.9rem]" />Done</>}
             </button>
           )}
@@ -973,7 +1047,6 @@ const MobileStudentCard = ({ item, idx, submittingId, onSubmit, onUnsubmit, onOp
 const MobileDetailModal = ({ student, submittingId, onSubmit, onUnsubmit, onClose }) => {
   const submitted = student.status === "submitted";
   const isLoading = submittingId === student._id;
-
   return (
     <>
       <div onClick={onClose} className="fixed inset-0 bg-black/55 backdrop-blur-[4px] z-[998]" style={{ animation: "fadeIn 0.2s ease" }} />
@@ -1054,7 +1127,6 @@ const MobileDetailModal = ({ student, submittingId, onSubmit, onUnsubmit, onClos
 const StudentRow = ({ item, idx, onSubmit, onUnsubmit, isSubmitting }) => {
   const [hovered, setHovered] = useState(false);
   const submitted = item.status === "submitted";
-
   return (
     <tr
       className="student-row border-b border-black/[0.06] transition-colors duration-150"
