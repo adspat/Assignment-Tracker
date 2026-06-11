@@ -67,6 +67,7 @@ export async function createAssignment(req, res) {
   
     const students = await StudentModel.find({
       classs: cls,
+      branch: br,
       semester,
       status: 'active',
     });
