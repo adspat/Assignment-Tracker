@@ -23,10 +23,12 @@ if (!document.getElementById("student-list-animations")) {
     @keyframes slideUpCenter { from{opacity:0;transform:translate(-50%,-40%)} to{opacity:1;transform:translate(-50%,-50%)} }
     @keyframes fadeIn { from{opacity:0} to{opacity:1} }
     @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes dropdownIn { from{opacity:0;transform:translateY(-6px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
     .student-row { animation: rowIn 0.35s ease both; }
     .mobile-card { animation: rowIn 0.3s ease both; }
     .shimmer-pulse { animation: shimmer 1.4s ease-in-out infinite; }
     .spin { animation: spin 0.7s linear infinite; }
+    .dropdown-menu { animation: dropdownIn 0.18s cubic-bezier(0.34,1.3,0.64,1) forwards; }
   `;
   document.head.appendChild(s);
 }
@@ -126,7 +128,7 @@ const SearchBar = ({ value, onChange, isMobile, resultCount, totalCount }) => {
   const hasQuery = value.length > 0;
 
   return (
-    <div className={`${isMobile ? "mb-3.5" : "mb-5"}`}>
+    <div className={`${isMobile ? "mb-3" : "mb-4"}`}>
       <div className="relative flex items-center">
         <i
           className={`ri-search-line absolute left-3.5 text-base pointer-events-none z-10 transition-colors duration-200 ${
@@ -166,6 +168,160 @@ const SearchBar = ({ value, onChange, isMobile, resultCount, totalCount }) => {
             ? "No students match your search"
             : `${resultCount} of ${totalCount} student${resultCount !== 1 ? "s" : ""} match`}
         </p>
+      )}
+    </div>
+  );
+};
+
+/* ─── Filter Tabs ─── */
+const FilterTabs = ({ activeFilter, onChange, counts, isMobile }) => {
+  const tabs = [
+    { key: "all", label: "All", count: counts.all, icon: "ri-team-line" },
+    { key: "submitted", label: "Submitted", count: counts.submitted, icon: "ri-checkbox-circle-line" },
+    { key: "pending", label: "Pending", count: counts.pending, icon: "ri-time-line" },
+  ];
+
+  return (
+    <div className={`flex gap-2 ${isMobile ? "mb-3" : "mb-4"}`}>
+      {tabs.map(({ key, label, count, icon }) => {
+        const isActive = activeFilter === key;
+        const colorMap = {
+          all: isActive
+            ? "bg-stone-900 text-white border-stone-900"
+            : "bg-white text-stone-500 border-black/[0.08] hover:border-stone-300 hover:text-stone-700",
+          submitted: isActive
+            ? "bg-emerald-500 text-white border-emerald-500"
+            : "bg-white text-stone-500 border-black/[0.08] hover:border-emerald-300 hover:text-emerald-600",
+          pending: isActive
+            ? "bg-amber-500 text-white border-amber-500"
+            : "bg-white text-stone-500 border-black/[0.08] hover:border-amber-300 hover:text-amber-600",
+        };
+        const badgeMap = {
+          all: isActive ? "bg-white/20 text-white" : "bg-stone-100 text-stone-500",
+          submitted: isActive ? "bg-white/20 text-white" : "bg-emerald-50 text-emerald-600",
+          pending: isActive ? "bg-white/20 text-white" : "bg-amber-50 text-amber-600",
+        };
+
+        return (
+          <button
+            key={key}
+            onClick={() => onChange(key)}
+            className={`flex items-center gap-1.5 px-3.5 ${isMobile ? "py-2 text-[0.72rem]" : "py-2 text-[0.74rem]"} font-bold rounded-xl border transition-all duration-150 cursor-pointer whitespace-nowrap ${colorMap[key]}`}
+          >
+            <i className={`${icon} text-[0.85rem]`} />
+            {label}
+            <span className={`text-[0.62rem] font-bold px-1.5 py-0.5 rounded-full ${badgeMap[key]}`}>
+              {count}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+/* ─── CSV Download Dropdown ─── */
+const DownloadDropdown = ({ students, assignmentId, isMobile }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const buildCSV = (rows) => {
+    const headers = ["Name", "Enrollment", "Class", "Branch", "Semester", "Status"];
+    const data = rows.map((item) => [
+      item.studentId?.name || "",
+      item.studentId?.enrollment || "",
+      item.studentId?.classs || "",
+      item.studentId?.branch || "",
+      item.studentId?.semester || "",
+      item.status || "",
+    ]);
+    return [headers, ...data].map((r) => r.join(",")).join("\n");
+  };
+
+  const triggerDownload = (csv, suffix) => {
+    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.setAttribute("download", `assignment_${assignmentId}_${suffix}.csv`);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setOpen(false);
+  };
+
+  const options = [
+    {
+      label: "All Students",
+      icon: "ri-team-line",
+      color: "text-stone-700",
+      bg: "hover:bg-stone-50",
+      action: () => triggerDownload(buildCSV(students), "all"),
+      count: students.length,
+    },
+    {
+      label: "Submitted Only",
+      icon: "ri-checkbox-circle-line",
+      color: "text-emerald-600",
+      bg: "hover:bg-emerald-50",
+      action: () => triggerDownload(buildCSV(students.filter((s) => s.status === "submitted")), "submitted"),
+      count: students.filter((s) => s.status === "submitted").length,
+    },
+    {
+      label: "Pending Only",
+      icon: "ri-time-line",
+      color: "text-amber-600",
+      bg: "hover:bg-amber-50",
+      action: () => triggerDownload(buildCSV(students.filter((s) => s.status !== "submitted")), "pending"),
+      count: students.filter((s) => s.status !== "submitted").length,
+    },
+  ];
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className={`flex items-center justify-center gap-1.5 px-4 py-2.5 bg-stone-900 text-white border-none rounded-xl text-[0.75rem] font-bold cursor-pointer hover:bg-stone-800 hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ${isMobile ? "flex-1" : ""}`}
+      >
+        <i className="ri-download-2-line" />
+        CSV
+        <i className={`ri-arrow-down-s-line text-base transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div
+          className="dropdown-menu absolute right-0 top-[calc(100%+6px)] z-50 bg-white border border-black/[0.09] rounded-2xl shadow-xl overflow-hidden"
+          style={{ minWidth: 200 }}
+        >
+          <div className="px-3.5 pt-3 pb-2">
+            <p className="text-[0.58rem] font-bold uppercase tracking-[0.1em] text-stone-400 m-0">
+              Download as CSV
+            </p>
+          </div>
+          <div className="px-2 pb-2">
+            {options.map(({ label, icon, color, bg, action, count }) => (
+              <button
+                key={label}
+                onClick={action}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border-none bg-transparent cursor-pointer text-left transition-colors duration-150 ${bg}`}
+              >
+                <i className={`${icon} text-base ${color}`} />
+                <span className={`text-[0.8rem] font-semibold ${color} flex-1`}>{label}</span>
+                <span className="text-[0.65rem] font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded-full">
+                  {count}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
@@ -211,14 +367,11 @@ const AddStudentModal = ({ onClose, onAdd }) => {
 
   return (
     <>
-      {/* Backdrop */}
       <div
         onClick={onClose}
         className="fixed inset-0 bg-black/55 backdrop-blur-sm z-[998]"
         style={{ animation: "fadeIn 0.2s ease" }}
       />
-
-      {/* Modal */}
       <div
         className="fixed left-1/2 top-1/2 z-[999] bg-white rounded-[22px] shadow-2xl w-[min(420px,calc(100vw-32px))]"
         style={{
@@ -227,7 +380,6 @@ const AddStudentModal = ({ onClose, onAdd }) => {
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-xl bg-violet-50 border border-violet-200 flex items-center justify-center text-violet-500 text-lg flex-shrink-0">
@@ -253,7 +405,6 @@ const AddStudentModal = ({ onClose, onAdd }) => {
           </button>
         </div>
 
-        {/* Input */}
         <div className="mb-2">
           <label className="block text-[0.62rem] font-bold uppercase tracking-[0.08em] text-stone-400 mb-2">
             Enrollment Number
@@ -284,8 +435,6 @@ const AddStudentModal = ({ onClose, onAdd }) => {
               style={{ fontFamily: "'DM Sans', sans-serif" }}
             />
           </div>
-
-          {/* Error */}
           {error && (
             <p
               className="mt-2 text-[0.7rem] font-semibold text-red-500 flex items-center gap-1.5"
@@ -297,13 +446,11 @@ const AddStudentModal = ({ onClose, onAdd }) => {
           )}
         </div>
 
-        {/* Info hint */}
         <p className="text-[0.68rem] text-stone-400 mb-5 flex items-center gap-1.5">
           <i className="ri-information-line text-xs text-violet-400" />
           The student will be added to this assignment's submission list.
         </p>
 
-        {/* Actions */}
         <div className="flex gap-3">
           <button
             onClick={onClose}
@@ -321,14 +468,9 @@ const AddStudentModal = ({ onClose, onAdd }) => {
             }`}
           >
             {loading ? (
-              <>
-                <Spinner /> Adding…
-              </>
+              <><Spinner /> Adding…</>
             ) : (
-              <>
-                <i className="ri-user-add-line text-base" />
-                Add Student
-              </>
+              <><i className="ri-user-add-line text-base" />Add Student</>
             )}
           </button>
         </div>
@@ -348,6 +490,7 @@ const StudentList = () => {
   const [showModal, setShowModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all"); // "all" | "submitted" | "pending"
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -356,42 +499,25 @@ const StudentList = () => {
   const isMobile = useIsMobile();
 
   /* ─── Filter logic ─── */
-  const filteredStudents = searchQuery.trim()
-    ? students.filter((item) => {
-        const q = searchQuery.toLowerCase();
-        return (
-          item.studentId?.name?.toLowerCase().includes(q) ||
-          item.studentId?.enrollment?.toLowerCase().includes(q) ||
-          item.studentId?.branch?.toLowerCase().includes(q) ||
-          item.studentId?.classs?.toLowerCase().includes(q) ||
-          item.studentId?.semester?.toString().includes(q) ||
-          item.status?.toLowerCase().includes(q)
-        );
-      })
-    : students;
+  const filteredStudents = students.filter((item) => {
+    // Status filter
+    if (statusFilter === "submitted" && item.status !== "submitted") return false;
+    if (statusFilter === "pending" && item.status === "submitted") return false;
 
-  /* ── Download CSV ── */
-  const handleDownload = () => {
-    if (!students.length) return;
-    const headers = ["Name", "Enrollment", "Class", "Branch", "Semester", "Status"];
-    const rows = students.map((item) => [
-      item.studentId?.name || "",
-      item.studentId?.enrollment || "",
-      item.studentId?.classs || "",
-      item.studentId?.branch || "",
-      item.studentId?.semester || "",
-      item.status || "",
-    ]);
-    const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
-    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.setAttribute("download", `assignment_${assignmentId}_students.csv`);
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
+    // Search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      return (
+        item.studentId?.name?.toLowerCase().includes(q) ||
+        item.studentId?.enrollment?.toLowerCase().includes(q) ||
+        item.studentId?.branch?.toLowerCase().includes(q) ||
+        item.studentId?.classs?.toLowerCase().includes(q) ||
+        item.studentId?.semester?.toString().includes(q) ||
+        item.status?.toLowerCase().includes(q)
+      );
+    }
+    return true;
+  });
 
   /* ── Fetch ── */
   useEffect(() => {
@@ -419,7 +545,6 @@ const StudentList = () => {
   const handleAddStudent = async (enrollment) => {
     const { data } = await API.post(`/api/submission/add/${assignmentId}`, { enrollment });
     if (data.success) {
-      // Re-fetch or optimistically add the new student
       const res = await API.get(`/api/submission/${assignmentId}`);
       if (res.data.success) {
         const sorted = [...res.data.data].sort((a, b) =>
@@ -480,17 +605,13 @@ const StudentList = () => {
   /* ── Stats ── */
   const totalSubmitted = students.filter((s) => s.status === "submitted").length;
   const totalStudents = students.length;
+  const totalPending = totalStudents - totalSubmitted;
   const pct = totalStudents ? Math.round((totalSubmitted / totalStudents) * 100) : 0;
 
-  const openModal = (student) => {
-    setSelectedStudent(student);
-    setShowModal(true);
-  };
+  const filterCounts = { all: totalStudents, submitted: totalSubmitted, pending: totalPending };
 
-  const closeModal = () => {
-    setShowModal(false);
-    setTimeout(() => setSelectedStudent(null), 200);
-  };
+  const openModal = (student) => { setSelectedStudent(student); setShowModal(true); };
+  const closeModal = () => { setShowModal(false); setTimeout(() => setSelectedStudent(null), 200); };
 
   /* ════════════ RENDER ════════════ */
   return (
@@ -511,7 +632,7 @@ const StudentList = () => {
 
         {/* ── Page header ── */}
         <header
-          className={`flex justify-between items-start flex-wrap ${isMobile ? "gap-3.5 mb-4.5 pb-4.5" : "gap-5 mb-7 pb-6"} border-b border-black/[0.06]`}
+          className={`flex justify-between items-start flex-wrap ${isMobile ? "gap-3.5 mb-4 pb-4" : "gap-5 mb-7 pb-6"} border-b border-black/[0.06]`}
         >
           <div className="min-w-0">
             <p className="text-[0.62rem] font-bold tracking-[0.12em] uppercase text-violet-500 mb-1.5">
@@ -540,7 +661,7 @@ const StudentList = () => {
               {[
                 { label: "Total", val: totalStudents, colorClass: "text-stone-900", bgClass: "bg-[#f9f8f5]", borderClass: "border-black/[0.07]" },
                 { label: "Submitted", val: totalSubmitted, colorClass: "text-emerald-600", bgClass: "bg-emerald-50", borderClass: "border-emerald-200" },
-                { label: "Pending", val: totalStudents - totalSubmitted, colorClass: "text-amber-600", bgClass: "bg-amber-50", borderClass: "border-amber-200" },
+                { label: "Pending", val: totalPending, colorClass: "text-amber-600", bgClass: "bg-amber-50", borderClass: "border-amber-200" },
               ].map(({ label, val, colorClass, bgClass, borderClass }) => (
                 <div
                   key={label}
@@ -561,7 +682,6 @@ const StudentList = () => {
           {/* Action buttons */}
           {!loading && (
             <div className={`flex gap-2 ${isMobile ? "w-full" : ""}`}>
-              {/* Add Student Button */}
               <button
                 onClick={() => setShowAddModal(true)}
                 className={`flex items-center justify-center gap-1.5 px-4 py-2.5 bg-violet-500 text-white border-none rounded-xl text-[0.75rem] font-bold cursor-pointer hover:bg-violet-600 hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ${isMobile ? "flex-1" : ""}`}
@@ -570,15 +690,8 @@ const StudentList = () => {
                 Add Student
               </button>
 
-              {/* Download CSV */}
               {students.length > 0 && (
-                <button
-                  onClick={handleDownload}
-                  className={`flex items-center justify-center gap-1.5 px-4 py-2.5 bg-stone-900 text-white border-none rounded-xl text-[0.75rem] font-bold cursor-pointer hover:bg-stone-800 hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ${isMobile ? "flex-1" : ""}`}
-                >
-                  <i className="ri-download-2-line" />
-                  CSV
-                </button>
+                <DownloadDropdown students={students} assignmentId={assignmentId} isMobile={isMobile} />
               )}
             </div>
           )}
@@ -586,23 +699,15 @@ const StudentList = () => {
 
         {/* ── Progress bar ── */}
         {!loading && totalStudents > 0 && (
-          <div
-            className={`bg-white border border-black/[0.07] rounded-2xl ${isMobile ? "p-3.5 mb-4" : "p-5 mb-5"} flex items-center gap-4`}
-          >
+          <div className={`bg-white border border-black/[0.07] rounded-2xl ${isMobile ? "p-3.5 mb-4" : "p-5 mb-5"} flex items-center gap-4`}>
             <div className="flex-1">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-[0.7rem] font-semibold text-stone-400 tracking-[0.05em] uppercase">
-                  Completion
-                </span>
-                <span className={`text-[0.9rem] font-bold ${pct === 100 ? "text-emerald-600" : "text-stone-900"}`}>
-                  {pct}%
-                </span>
+                <span className="text-[0.7rem] font-semibold text-stone-400 tracking-[0.05em] uppercase">Completion</span>
+                <span className={`text-[0.9rem] font-bold ${pct === 100 ? "text-emerald-600" : "text-stone-900"}`}>{pct}%</span>
               </div>
               <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden border border-black/[0.06]">
                 <div
-                  className={`h-full rounded-full transition-all duration-700 ${
-                    pct === 100 ? "bg-emerald-500" : "bg-gradient-to-r from-violet-500 to-violet-400"
-                  }`}
+                  className={`h-full rounded-full transition-all duration-700 ${pct === 100 ? "bg-emerald-500" : "bg-gradient-to-r from-violet-500 to-violet-400"}`}
                   style={{ width: `${pct}%` }}
                 />
               </div>
@@ -613,15 +718,23 @@ const StudentList = () => {
           </div>
         )}
 
-        {/* ── Search Bar ── */}
+        {/* ── Filter Tabs + Search Bar ── */}
         {!loading && students.length > 0 && (
-          <SearchBar
-            value={searchQuery}
-            onChange={setSearchQuery}
-            isMobile={isMobile}
-            resultCount={filteredStudents.length}
-            totalCount={totalStudents}
-          />
+          <>
+            <FilterTabs
+              activeFilter={statusFilter}
+              onChange={(f) => { setStatusFilter(f); setSearchQuery(""); }}
+              counts={filterCounts}
+              isMobile={isMobile}
+            />
+            <SearchBar
+              value={searchQuery}
+              onChange={setSearchQuery}
+              isMobile={isMobile}
+              resultCount={filteredStudents.length}
+              totalCount={statusFilter === "all" ? totalStudents : statusFilter === "submitted" ? totalSubmitted : totalPending}
+            />
+          </>
         )}
 
         {/* ════════════ CONTENT AREA ════════════ */}
@@ -636,9 +749,7 @@ const StudentList = () => {
                 <thead>
                   <tr className="border-b border-black/[0.06] bg-[#f9f8f5]">
                     {["Student", "Enrollment", "Class", "Branch", "Semester", "Status", "Action"].map((h) => (
-                      <th key={h} className="px-5 py-3 text-[0.6rem] font-bold tracking-[0.1em] uppercase text-stone-400 text-left">
-                        {h}
-                      </th>
+                      <th key={h} className="px-5 py-3 text-[0.6rem] font-bold tracking-[0.1em] uppercase text-stone-400 text-left">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -647,28 +758,28 @@ const StudentList = () => {
             </div>
           )
         ) : filteredStudents.length === 0 ? (
-          /* Empty state */
           <div className="bg-white border-2 border-dashed border-black/[0.10] rounded-[20px] text-center py-20 px-8">
             <div className="w-14 h-14 rounded-full bg-violet-50 border border-violet-200 flex items-center justify-center mx-auto mb-4 text-violet-500">
-              <i className={`${searchQuery ? "ri-search-line" : "ri-user-search-line"} text-2xl`} />
+              <i className={`${searchQuery ? "ri-search-line" : statusFilter !== "all" ? "ri-filter-line" : "ri-user-search-line"} text-2xl`} />
             </div>
-            <h3
-              className="text-[1.05rem] font-bold text-stone-900 mb-1.5"
-              style={{ fontFamily: "'Playfair Display', serif" }}
-            >
-              {searchQuery ? "No results found" : "No student records"}
+            <h3 className="text-[1.05rem] font-bold text-stone-900 mb-1.5" style={{ fontFamily: "'Playfair Display', serif" }}>
+              {searchQuery ? "No results found" : statusFilter !== "all" ? `No ${statusFilter} students` : "No student records"}
             </h3>
             <p className="text-[0.78rem] text-stone-400">
               {searchQuery
                 ? `No students match "${searchQuery}". Try a different search.`
+                : statusFilter === "submitted"
+                ? "No students have submitted this assignment yet."
+                : statusFilter === "pending"
+                ? "All students have submitted — great work!"
                 : "No submissions have been recorded for this assignment yet."}
             </p>
-            {searchQuery ? (
+            {(searchQuery || statusFilter !== "all") ? (
               <button
-                onClick={() => setSearchQuery("")}
+                onClick={() => { setSearchQuery(""); setStatusFilter("all"); }}
                 className="mt-3.5 px-4 py-2 bg-violet-50 text-violet-500 border border-violet-200 rounded-[9px] text-[0.76rem] font-bold cursor-pointer inline-flex items-center gap-1.5 hover:bg-violet-100 transition-colors"
               >
-                <i className="ri-close-line" /> Clear search
+                <i className="ri-close-line" /> Clear filters
               </button>
             ) : (
               <button
@@ -680,7 +791,6 @@ const StudentList = () => {
             )}
           </div>
         ) : isMobile ? (
-          /* ══ MOBILE CARD LIST ══ */
           <MobileCardList
             students={filteredStudents}
             submittingId={submittingId}
@@ -689,7 +799,6 @@ const StudentList = () => {
             onOpenModal={openModal}
           />
         ) : (
-          /* ══ DESKTOP TABLE ══ */
           <div className="bg-white border border-black/[0.07] rounded-[18px] overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full border-collapse" style={{ tableLayout: "fixed", minWidth: 760 }}>
@@ -737,19 +846,35 @@ const StudentList = () => {
                 </tbody>
               </table>
             </div>
-            <div className="border-t border-black/[0.06] px-5 py-2.5 flex justify-end items-center gap-1.5">
-              <i className="ri-list-check text-stone-400 text-[0.85rem]" />
-              <span className="text-[0.7rem] font-semibold text-stone-400">
-                {searchQuery
-                  ? `${filteredStudents.length} of ${students.length} records`
-                  : `${students.length} records total`}
-              </span>
+            <div className="border-t border-black/[0.06] px-5 py-2.5 flex justify-between items-center gap-1.5">
+              {statusFilter !== "all" && (
+                <div className="flex items-center gap-1.5">
+                  <span className={`text-[0.68rem] font-bold px-2 py-0.5 rounded-full ${
+                    statusFilter === "submitted" ? "bg-emerald-50 text-emerald-600 border border-emerald-200" : "bg-amber-50 text-amber-600 border border-amber-200"
+                  }`}>
+                    {statusFilter === "submitted" ? "Submitted" : "Pending"} filter active
+                  </span>
+                  <button
+                    onClick={() => setStatusFilter("all")}
+                    className="text-[0.68rem] font-semibold text-stone-400 hover:text-stone-600 transition-colors cursor-pointer bg-transparent border-none"
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
+              <div className={`flex items-center gap-1.5 ${statusFilter === "all" ? "ml-auto" : ""}`}>
+                <i className="ri-list-check text-stone-400 text-[0.85rem]" />
+                <span className="text-[0.7rem] font-semibold text-stone-400">
+                  {searchQuery || statusFilter !== "all"
+                    ? `${filteredStudents.length} of ${students.length} records`
+                    : `${students.length} records total`}
+                </span>
+              </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* ════════════ MOBILE DETAIL MODAL ════════════ */}
       {showModal && selectedStudent && (
         <MobileDetailModal
           student={selectedStudent}
@@ -760,7 +885,6 @@ const StudentList = () => {
         />
       )}
 
-      {/* ════════════ ADD STUDENT MODAL ════════════ */}
       {showAddModal && (
         <AddStudentModal
           onClose={() => setShowAddModal(false)}
@@ -775,32 +899,27 @@ const StudentList = () => {
 /* ════════════════════════════════
    MOBILE CARD LIST
 ════════════════════════════════ */
-const MobileCardList = ({ students, submittingId, onSubmit, onUnsubmit, onOpenModal }) => {
-  return (
-    <div className="flex flex-col gap-2.5">
-      <div className="flex items-center justify-between pb-2">
-        <span className="text-[0.65rem] font-bold text-stone-400 uppercase tracking-[0.08em]">
-          {students.length} students
-        </span>
-        <span className="text-[0.65rem] text-stone-400 font-medium flex items-center gap-1">
-          <i className="ri-information-line text-[0.8rem]" />
-          Tap name for full details
-        </span>
-      </div>
-      {students.map((item, idx) => (
-        <MobileStudentCard
-          key={item._id}
-          item={item}
-          idx={idx}
-          submittingId={submittingId}
-          onSubmit={onSubmit}
-          onUnsubmit={onUnsubmit}
-          onOpenModal={onOpenModal}
-        />
-      ))}
+const MobileCardList = ({ students, submittingId, onSubmit, onUnsubmit, onOpenModal }) => (
+  <div className="flex flex-col gap-2.5">
+    <div className="flex items-center justify-between pb-2">
+      <span className="text-[0.65rem] font-bold text-stone-400 uppercase tracking-[0.08em]">{students.length} students</span>
+      <span className="text-[0.65rem] text-stone-400 font-medium flex items-center gap-1">
+        <i className="ri-information-line text-[0.8rem]" />Tap name for full details
+      </span>
     </div>
-  );
-};
+    {students.map((item, idx) => (
+      <MobileStudentCard
+        key={item._id}
+        item={item}
+        idx={idx}
+        submittingId={submittingId}
+        onSubmit={onSubmit}
+        onUnsubmit={onUnsubmit}
+        onOpenModal={onOpenModal}
+      />
+    ))}
+  </div>
+);
 
 /* ════════════════════════════════
    MOBILE STUDENT CARD
@@ -810,10 +929,7 @@ const MobileStudentCard = ({ item, idx, submittingId, onSubmit, onUnsubmit, onOp
   const isLoading = submittingId === item._id;
 
   return (
-    <div
-      className="mobile-card bg-white border border-black/[0.07] rounded-2xl overflow-hidden shadow-sm"
-      style={{ animationDelay: `${idx * 0.035}s` }}
-    >
+    <div className="mobile-card bg-white border border-black/[0.07] rounded-2xl overflow-hidden shadow-sm" style={{ animationDelay: `${idx * 0.035}s` }}>
       <div className="flex items-center">
         <button
           onClick={() => onOpenModal(item)}
@@ -821,18 +937,12 @@ const MobileStudentCard = ({ item, idx, submittingId, onSubmit, onUnsubmit, onOp
         >
           <Avatar name={item.studentId?.name} size="lg" />
           <div className="min-w-0 flex-1">
-            <p className="m-0 text-[0.88rem] font-bold text-stone-900 truncate">
-              {item.studentId?.name || "N/A"}
-            </p>
-            <div className="flex items-center gap-1.5 mt-1">
-              <StatusBadge status={item.status} />
-            </div>
+            <p className="m-0 text-[0.88rem] font-bold text-stone-900 truncate">{item.studentId?.name || "N/A"}</p>
+            <div className="flex items-center gap-1.5 mt-1"><StatusBadge status={item.status} /></div>
           </div>
           <i className="ri-arrow-right-s-line text-base text-stone-400 flex-shrink-0 ml-auto" />
         </button>
-
         <div className="w-px h-14 bg-black/[0.06] flex-shrink-0" />
-
         <div className="px-3 flex-shrink-0">
           {!submitted ? (
             <button
@@ -866,96 +976,57 @@ const MobileDetailModal = ({ student, submittingId, onSubmit, onUnsubmit, onClos
 
   return (
     <>
-      <div
-        onClick={onClose}
-        className="fixed inset-0 bg-black/55 backdrop-blur-[4px] z-[998]"
-        style={{ animation: "fadeIn 0.2s ease" }}
-      />
+      <div onClick={onClose} className="fixed inset-0 bg-black/55 backdrop-blur-[4px] z-[998]" style={{ animation: "fadeIn 0.2s ease" }} />
       <div
         className="fixed bottom-0 left-0 right-0 z-[999] bg-white rounded-t-[22px] shadow-[0_-8px_40px_rgba(0,0,0,0.18)] max-h-[88vh] overflow-y-auto overflow-x-hidden"
-        style={{
-          paddingBottom: "calc(20px + env(safe-area-inset-bottom))",
-          animation: "slideUp 0.3s cubic-bezier(0.34,1.3,0.64,1)",
-        }}
+        style={{ paddingBottom: "calc(20px + env(safe-area-inset-bottom))", animation: "slideUp 0.3s cubic-bezier(0.34,1.3,0.64,1)" }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Drag handle */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-9 h-1 rounded-full bg-black/[0.12]" />
-        </div>
-
-        {/* Header */}
+        <div className="flex justify-center pt-3 pb-1"><div className="w-9 h-1 rounded-full bg-black/[0.12]" /></div>
         <div className="flex items-center justify-between px-5 py-3 pb-4 border-b border-black/[0.06]">
           <div className="flex items-center gap-3">
             <Avatar name={student.studentId?.name} size="lg" />
             <div>
-              <p className="m-0 text-base font-bold text-stone-900">
-                {student.studentId?.name || "N/A"}
-              </p>
+              <p className="m-0 text-base font-bold text-stone-900">{student.studentId?.name || "N/A"}</p>
               <p className="mt-0.5 m-0 text-[0.68rem] text-stone-400 font-medium">Student Details</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="w-9 h-9 rounded-full bg-black/[0.06] border-none flex items-center justify-center cursor-pointer text-stone-500 text-lg hover:bg-black/10 transition-colors"
-          >
+          <button onClick={onClose} className="w-9 h-9 rounded-full bg-black/[0.06] border-none flex items-center justify-center cursor-pointer text-stone-500 text-lg hover:bg-black/10 transition-colors">
             <i className="ri-close-line" />
           </button>
         </div>
-
-        {/* Body */}
         <div className="px-5 pt-5 grid gap-2.5">
-          <div
-            className={`border-2 rounded-2xl p-4 flex items-center justify-between ${
-              submitted ? "bg-emerald-50 border-emerald-200" : "bg-amber-50 border-amber-200"
-            }`}
-          >
+          <div className={`border-2 rounded-2xl p-4 flex items-center justify-between ${submitted ? "bg-emerald-50 border-emerald-200" : "bg-amber-50 border-amber-200"}`}>
             <div>
-              <p className={`text-[0.62rem] font-bold uppercase tracking-[0.08em] mb-1 ${submitted ? "text-emerald-600" : "text-amber-600"}`}>
-                Submission Status
-              </p>
-              <p className={`m-0 text-base font-bold ${submitted ? "text-emerald-600" : "text-amber-600"}`}>
-                {submitted ? "Submitted ✓" : "Pending"}
-              </p>
+              <p className={`text-[0.62rem] font-bold uppercase tracking-[0.08em] mb-1 ${submitted ? "text-emerald-600" : "text-amber-600"}`}>Submission Status</p>
+              <p className={`m-0 text-base font-bold ${submitted ? "text-emerald-600" : "text-amber-600"}`}>{submitted ? "Submitted ✓" : "Pending"}</p>
             </div>
             <div className={`w-10 h-10 rounded-full flex items-center justify-center ${submitted ? "bg-emerald-200/50" : "bg-amber-200/50"}`}>
-              <i
-                className={`${submitted ? "ri-checkbox-circle-fill" : "ri-time-line"} text-2xl ${submitted ? "text-emerald-500" : "text-amber-500"}`}
-              />
+              <i className={`${submitted ? "ri-checkbox-circle-fill" : "ri-time-line"} text-2xl ${submitted ? "text-emerald-500" : "text-amber-500"}`} />
             </div>
           </div>
-
           <div className="grid grid-cols-2 gap-2.5">
             {[
               { label: "Enrollment", value: student.studentId?.enrollment || "N/A", icon: "ri-hashtag" },
               { label: "Class", value: student.studentId?.classs || "N/A", icon: "ri-hotel-line" },
               { label: "Branch", value: student.studentId?.branch || "N/A", icon: "ri-git-branch-line" },
-              {
-                label: "Semester",
-                value: student.studentId?.semester ? `Semester ${student.studentId.semester}` : "N/A",
-                icon: "ri-calendar-event-line",
-              },
+              { label: "Semester", value: student.studentId?.semester ? `Semester ${student.studentId.semester}` : "N/A", icon: "ri-calendar-event-line" },
             ].map(({ label, value, icon }) => (
               <div key={label} className="bg-[#f9f8f5] border border-black/[0.06] rounded-xl p-3.5">
                 <p className="text-[0.62rem] font-bold uppercase tracking-[0.05em] text-stone-400 m-0 mb-1.5 flex items-center gap-1">
-                  <i className={`${icon} text-[0.75rem] text-violet-500`} />
-                  {label}
+                  <i className={`${icon} text-[0.75rem] text-violet-500`} />{label}
                 </p>
                 <p className="text-[0.84rem] font-semibold text-stone-900 m-0 truncate">{value}</p>
               </div>
             ))}
           </div>
         </div>
-
-        {/* Actions */}
         <div className="px-5 pt-5">
           {!submitted ? (
             <button
               onClick={() => onSubmit(student._id)}
               disabled={isLoading}
-              className={`w-full py-3.5 px-4 bg-violet-500 text-white border-none rounded-2xl text-[0.85rem] font-bold cursor-pointer flex items-center justify-center gap-2 tracking-[0.02em] ${
-                isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-violet-600 transition-colors"
-              }`}
+              className={`w-full py-3.5 px-4 bg-violet-500 text-white border-none rounded-2xl text-[0.85rem] font-bold cursor-pointer flex items-center justify-center gap-2 tracking-[0.02em] ${isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-violet-600 transition-colors"}`}
             >
               {isLoading ? <><Spinner /> Saving…</> : <><i className="ri-check-double-line text-base" />Mark as Submitted</>}
             </button>
@@ -963,17 +1034,12 @@ const MobileDetailModal = ({ student, submittingId, onSubmit, onUnsubmit, onClos
             <button
               onClick={() => onUnsubmit(student._id)}
               disabled={isLoading}
-              className={`w-full py-3.5 px-4 bg-transparent text-red-500 border-2 border-red-200 rounded-2xl text-[0.85rem] font-bold cursor-pointer flex items-center justify-center gap-2 ${
-                isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-red-50 transition-colors"
-              }`}
+              className={`w-full py-3.5 px-4 bg-transparent text-red-500 border-2 border-red-200 rounded-2xl text-[0.85rem] font-bold cursor-pointer flex items-center justify-center gap-2 ${isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-red-50 transition-colors"}`}
             >
               {isLoading ? <><Spinner /> Saving…</> : <><i className="ri-close-circle-line text-base" />Unmark Submitted</>}
             </button>
           )}
-          <button
-            onClick={onClose}
-            className="w-full mt-2.5 py-3 px-4 bg-black/[0.04] text-stone-400 border border-black/[0.07] rounded-2xl text-[0.82rem] font-semibold cursor-pointer hover:bg-black/[0.07] transition-colors"
-          >
+          <button onClick={onClose} className="w-full mt-2.5 py-3 px-4 bg-black/[0.04] text-stone-400 border border-black/[0.07] rounded-2xl text-[0.82rem] font-semibold cursor-pointer hover:bg-black/[0.07] transition-colors">
             Close
           </button>
         </div>
@@ -994,17 +1060,12 @@ const StudentRow = ({ item, idx, onSubmit, onUnsubmit, isSubmitting }) => {
       className="student-row border-b border-black/[0.06] transition-colors duration-150"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        background: hovered ? "rgba(124,106,247,0.03)" : "transparent",
-        animationDelay: `${idx * 0.04}s`,
-      }}
+      style={{ background: hovered ? "rgba(124,106,247,0.03)" : "transparent", animationDelay: `${idx * 0.04}s` }}
     >
       <td className="px-5 py-3">
         <div className="flex items-center gap-2.5">
           <Avatar name={item.studentId?.name} />
-          <span className="text-[0.82rem] font-semibold text-stone-900 truncate">
-            {item.studentId?.name || "N/A"}
-          </span>
+          <span className="text-[0.82rem] font-semibold text-stone-900 truncate">{item.studentId?.name || "N/A"}</span>
         </div>
       </td>
       <td className="px-5 py-3">
@@ -1014,12 +1075,8 @@ const StudentRow = ({ item, idx, onSubmit, onUnsubmit, isSubmitting }) => {
       </td>
       <td className="px-5 py-3 text-[0.78rem] text-stone-500">{item.studentId?.classs || "—"}</td>
       <td className="px-5 py-3 text-[0.78rem] font-medium text-stone-900">{item.studentId?.branch || "—"}</td>
-      <td className="px-5 py-3 text-[0.78rem] text-stone-500">
-        {item.studentId?.semester ? `Sem ${item.studentId.semester}` : "—"}
-      </td>
-      <td className="px-5 py-3">
-        <StatusBadge status={item.status} />
-      </td>
+      <td className="px-5 py-3 text-[0.78rem] text-stone-500">{item.studentId?.semester ? `Sem ${item.studentId.semester}` : "—"}</td>
+      <td className="px-5 py-3"><StatusBadge status={item.status} /></td>
       <td className="px-5 py-3 text-right overflow-visible">
         {!submitted ? (
           <button
