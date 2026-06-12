@@ -88,15 +88,15 @@ const Admin = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#fff",
+                color: tk.textPrimary,
                 fontWeight: 800,
               }}
             >
               A
             </div>
             <div>
-              <p style={{ margin: 0, color: "#fff", fontWeight: 800, fontSize: "0.95rem" }}>AssiTrack</p>
-              <p style={{ margin: 0, color: tk.textMuted, fontSize: "0.68rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+              <p style={{ margin: 0, color: tk.textPrimary, fontWeight: 800, fontSize: "0.95rem" }}>AssiTrack</p>
+              <p style={{ margin: 0, color: tk.textSecondary, fontSize: "0.68rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
                 Admin Panel
               </p>
             </div>
@@ -123,7 +123,7 @@ const Admin = () => {
                     cursor: "pointer",
                     textAlign: "left",
                     background: isActive ? tk.accentSoft : "transparent",
-                    color: isActive ? tk.accent : "#c8c6d0",
+                    color: isActive ? tk.textPrimary : tk.textSecondary,
                     fontWeight: isActive ? 700 : 500,
                     fontSize: "0.85rem",
                     transition: "background 0.15s",
@@ -137,10 +137,10 @@ const Admin = () => {
           </nav>
 
           <div style={{ marginTop: 32, paddingTop: 20, borderTop: `1px solid ${tk.sidebarBorder}` }}>
-            <p style={{ margin: "0 0 4px", color: "#fff", fontSize: "0.82rem", fontWeight: 600 }}>
+            <p style={{ margin: "0 0 4px", color: tk.textPrimary, fontSize: "0.82rem", fontWeight: 600 }}>
               {user?.name || "Admin"}
             </p>
-            <p style={{ margin: "0 0 16px", color: tk.textMuted, fontSize: "0.72rem" }}>{user?.email}</p>
+            <p style={{ margin: "0 0 16px", color: tk.textSecondary, fontSize: "0.72rem" }}>{user?.email}</p>
             <button
               type="button"
               onClick={handleLogout}
@@ -150,7 +150,7 @@ const Admin = () => {
                 borderRadius: 10,
                 border: `1px solid ${tk.sidebarBorder}`,
                 background: "transparent",
-                color: "#e8e6ef",
+                color: tk.textPrimary,
                 fontSize: "0.78rem",
                 fontWeight: 600,
                 cursor: "pointer",
@@ -174,7 +174,7 @@ const Admin = () => {
             position: "sticky",
             top: 0,
             zIndex: 50,
-            background: "rgba(245,244,240,0.92)",
+            background: "rgba(254,250,224,0.92)",
             backdropFilter: "blur(12px)",
             borderBottom: `1px solid ${tk.cardBorder}`,
             padding: "14px 24px",
@@ -221,7 +221,7 @@ const Admin = () => {
               padding: "6px 12px",
               borderRadius: 999,
               background: tk.accentSoft,
-              color: tk.accent,
+              color: tk.textPrimary,
               fontSize: "0.72rem",
               fontWeight: 700,
             }}

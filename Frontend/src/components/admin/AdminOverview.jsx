@@ -69,14 +69,14 @@ const AdminOverview = () => {
   const cards = [
     { label: "Active Students", value: stats?.activeStudents, icon: "ri-graduation-cap-line", color: tk.accent, bg: tk.accentSoft },
     { label: "Graduated", value: stats?.graduatedStudents, icon: "ri-award-line", color: tk.warning, bg: tk.warningSoft },
-    { label: "Total Students", value: stats?.totalStudents, icon: "ri-group-line", color: tk.textSecondary, bg: "#f3f2ef" },
+    { label: "Total Students", value: stats?.totalStudents, icon: "ri-group-line", color: tk.textSecondary, bg: tk.metaBg },
     // { label: "Faculty Users", value: stats?.totalFaculty, icon: "ri-user-star-line", color: tk.success, bg: tk.successSoft },
     // { label: "Admin Users", value: stats?.totalAdmins, icon: "ri-shield-user-line", color: tk.warning, bg: tk.warningSoft },
-    { label: "Assignments", value: stats?.totalAssignments, icon: "ri-book-2-line", color: "#3b82f6", bg: "rgba(59,130,246,0.10)" },
-    { label: "Submissions", value: stats?.totalSubmissions, icon: "ri-file-list-3-line", color: "#8b5cf6", bg: "rgba(139,92,246,0.10)" },
+    { label: "Assignments", value: stats?.totalAssignments, icon: "ri-book-2-line", color: tk.accentBorder, bg: tk.metaBg },
+    { label: "Submissions", value: stats?.totalSubmissions, icon: "ri-file-list-3-line", color: tk.textPrimary, bg: tk.accentSoft },
     // { label: "Submitted", value: stats?.submittedCount, icon: "ri-checkbox-circle-line", color: tk.success, bg: tk.successSoft },
     // { label: "Pending", value: stats?.pendingCount, icon: "ri-time-line", color: tk.danger, bg: tk.dangerSoft },
-    { label: "Total Users", value: stats?.totalUsers, icon: "ri-group-line", color: tk.textSecondary, bg: "#f3f2ef" },
+    { label: "Total Users", value: stats?.totalUsers, icon: "ri-group-line", color: tk.textSecondary, bg: tk.metaBg },
   ];
 
   return (

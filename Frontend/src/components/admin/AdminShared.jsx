@@ -6,7 +6,7 @@ export const Modal = ({ title, children, onClose, width = 520 }) => (
     style={{
       position: "fixed",
       inset: 0,
-      background: "rgba(15,15,20,0.55)",
+      background: "rgba(74,68,58,0.45)",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -51,7 +51,7 @@ export const Modal = ({ title, children, onClose, width = 520 }) => (
           onClick={onClose}
           style={{
             border: "none",
-            background: "#f9f8f5",
+            background: tk.metaBg,
             borderRadius: 8,
             width: 32,
             height: 32,
@@ -98,7 +98,7 @@ export const Pagination = ({ page, totalPages, onPageChange }) => {
 function paginationBtnStyle(disabled) {
   return {
     border: `1px solid ${tk.cardBorder}`,
-    background: disabled ? "#f5f5f5" : "#fff",
+    background: disabled ? tk.metaBg : "#fff",
     color: disabled ? tk.textMuted : tk.textPrimary,
     borderRadius: 8,
     padding: "6px 14px",
@@ -120,7 +120,7 @@ export const SearchInput = ({ value, onChange, placeholder }) => (
 
 export const ActionButton = ({ children, onClick, variant = "primary", disabled = false, type = "button" }) => {
   const styles = {
-    primary: { background: tk.accent, color: "#fff", border: "none" },
+    primary: { background: tk.accent, color: tk.textPrimary, border: "none" },
     danger: { background: tk.dangerSoft, color: tk.danger, border: `1px solid ${tk.danger}33` },
     ghost: { background: "#fff", color: tk.textSecondary, border: `1px solid ${tk.cardBorder}` },
     success: { background: tk.successSoft, color: tk.success, border: `1px solid ${tk.success}33` },
@@ -189,7 +189,7 @@ export const thStyle = {
   textTransform: "uppercase",
   color: tk.textMuted,
   borderBottom: `1px solid ${tk.cardBorder}`,
-  background: "#faf9f7",
+  background: tk.metaBg,
   whiteSpace: "nowrap",
 };
 

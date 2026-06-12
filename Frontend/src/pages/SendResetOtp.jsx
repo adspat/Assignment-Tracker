@@ -53,24 +53,24 @@ const SendResetOtp = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-slate-50 font-sans antialiased p-4 sm:p-6 md:p-8 relative">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#FEFAE0] font-sans antialiased p-4 sm:p-6 md:p-8 relative">
       
       {/* Webpage Title Top-Left */}
       <div className="absolute top-6 left-6 sm:top-8 sm:left-8">
-        <span className="text-xl font-bold tracking-tight text-slate-950">
-          Assi<span className="text-indigo-600">Track</span>
+        <span className="text-xl font-bold tracking-tight text-[#4A443A]">
+          Assi<span className="text-[#D4A373]">Track</span>
         </span>
       </div>
 
       {/* Centralized Card Wrapper */}
-      <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 md:p-10 shadow-sm mt-12 sm:mt-0">
+      <div className="w-full max-w-md bg-white rounded-2xl border border-[#D4A373]/25 p-6 sm:p-8 md:p-10 shadow-sm mt-12 sm:mt-0">
         
         {/* Header */}
         <div className="space-y-2 mb-8">
-          <h1 className="text-2xl font-semibold tracking-tight text-slate-950">
+          <h1 className="text-2xl font-semibold tracking-tight text-[#4A443A]">
             Reset Password
           </h1>
-          <p className="text-sm text-slate-500 leading-relaxed">
+          <p className="text-sm text-[#6E675F] leading-relaxed">
             Enter your email address below to receive a secure authorization passcode.
           </p>
         </div>
@@ -80,7 +80,7 @@ const SendResetOtp = () => {
           
           {/* Email Input */}
           <div className="space-y-2">
-            <label htmlFor="email" className="text-xs font-medium text-slate-700 tracking-wide block">
+            <label htmlFor="email" className="text-xs font-medium text-[#6E675F] tracking-wide block">
               Email Address
             </label>
             <input
@@ -90,7 +90,7 @@ const SendResetOtp = () => {
               placeholder="name@company.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-950 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600 transition shadow-sm"
+              className="w-full bg-white border border-[#D4A373]/25 rounded-xl px-4 py-3 text-sm text-[#4A443A] placeholder:text-[#918A82] focus:outline-none focus:ring-2 focus:ring-[#CCD5AE]/40 focus:border-[#CCD5AE] transition shadow-sm"
             />
           </div>
 
@@ -98,7 +98,7 @@ const SendResetOtp = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-indigo-600 text-white text-sm font-medium py-3 rounded-xl hover:bg-indigo-700 transition flex justify-center items-center disabled:opacity-60 disabled:cursor-not-allowed shadow-sm shadow-indigo-600/10 mt-2"
+            className="w-full bg-[#CCD5AE] text-[#4A443A] text-sm font-semibold py-3 rounded-xl hover:bg-[#b6bf96] transition flex justify-center items-center disabled:opacity-60 disabled:cursor-not-allowed shadow-sm mt-2"
           >
             {isSubmitting ? (
               <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -109,10 +109,10 @@ const SendResetOtp = () => {
         </form>
 
         {/* Backlink Divider & Button */}
-        <div className="pt-6 mt-6 border-t border-slate-100 flex justify-center">
+        <div className="pt-6 mt-6 border-t border-[#D4A373]/15 flex justify-center">
           <button
             onClick={() => navigate("/")}
-            className="text-sm text-slate-500 hover:text-indigo-600 font-medium transition inline-flex items-center gap-2 group"
+            className="text-sm text-[#6E675F] hover:text-[#4A443A] font-medium transition inline-flex items-center gap-2 group"
           >
             <span className="transition-transform group-hover:-translate-x-0.5">&larr;</span> 
             Return to sign in

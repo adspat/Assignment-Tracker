@@ -4,3 +4,87 @@
   display: none;
 }
 
+@font-face {
+  font-family: "boldonse";
+  src: url(./assets/fonts/bold-fonts/Boldonse/Boldonse-Regular.ttf)
+    format(truetype);
+  font-weight: bold;
+  font-style: italic;
+}
+@theme {
+  --font-boldonse: "boldonse", sans-serif;
+}
+
+@font-face {
+  font-family: "babes";
+  src: url(./assets/fonts/bold-fonts/Montserrat/Montserrat-Italic-VariableFont_wght.ttf);
+  font-style: italic;
+}
+@theme {
+  --font-babes: "babes", sans-serif;
+}
+
+@font-face {
+  font-family: "ibm";
+  src: url(./assets/fonts/bold-fonts/IBM_Plex_Mono/IBMPlexMono-Bold.ttf);
+}
+@theme {
+  --font-ibm: "ibm", sans-serif;
+}
+
+@font-face {
+  font-family: "intel";
+  src: url(./assets/fonts/bold-fonts/Intel_One_Mono/IntelOneMono-Italic-VariableFont_wght.ttf);
+}
+@theme {
+  --font-intel: "intel", sans-serif;
+}
+
+@font-face {
+  font-family: "mont";
+  src: url(./assets/fonts/bold-fonts/Montserrat/Montserrat-Italic-VariableFont_wght.ttf);
+}
+@theme {
+  --font-mont: "mont", sans-serif;
+}
+
+@font-face {
+  font-family: "archivo";
+  src: url(./assets/fonts/Archivo/ArchivoBlack-Regular.ttf);
+}
+@theme {
+  --font-archivo: "archivo", sans-serif;
+}
+
+@font-face {
+  font-family: "inter";
+  src: url(./assets/fonts/Inter/Inter-Italic-VariableFont_opsz\,wght.ttf);
+}
+@theme {
+  --font-inter: "inter", sans-serif;
+}
+
+@font-face {
+  font-family: "lato";
+  src: url(./assets/fonts/Lato/Lato-Bold.ttf);
+}
+@theme {
+  --font-lato: "lato", sans-serif;
+}
+
+@font-face {
+  font-family: "playfair";
+  src: url(./assets/fonts/Playfair/PlayfairDisplay-VariableFont_wght.ttf);
+}
+@theme {
+  --font-playfair: "playfair", sans-serif;
+}
+
+@font-face {
+  font-family: "roboto-mono";
+  src: url(./assets/fonts/Roboto_Mono/RobotoMono-VariableFont_wght.ttf);
+}
+@theme {
+  --font-roboto-mono: "roboto-mono", sans-serif;
+}
+    

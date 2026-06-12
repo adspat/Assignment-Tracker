@@ -4,6 +4,25 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Html5Qrcode } from "html5-qrcode";
 import { playScanErrorSound, playScanSuccessSound } from "../utils/scanSounds";
 
+/* ─── Palette tokens updated to the earthy pastel theme ─── */
+const tk = {
+  canvas: "#FFFFFF",          // Pure White base for main layout backdrops
+  card: "#FFFFFF",            // Pure White background surface for modules
+  accent: "#CCD5AE",          // 1. Sage Green for primary confirmation accents & buttons
+  accentHover: "#b6bf96",     // Darker iteration of Sage Green for interactive actions
+  accentSoft: "#E9EDC9",      // 2. Olive Cream for active tags, badge fills, and structural markers
+  accentBorder: "#D4A373",    // 5. Rich Tan Accent for explicit outlines & focal framework links
+  cardBorder: "rgba(212,163,115,0.25)", // Softened Tan wire edges
+  textPrimary: "#4A443A",     // Charcoal-Brown ensures premium high-contrast readability
+  textSecondary: "#6E675F",   // Medium muted text accents
+  textMuted: "#918A82",       // Soft label subtext color values
+  metaBg: "#FAEDCD",          // 4. Sand color for distinct content info matrices
+  danger: "#e5484d",
+  dangerSoft: "rgba(229,72,77,0.08)",
+  success: "#30a46c",
+  successSoft: "rgba(48,164,108,0.10)",
+};
+
 /* ─── Google Fonts injection ─── */
 if (!document.getElementById("edu-fonts")) {
   const link = document.createElement("link");
@@ -28,7 +47,7 @@ if (!document.getElementById("student-list-animations")) {
     @keyframes dropdownIn { from{opacity:0;transform:translateY(-6px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
     @keyframes scanLine {
       0%, 100% { top: 20%; opacity: 0.5; }
-      50%       { top: 80%; opacity: 1;   }
+      50%        { top: 80%; opacity: 1;   }
     }
     .student-row { animation: rowIn 0.35s ease both; }
     .mobile-card { animation: rowIn 0.3s ease both; }
@@ -62,9 +81,9 @@ if (!document.getElementById("student-list-animations")) {
 const useIsMobile = () => {
   const [mobile, setMobile] = useState(window.innerWidth <= 768);
   useEffect(() => {
-    const h = () => setMobile(window.innerWidth <= 768);
-    window.addEventListener("resize", h);
-    return () => window.removeEventListener("resize", h);
+    const handler = () => setMobile(window.innerWidth <= 768);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
   }, []);
   return mobile;
 };
@@ -82,9 +101,9 @@ const Avatar = ({ name, size = "md" }) => {
     <div
       className={`${sizeClasses} rounded-full flex items-center justify-center font-bold flex-shrink-0 tracking-wide border`}
       style={{
-        background: `hsl(${hue},40%,88%)`,
-        borderColor: `hsl(${hue},30%,78%)`,
-        color: `hsl(${hue},40%,30%)`,
+        background: `hsl(${hue},40%,93%)`,
+        borderColor: `hsl(${hue},25%,83%)`,
+        color: tk.textPrimary,
       }}
     >
       {initials}
@@ -97,16 +116,16 @@ const StatusBadge = ({ status }) => {
   const submitted = status === "submitted";
   return (
     <span
-      className={`inline-flex items-center gap-1 text-[0.65rem] font-bold tracking-wide px-2.5 py-1 rounded-full border whitespace-nowrap ${
-        submitted
-          ? "bg-emerald-50 text-emerald-600 border-emerald-200"
-          : "bg-amber-50 text-amber-600 border-amber-200"
-      }`}
+      className="inline-flex items-center gap-1 text-[0.65rem] font-bold tracking-wide px-2.5 py-1 rounded-full border whitespace-nowrap"
+      style={{
+        backgroundColor: submitted ? tk.successSoft : tk.metaBg,
+        borderColor: submitted ? "rgba(48,164,108,0.2)" : tk.cardBorder,
+        color: submitted ? tk.success : tk.textPrimary,
+      }}
     >
       <span
-        className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-          submitted ? "bg-emerald-500" : "bg-amber-500"
-        }`}
+        className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+        style={{ backgroundColor: submitted ? tk.success : tk.accentBorder }}
       />
       {submitted ? "Submitted" : "Pending"}
     </span>
@@ -127,8 +146,8 @@ const SkeletonRow = () => (
     {[44, 28, 16, 16, 14, 18, 14].map((w, i) => (
       <td key={i} className="px-5 py-4">
         <div
-          className="shimmer-pulse h-3 rounded-md bg-black/[0.06]"
-          style={{ width: `${w}%` }}
+          className="shimmer-pulse h-3 rounded-md"
+          style={{ width: `${w}%`, backgroundColor: tk.metaBg, opacity: 0.5 }}
         />
       </td>
     ))}
@@ -137,13 +156,13 @@ const SkeletonRow = () => (
 
 /* ─── Skeleton card (mobile) ─── */
 const SkeletonCard = () => (
-  <div className="bg-white border border-black/[0.07] rounded-2xl p-4 flex items-center gap-3">
-    <div className="shimmer-pulse w-11 h-11 rounded-full bg-black/[0.06] flex-shrink-0" />
+  <div className="bg-white rounded-2xl p-4 flex items-center gap-3" style={{ border: `1px solid ${tk.cardBorder}` }}>
+    <div className="shimmer-pulse w-11 h-11 rounded-full bg-black/[0.04] flex-shrink-0" />
     <div className="flex-1">
-      <div className="shimmer-pulse h-3 w-[55%] rounded-md bg-black/[0.06] mb-2" />
-      <div className="shimmer-pulse h-2.5 w-[30%] rounded-md bg-black/[0.06]" />
+      <div className="shimmer-pulse h-3 w-[55%] rounded-md bg-black/[0.04] mb-2" />
+      <div className="shimmer-pulse h-2.5 w-[30%] rounded-md bg-black/[0.04]" />
     </div>
-    <div className="shimmer-pulse w-20 h-8 rounded-xl bg-black/[0.06]" />
+    <div className="shimmer-pulse w-20 h-8 rounded-xl bg-black/[0.04]" />
   </div>
 );
 
@@ -155,9 +174,8 @@ const SearchBar = ({ value, onChange, isMobile, resultCount, totalCount }) => {
     <div className={`${isMobile ? "mb-3" : "mb-4"}`}>
       <div className="relative flex items-center">
         <i
-          className={`ri-search-line absolute left-3.5 text-base pointer-events-none z-10 transition-colors duration-200 ${
-            hasQuery ? "text-violet-500" : "text-stone-400"
-          }`}
+          className="ri-search-line absolute left-3.5 text-base pointer-events-none z-10 transition-colors duration-200"
+          style={{ color: hasQuery ? tk.accentBorder : tk.textMuted }}
         />
         <input
           ref={inputRef}
@@ -165,17 +183,19 @@ const SearchBar = ({ value, onChange, isMobile, resultCount, totalCount }) => {
           placeholder="Search by name, enrollment, branch…"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`w-full ${isMobile ? "py-2.5" : "py-3"} pl-10 pr-10 bg-white rounded-xl text-[0.82rem] font-medium text-stone-900 transition-all duration-200 font-[DM_Sans] focus:outline-none ${
-            hasQuery
-              ? "border-2 border-violet-300 shadow-[0_0_0_3px_rgba(124,106,247,0.08)]"
-              : "border border-black/[0.07] shadow-sm"
-          }`}
-          style={{ fontFamily: "'DM Sans', sans-serif" }}
+          className={`w-full ${isMobile ? "py-2.5" : "py-3"} pl-10 pr-10 bg-white rounded-xl text-[0.82rem] font-medium transition-all duration-200 focus:outline-none`}
+          style={{
+            fontFamily: "'DM Sans', sans-serif",
+            color: tk.textPrimary,
+            border: hasQuery ? `2px solid ${tk.accent}` : `1px solid ${tk.cardBorder}`,
+            boxShadow: hasQuery ? `0 0 0 3px ${tk.accentSoft}` : "0 1px 2px rgba(0,0,0,0.03)",
+          }}
         />
         {hasQuery && (
           <button
             onClick={() => { onChange(""); inputRef.current?.focus(); }}
-            className="absolute right-2.5 w-6 h-6 rounded-full bg-black/[0.07] border-none flex items-center justify-center cursor-pointer text-stone-400 text-sm hover:bg-black/[0.12] transition-colors duration-150"
+            className="absolute right-2.5 w-6 h-6 rounded-full border-none flex items-center justify-center cursor-pointer transition-colors duration-150"
+            style={{ backgroundColor: tk.metaBg, color: tk.textSecondary }}
           >
             <i className="ri-close-line" />
           </button>
@@ -183,10 +203,8 @@ const SearchBar = ({ value, onChange, isMobile, resultCount, totalCount }) => {
       </div>
       {hasQuery && (
         <p
-          className={`mt-1.5 ml-0.5 text-[0.68rem] font-semibold ${
-            resultCount === 0 ? "text-red-500" : "text-violet-500"
-          }`}
-          style={{ animation: "fadeIn 0.15s ease" }}
+          className="mt-1.5 ml-0.5 text-[0.68rem] font-semibold"
+          style={{ animation: "fadeIn 0.15s ease", color: resultCount === 0 ? tk.danger : tk.accentBorder }}
         >
           {resultCount === 0
             ? "No students match your search"
@@ -208,25 +226,30 @@ const FilterTabs = ({ activeFilter, onChange, counts, isMobile }) => {
     <div className={`flex gap-2 ${isMobile ? "mb-3" : "mb-4"}`}>
       {tabs.map(({ key, label, count, icon }) => {
         const isActive = activeFilter === key;
-        const colorMap = {
-          all: isActive ? "bg-stone-900 text-white border-stone-900" : "bg-white text-stone-500 border-black/[0.08] hover:border-stone-300 hover:text-stone-700",
-          submitted: isActive ? "bg-emerald-500 text-white border-emerald-500" : "bg-white text-stone-500 border-black/[0.08] hover:border-emerald-300 hover:text-emerald-600",
-          pending: isActive ? "bg-amber-500 text-white border-amber-500" : "bg-white text-stone-500 border-black/[0.08] hover:border-amber-300 hover:text-amber-600",
-        };
-        const badgeMap = {
-          all: isActive ? "bg-white/20 text-white" : "bg-stone-100 text-stone-500",
-          submitted: isActive ? "bg-white/20 text-white" : "bg-emerald-50 text-emerald-600",
-          pending: isActive ? "bg-white/20 text-white" : "bg-amber-50 text-amber-600",
-        };
+        
+        let btnBg = "#FFFFFF";
+        let btnText = tk.textSecondary;
+        let btnBorder = tk.cardBorder;
+
+        if (isActive) {
+          if (key === "all") { btnBg = tk.textPrimary; btnText = "#FFFFFF"; btnBorder = tk.textPrimary; }
+          else if (key === "submitted") { btnBg = tk.success; btnText = "#FFFFFF"; btnBorder = tk.success; }
+          else if (key === "pending") { btnBg = tk.accentBorder; btnText = "#FFFFFF"; btnBorder = tk.accentBorder; }
+        }
+
+        const badgeBg = isActive ? "rgba(255,255,255,0.2)" : tk.metaBg;
+        const badgeText = isActive ? "#FFFFFF" : tk.textPrimary;
+
         return (
           <button
             key={key}
             onClick={() => onChange(key)}
-            className={`flex items-center gap-1.5 px-3.5 ${isMobile ? "py-2 text-[0.72rem]" : "py-2 text-[0.74rem]"} font-bold rounded-xl border transition-all duration-150 cursor-pointer whitespace-nowrap ${colorMap[key]}`}
+            className={`flex items-center gap-1.5 px-3.5 ${isMobile ? "py-2 text-[0.72rem]" : "py-2 text-[0.74rem]"} font-bold rounded-xl border transition-all duration-150 cursor-pointer whitespace-nowrap`}
+            style={{ backgroundColor: btnBg, color: btnText, borderColor: btnBorder }}
           >
             <i className={`${icon} text-[0.85rem]`} />
             {label}
-            <span className={`text-[0.62rem] font-bold px-1.5 py-0.5 rounded-full ${badgeMap[key]}`}>
+            <span className="text-[0.62rem] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: badgeBg, color: badgeText }}>
               {count}
             </span>
           </button>
@@ -269,31 +292,32 @@ const DownloadDropdown = ({ students, assignmentId, isMobile }) => {
     setOpen(false);
   };
   const options = [
-    { label: "All Students", icon: "ri-team-line", color: "text-stone-700", bg: "hover:bg-stone-50", action: () => triggerDownload(buildCSV(students), "all"), count: students.length },
-    { label: "Submitted Only", icon: "ri-checkbox-circle-line", color: "text-emerald-600", bg: "hover:bg-emerald-50", action: () => triggerDownload(buildCSV(students.filter((s) => s.status === "submitted")), "submitted"), count: students.filter((s) => s.status === "submitted").length },
-    { label: "Pending Only", icon: "ri-time-line", color: "text-amber-600", bg: "hover:bg-amber-50", action: () => triggerDownload(buildCSV(students.filter((s) => s.status !== "submitted")), "pending"), count: students.filter((s) => s.status !== "submitted").length },
+    { label: "All Students", icon: "ri-team-line", color: tk.textPrimary, bg: "hover:bg-[#FEFAE0]", action: () => triggerDownload(buildCSV(students), "all"), count: students.length },
+    { label: "Submitted Only", icon: "ri-checkbox-circle-line", color: tk.success, bg: "hover:bg-emerald-50", action: () => triggerDownload(buildCSV(students.filter((s) => s.status === "submitted")), "submitted"), count: students.filter((s) => s.status === "submitted").length },
+    { label: "Pending Only", icon: "ri-time-line", color: tk.accentBorder, bg: "hover:bg-amber-50", action: () => triggerDownload(buildCSV(students.filter((s) => s.status !== "submitted")), "pending"), count: students.filter((s) => s.status !== "submitted").length },
   ];
   return (
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        className={`flex items-center justify-center gap-1.5 px-4 py-2.5 bg-stone-900 text-white border-none rounded-xl text-[0.75rem] font-bold cursor-pointer hover:bg-stone-800 hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ${isMobile ? "flex-1" : ""}`}
+        className={`flex items-center justify-center gap-1.5 px-4 py-2.5 text-white border-none rounded-xl text-[0.75rem] font-bold cursor-pointer active:scale-[0.97] transition-all duration-150 ${isMobile ? "w-full" : ""}`}
+        style={{ backgroundColor: tk.textPrimary }}
       >
         <i className="ri-download-2-line" />
         CSV
         <i className={`ri-arrow-down-s-line text-base transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
-        <div className="dropdown-menu absolute right-0 top-[calc(100%+6px)] z-50 bg-white border border-black/[0.09] rounded-2xl shadow-xl overflow-hidden" style={{ minWidth: 200 }}>
+        <div className="dropdown-menu absolute right-0 top-[calc(100%+6px)] z-50 bg-white border rounded-2xl shadow-xl overflow-hidden" style={{ minWidth: 200, borderColor: tk.cardBorder }}>
           <div className="px-3.5 pt-3 pb-2">
-            <p className="text-[0.58rem] font-bold uppercase tracking-[0.1em] text-stone-400 m-0">Download as CSV</p>
+            <p className="text-[0.58rem] font-bold uppercase tracking-[0.1em] m-0" style={{ color: tk.textMuted }}>Download as CSV</p>
           </div>
           <div className="px-2 pb-2">
             {options.map(({ label, icon, color, bg, action, count }) => (
               <button key={label} onClick={action} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border-none bg-transparent cursor-pointer text-left transition-colors duration-150 ${bg}`}>
-                <i className={`${icon} text-base ${color}`} />
-                <span className={`text-[0.8rem] font-semibold ${color} flex-1`}>{label}</span>
-                <span className="text-[0.65rem] font-bold text-stone-400 bg-stone-100 px-1.5 py-0.5 rounded-full">{count}</span>
+                <i className={`${icon} text-base`} style={{ color }} />
+                <span className="text-[0.8rem] font-semibold flex-1" style={{ color: tk.textPrimary }}>{label}</span>
+                <span className="text-[0.65rem] font-bold px-1.5 py-0.5 rounded-full" style={{ backgroundColor: tk.metaBg, color: tk.textPrimary }}>{count}</span>
               </button>
             ))}
           </div>
@@ -329,7 +353,7 @@ const AddStudentModal = ({ onClose, onAdd }) => {
   const handleKeyDown = (e) => { if (e.key === "Enter") handleAdd(); if (e.key === "Escape") onClose(); };
   return (
     <>
-      <div onClick={onClose} className="fixed inset-0 bg-black/55 backdrop-blur-sm z-[998]" style={{ animation: "fadeIn 0.2s ease" }} />
+      <div onClick={onClose} className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[998]" style={{ animation: "fadeIn 0.2s ease" }} />
       <div
         className="fixed left-1/2 top-1/2 z-[999] bg-white rounded-[22px] shadow-2xl w-[min(420px,calc(100vw-32px))]"
         style={{ animation: "slideUpCenter 0.3s cubic-bezier(0.34,1.3,0.64,1) forwards", padding: "28px 28px 24px" }}
@@ -337,22 +361,22 @@ const AddStudentModal = ({ onClose, onAdd }) => {
       >
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-violet-50 border border-violet-200 flex items-center justify-center text-violet-500 text-lg flex-shrink-0">
-              <i className="ri-user-add-line" />
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center text-lg flex-shrink-0" style={{ backgroundColor: tk.accentSoft, border: `1px solid ${tk.accent}` }}>
+              <i className="ri-user-add-line" style={{ color: tk.textPrimary }} />
             </div>
             <div>
-              <h2 className="m-0 text-[1.1rem] font-black text-stone-900 tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>Add Student</h2>
-              <p className="mt-0.5 text-[0.68rem] text-stone-400 font-medium">Link student by enrollment number</p>
+              <h2 className="m-0 text-[1.1rem] font-black tracking-tight" style={{ fontFamily: "'Playfair Display', serif", color: tk.textPrimary }}>Add Student</h2>
+              <p className="mt-0.5 text-[0.68rem] font-medium" style={{ color: tk.textMuted }}>Link student by enrollment number</p>
             </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-black/[0.06] border-none flex items-center justify-center cursor-pointer text-stone-500 text-base hover:bg-black/10 transition-colors flex-shrink-0">
+          <button onClick={onClose} className="w-8 h-8 rounded-full border-none flex items-center justify-center cursor-pointer text-base hover:bg-black/10 transition-colors flex-shrink-0" style={{ backgroundColor: tk.metaBg, color: tk.textSecondary }}>
             <i className="ri-close-line" />
           </button>
         </div>
         <div className="mb-2">
-          <label className="block text-[0.62rem] font-bold uppercase tracking-[0.08em] text-stone-400 mb-2">Enrollment Number</label>
+          <label className="block text-[0.62rem] font-bold uppercase tracking-[0.08em] mb-2" style={{ color: tk.textMuted }}>Enrollment Number</label>
           <div className="relative">
-            <i className={`ri-hashtag absolute left-3.5 top-1/2 -translate-y-1/2 text-[0.9rem] pointer-events-none transition-colors duration-200 ${enrollment ? "text-violet-500" : "text-stone-400"}`} />
+            <i className="ri-hashtag absolute left-3.5 top-1/2 -translate-y-1/2 text-[0.9rem] pointer-events-none transition-colors duration-200" style={{ color: enrollment ? tk.accentBorder : tk.textMuted }} />
             <input
               ref={inputRef}
               type="text"
@@ -360,30 +384,33 @@ const AddStudentModal = ({ onClose, onAdd }) => {
               value={enrollment}
               onChange={(e) => { setEnrollment(e.target.value); setError(""); }}
               onKeyDown={handleKeyDown}
-              className={`w-full py-3 pl-9 pr-4 bg-stone-50 rounded-xl text-sm font-semibold text-stone-900 transition-all duration-200 focus:outline-none placeholder:text-stone-300 placeholder:font-normal ${
-                error ? "border-2 border-red-300 shadow-[0_0_0_3px_rgba(229,72,77,0.08)]"
-                : enrollment ? "border-2 border-violet-300 shadow-[0_0_0_3px_rgba(124,106,247,0.08)]"
-                : "border border-black/[0.07]"
-              }`}
-              style={{ fontFamily: "'DM Sans', sans-serif" }}
+              className="w-full py-3 pl-9 pr-4 rounded-xl text-sm font-semibold transition-all duration-200 focus:outline-none placeholder:font-normal"
+              style={{ 
+                fontFamily: "'DM Sans', sans-serif",
+                color: tk.textPrimary,
+                backgroundColor: "#FFFFFF",
+                border: error ? `2px solid ${tk.danger}` : enrollment ? `2px solid ${tk.accent}` : `1px solid ${tk.cardBorder}`,
+                boxShadow: error ? `0 0 0 3px ${tk.danger}22` : enrollment ? `0 0 0 3px ${tk.accentSoft}` : "none"
+              }}
             />
           </div>
           {error && (
-            <p className="mt-2 text-[0.7rem] font-semibold text-red-500 flex items-center gap-1.5" style={{ animation: "fadeIn 0.15s ease" }}>
+            <p className="mt-2 text-[0.7rem] font-semibold flex items-center gap-1.5" style={{ animation: "fadeIn 0.15s ease", color: tk.danger }}>
               <i className="ri-error-warning-line text-sm" />{error}
             </p>
           )}
         </div>
-        <p className="text-[0.68rem] text-stone-400 mb-5 flex items-center gap-1.5">
-          <i className="ri-information-line text-xs text-violet-400" />
+        <p className="text-[0.68rem] mb-5 flex items-center gap-1.5" style={{ color: tk.textMuted }}>
+          <i className="ri-information-line text-xs" style={{ color: tk.accentBorder }} />
           The student will be added to this assignment's submission list.
         </p>
         <div className="flex gap-3">
-          <button onClick={onClose} className="flex-1 py-3 px-4 bg-black/[0.04] text-stone-500 border border-black/[0.07] rounded-xl text-[0.82rem] font-semibold cursor-pointer hover:bg-black/[0.07] transition-colors duration-150">Cancel</button>
+          <button onClick={onClose} className="flex-1 py-3 px-4 rounded-xl text-[0.82rem] font-semibold cursor-pointer transition-colors duration-150" style={{ backgroundColor: tk.metaBg, border: `1px solid ${tk.cardBorder}`, color: tk.textPrimary }}>Cancel</button>
           <button
             onClick={handleAdd}
             disabled={loading}
-            className={`flex-1 py-3 px-4 bg-violet-500 text-white border-none rounded-xl text-[0.82rem] font-bold cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 ${loading ? "opacity-70 cursor-not-allowed" : "hover:bg-violet-600 hover:-translate-y-px active:scale-[0.97]"}`}
+            className={`flex-1 py-3 px-4 border-none rounded-xl text-[0.82rem] font-bold cursor-pointer flex items-center justify-center gap-2 transition-all duration-150 ${loading ? "opacity-70 cursor-not-allowed" : "hover:-translate-y-px active:scale-[0.97]"}`}
+            style={{ backgroundColor: tk.textPrimary, color: "#FFFFFF" }}
           >
             {loading ? <><Spinner /> Adding…</> : <><i className="ri-user-add-line text-base" />Add Student</>}
           </button>
@@ -413,7 +440,6 @@ const QRScannerModal = ({ onClose, onScan, isProcessing, error: externalError, s
   }, [isProcessing]);
 
   useEffect(() => {
-    // Small delay so the DOM element is mounted
     const timer = setTimeout(() => {
       startScanner();
     }, 200);
@@ -435,7 +461,6 @@ const QRScannerModal = ({ onClose, onScan, isProcessing, error: externalError, s
         return;
       }
 
-      // Prefer back camera
       const backCam = cameras.find((c) =>
         c.label.toLowerCase().includes("back") ||
         c.label.toLowerCase().includes("rear") ||
@@ -469,9 +494,7 @@ const QRScannerModal = ({ onClose, onScan, isProcessing, error: externalError, s
             }, 500);
           });
         },
-        () => {
-          // onScanFailure — called every frame when no QR found, ignore silently
-        }
+        () => {}
       );
 
       scannerStartedRef.current = true;
@@ -507,55 +530,39 @@ const QRScannerModal = ({ onClose, onScan, isProcessing, error: externalError, s
 
   return (
     <>
-      <div
-        onClick={handleClose}
-        className="fixed inset-0 bg-black/55 backdrop-blur-sm z-[998]"
-        style={{ animation: "fadeIn 0.2s ease" }}
-      />
+      <div onClick={handleClose} className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[998]" style={{ animation: "fadeIn 0.2s ease" }} />
       <div
         className="fixed left-1/2 top-1/2 z-[999] bg-white rounded-[22px] shadow-2xl w-[min(420px,calc(100vw-32px))]"
-        style={{
-          animation: "slideUpCenter 0.3s cubic-bezier(0.34,1.3,0.64,1) forwards",
-          padding: "28px 28px 24px",
-        }}
+        style={{ animation: "slideUpCenter 0.3s cubic-bezier(0.34,1.3,0.64,1) forwards", padding: "28px 28px 24px" }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* ── Header ── */}
+        {/* Header */}
         <div className="flex items-start justify-between mb-5">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-violet-50 border border-violet-200 flex items-center justify-center text-violet-500 text-lg flex-shrink-0">
-              <i className="ri-qr-scan-2-line" />
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center text-lg flex-shrink-0" style={{ backgroundColor: tk.accentSoft, border: `1px solid ${tk.accent}` }}>
+              <i className="ri-qr-scan-2-line" style={{ color: tk.textPrimary }} />
             </div>
             <div>
-              <h2 className="m-0 text-[1.1rem] font-black text-stone-900 tracking-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+              <h2 className="m-0 text-[1.1rem] font-black tracking-tight" style={{ fontFamily: "'Playfair Display', serif", color: tk.textPrimary }}>
                 Scan QR Code
               </h2>
-              <p className="mt-0.5 text-[0.68rem] text-stone-400 font-medium">
+              <p className="mt-0.5 text-[0.68rem] font-medium" style={{ color: tk.textMuted }}>
                 Scan continuously — camera stays on after each student
               </p>
             </div>
           </div>
-          <button
-            onClick={handleClose}
-            className="w-8 h-8 rounded-full bg-black/[0.06] border-none flex items-center justify-center cursor-pointer text-stone-500 text-base hover:bg-black/10 transition-colors flex-shrink-0"
-          >
+          <button onClick={handleClose} className="w-8 h-8 rounded-full border-none flex items-center justify-center cursor-pointer text-base hover:bg-black/10 transition-colors flex-shrink-0" style={{ backgroundColor: tk.metaBg, color: tk.textSecondary }}>
             <i className="ri-close-line" />
           </button>
         </div>
 
-        {/* ── Camera View ── */}
+        {/* Camera View */}
         <div
-          className="rounded-2xl overflow-hidden mb-4 border-2 border-black/[0.07] bg-black relative shadow-inner"
-          style={{ aspectRatio: "1/1", minHeight: 260 }}
+          className="rounded-2xl overflow-hidden mb-4 bg-black relative shadow-inner"
+          style={{ aspectRatio: "1/1", minHeight: 260, border: `2px solid ${tk.cardBorder}` }}
         >
-          {/* html5-qrcode mounts video inside this div */}
-          <div
-            id={SCANNER_ID}
-            className="w-full h-full"
-            style={{ width: "100%", height: "100%" }}
-          />
+          <div id={SCANNER_ID} className="w-full h-full" style={{ width: "100%", height: "100%" }} />
 
-          {/* Loading overlay — shown until camera is ready */}
           {!ready && !camError && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black z-10">
               <Spinner />
@@ -563,7 +570,6 @@ const QRScannerModal = ({ onClose, onScan, isProcessing, error: externalError, s
             </div>
           )}
 
-          {/* Processing banner — brief feedback without stopping the camera */}
           {isProcessing && (
             <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-center gap-2 py-2.5 bg-black/75 backdrop-blur-sm">
               <Spinner />
@@ -571,22 +577,19 @@ const QRScannerModal = ({ onClose, onScan, isProcessing, error: externalError, s
             </div>
           )}
 
-          {/* Corner decorators (shown after camera is ready) */}
           {ready && !isProcessing && (
             <div className="absolute inset-0 pointer-events-none z-10">
-              <div className="absolute top-5 left-5 w-7 h-7 border-t-[3px] border-l-[3px] border-violet-400 rounded-tl-lg opacity-80" />
-              <div className="absolute top-5 right-5 w-7 h-7 border-t-[3px] border-r-[3px] border-violet-400 rounded-tr-lg opacity-80" />
-              <div className="absolute bottom-5 left-5 w-7 h-7 border-b-[3px] border-l-[3px] border-violet-400 rounded-bl-lg opacity-80" />
-              <div className="absolute bottom-5 right-5 w-7 h-7 border-b-[3px] border-r-[3px] border-violet-400 rounded-br-lg opacity-80" />
-              {/* Animated scan line */}
+              <div className="absolute top-5 left-5 w-7 h-7 border-t-[3px] border-l-[3px] rounded-tl-lg opacity-80" style={{ borderColor: tk.accent }} />
+              <div className="absolute top-5 right-5 w-7 h-7 border-t-[3px] border-r-[3px] rounded-tr-lg opacity-80" style={{ borderColor: tk.accent }} />
+              <div className="absolute bottom-5 left-5 w-7 h-7 border-b-[3px] border-l-[3px] rounded-bl-lg opacity-80" style={{ borderColor: tk.accent }} />
+              <div className="absolute bottom-5 right-5 w-7 h-7 border-b-[3px] border-r-[3px] rounded-br-lg opacity-80" style={{ borderColor: tk.accent }} />
               <div
-                className="absolute left-8 right-8 h-[2px] bg-gradient-to-r from-transparent via-violet-400 to-transparent rounded-full"
-                style={{ animation: "scanLine 2s ease-in-out infinite" }}
+                className="absolute left-8 right-8 h-[2px] rounded-full"
+                style={{ animation: "scanLine 2s ease-in-out infinite", backgroundImage: `linear-gradient(to right, transparent, ${tk.accent}, transparent)` }}
               />
             </div>
           )}
 
-          {/* Camera error state */}
           {camError && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 z-10 px-6 text-center">
               <div className="w-12 h-12 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center mb-3">
@@ -597,26 +600,26 @@ const QRScannerModal = ({ onClose, onScan, isProcessing, error: externalError, s
           )}
         </div>
 
-        {/* ── Status text ── */}
+        {/* Status text */}
         {successMessage && !camError ? (
           <p
-            className="mb-4 text-[0.75rem] font-semibold text-emerald-600 flex items-center justify-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-xl py-2.5 px-3"
-            style={{ animation: "fadeIn 0.15s ease" }}
+            className="mb-4 text-[0.75rem] font-semibold flex items-center justify-center gap-1.5 border rounded-xl py-2.5 px-3"
+            style={{ animation: "fadeIn 0.15s ease", backgroundColor: tk.successSoft, borderColor: "rgba(48,164,108,0.2)", color: tk.success }}
           >
             <i className="ri-checkbox-circle-fill text-sm" />
             {successMessage}
           </p>
         ) : displayError && !camError ? (
           <p
-            className="mb-4 text-[0.75rem] font-semibold text-red-500 flex items-center justify-center gap-1.5 bg-red-50 border border-red-200 rounded-xl py-2.5 px-3"
-            style={{ animation: "fadeIn 0.15s ease" }}
+            className="mb-4 text-[0.75rem] font-semibold flex items-center justify-center gap-1.5 border rounded-xl py-2.5 px-3"
+            style={{ animation: "fadeIn 0.15s ease", backgroundColor: tk.dangerSoft, borderColor: "rgba(229,72,77,0.2)", color: tk.danger }}
           >
             <i className="ri-error-warning-line text-sm" />
             {displayError}
           </p>
         ) : !camError ? (
-          <p className="text-[0.68rem] text-stone-400 text-center mb-4 flex items-center justify-center gap-1.5">
-            <i className="ri-focus-3-line text-violet-400" />
+          <p className="text-[0.68rem] text-center mb-4 flex items-center justify-center gap-1.5" style={{ color: tk.textMuted }}>
+            <i className="ri-focus-3-line" style={{ color: tk.accentBorder }} />
             Point at a student QR — scanner stays open for the next scan
           </p>
         ) : (
@@ -625,7 +628,8 @@ const QRScannerModal = ({ onClose, onScan, isProcessing, error: externalError, s
 
         <button
           onClick={handleClose}
-          className="w-full py-3 px-4 bg-black/[0.04] text-stone-500 border border-black/[0.07] rounded-xl text-[0.82rem] font-semibold cursor-pointer hover:bg-black/[0.07] transition-colors duration-150"
+          className="w-full py-3 px-4 rounded-xl text-[0.82rem] font-semibold cursor-pointer transition-colors duration-150"
+          style={{ backgroundColor: tk.metaBg, border: `1px solid ${tk.cardBorder}`, color: tk.textPrimary }}
         >
           Done Scanning
         </button>
@@ -777,12 +781,10 @@ const StudentList = () => {
     if (successClearTimerRef.current) clearTimeout(successClearTimerRef.current);
   }, []);
 
-  /* ── QR Scan handler — keeps scanner open for batch scanning ── */
+  /* ── QR Scan handler ── */
   const handleQRScan = async (scannedText) => {
     if (!scannedText) return;
-
     const normalised = scannedText.trim().toLowerCase();
-
     const student = students.find(
       (s) => s.studentId?.enrollment?.trim().toLowerCase() === normalised
     );
@@ -820,9 +822,7 @@ const StudentList = () => {
       setQrProcessing(false);
     }
   };
-  
 
-  /* ── Stats ── */
   const totalSubmitted = students.filter((s) => s.status === "submitted").length;
   const totalStudents = students.length;
   const totalPending = totalStudents - totalSubmitted;
@@ -832,39 +832,39 @@ const StudentList = () => {
   const openModal = (student) => { setSelectedStudent(student); setShowModal(true); };
   const closeModal = () => { setShowModal(false); setTimeout(() => setSelectedStudent(null), 200); };
 
-  /* ════════════ RENDER ════════════ */
   return (
     <div
-      className="min-h-screen bg-[#f5f4f0] overflow-x-hidden"
-      style={{ fontFamily: "'DM Sans', sans-serif", color: "#12110f", padding: isMobile ? "20px 14px 32px" : "44px 48px" }}
+      className="min-h-screen overflow-x-hidden"
+      style={{ backgroundColor: tk.canvas, fontFamily: "'DM Sans', sans-serif", color: tk.textPrimary, padding: isMobile ? "20px 14px 32px" : "44px 48px" }}
     >
       <div className="mx-auto w-full" style={{ maxWidth: isMobile ? "100%" : 1100 }}>
 
-        {/* ── Back button ── */}
+        {/* Back button */}
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-1.5 text-[0.75rem] font-semibold text-stone-400 bg-transparent border border-black/[0.07] rounded-[9px] px-3.5 py-1.5 cursor-pointer mb-7 hover:bg-black/[0.07] transition-colors duration-150"
+          className="inline-flex items-center gap-1.5 text-[0.75rem] font-semibold bg-transparent rounded-[9px] px-3.5 py-1.5 cursor-pointer mb-7 hover:bg-black/[0.04] transition-all duration-150"
+          style={{ border: `1px solid ${tk.cardBorder}`, color: tk.textSecondary }}
         >
           <i className="ri-arrow-left-s-line text-base" />Back to Dashboard
         </button>
 
-        {/* ── Page header ── */}
-        <header className={`flex justify-between items-start flex-wrap ${isMobile ? "gap-3.5 mb-4 pb-4" : "gap-5 mb-7 pb-6"} border-b border-black/[0.06]`}>
+        {/* Page header */}
+        <header className={`flex justify-between items-start flex-wrap ${isMobile ? "gap-3.5 mb-4 pb-4" : "gap-5 mb-7 pb-6"} border-b`} style={{ borderColor: tk.cardBorder }}>
           <div className="min-w-0">
-            <p className="text-[0.62rem] font-bold tracking-[0.12em] uppercase text-violet-500 mb-1.5">Assignment Submissions</p>
+            <p className="text-[0.62rem] font-bold tracking-[0.12em] uppercase mb-1.5" style={{ color: tk.accentBorder }}>Assignment Submissions</p>
             <h1
-              className={`${isMobile ? "text-[1.55rem]" : "text-[2rem]"} font-black text-stone-900 tracking-tight leading-tight m-0`}
-              style={{ fontFamily: "'Playfair Display', serif" }}
+              className={`${isMobile ? "text-[1.55rem]" : "text-[2rem]"} font-black tracking-tight leading-tight m-0`}
+              style={{ fontFamily: "'Playfair Display', serif", color: tk.textPrimary }}
             >
-              Student<span className="text-violet-500"> Records</span>
+              Student<span style={{ color: tk.accentBorder }}> Records</span>
             </h1>
             {branch && (
-              <p className="mt-2 text-[0.76rem] text-stone-400 font-normal flex items-center gap-1.5 flex-wrap">
-                <i className="ri-git-branch-line text-[0.85rem]" />{branch}
-                <span className="text-black/10">·</span>
-                <i className="ri-hotel-line text-[0.85rem]" />Class {classs}
-                <span className="text-black/10">·</span>
-                <i className="ri-calendar-event-line text-[0.85rem]" />Semester {semester}
+              <p className="mt-2 text-[0.76rem] font-normal flex items-center gap-1.5 flex-wrap" style={{ color: tk.textSecondary }}>
+                <i className="ri-git-branch-line text-[0.85rem]" style={{ color: tk.accentBorder }} />{branch}
+                <span style={{ opacity: 0.2 }}>·</span>
+                <i className="ri-hotel-line text-[0.85rem]" style={{ color: tk.accentBorder }} />Class {classs}
+                <span style={{ opacity: 0.2 }}>·</span>
+                <i className="ri-calendar-event-line text-[0.85rem]" style={{ color: tk.accentBorder }} />Semester {semester}
               </p>
             )}
           </div>
@@ -873,13 +873,13 @@ const StudentList = () => {
           {!loading && totalStudents > 0 && (
             <div className={`flex ${isMobile ? "gap-2 w-full" : "gap-2.5"} flex-wrap`}>
               {[
-                { label: "Total", val: totalStudents, colorClass: "text-stone-900", bgClass: "bg-[#f9f8f5]", borderClass: "border-black/[0.07]" },
-                { label: "Submitted", val: totalSubmitted, colorClass: "text-emerald-600", bgClass: "bg-emerald-50", borderClass: "border-emerald-200" },
-                { label: "Pending", val: totalPending, colorClass: "text-amber-600", bgClass: "bg-amber-50", borderClass: "border-amber-200" },
-              ].map(({ label, val, colorClass, bgClass, borderClass }) => (
-                <div key={label} className={`${isMobile ? "px-3.5 py-2 flex-1" : "px-4 py-2.5"} ${bgClass} border ${borderClass} rounded-xl text-center`}>
-                  <p className="text-[0.6rem] font-bold uppercase tracking-[0.08em] text-stone-400 m-0 mb-0.5">{label}</p>
-                  <p className={`${isMobile ? "text-base" : "text-xl"} font-bold ${colorClass} m-0`} style={{ fontFamily: "'Playfair Display', serif" }}>{val}</p>
+                { label: "Total", val: totalStudents, colorClass: tk.textPrimary, bgStyle: tk.metaBg, borderStyle: tk.cardBorder },
+                { label: "Submitted", val: totalSubmitted, colorClass: tk.success, bgStyle: tk.successSoft, borderStyle: "rgba(48,164,108,0.2)" },
+                { label: "Pending", val: totalPending, colorClass: tk.textPrimary, bgStyle: tk.accentSoft, borderStyle: tk.cardBorder },
+              ].map(({ label, val, colorClass, bgStyle, borderStyle }) => (
+                <div key={label} className={`${isMobile ? "px-3.5 py-2 flex-1" : "px-4 py-2.5"} rounded-xl text-center border`} style={{ backgroundColor: bgStyle, borderColor: borderStyle }}>
+                  <p className="text-[0.6rem] font-bold uppercase tracking-[0.08em] m-0 mb-0.5" style={{ color: tk.textMuted }}>{label}</p>
+                  <p className={`${isMobile ? "text-base" : "text-xl"} font-bold m-0`} style={{ fontFamily: "'Playfair Display', serif", color: colorClass }}>{val}</p>
                 </div>
               ))}
             </div>
@@ -890,13 +890,15 @@ const StudentList = () => {
             <div className={`flex flex-wrap gap-2 ${isMobile ? "w-full" : ""}`}>
               <button
                 onClick={() => { setScannerError(""); setScannerSuccess(""); setShowScannerModal(true); }}
-                className={`flex items-center justify-center gap-1.5 px-4 py-2.5 bg-violet-100 text-violet-700 border border-violet-200 rounded-xl text-[0.75rem] font-bold cursor-pointer hover:bg-violet-200 hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ${isMobile ? "flex-1 min-w-[120px]" : ""}`}
+                className={`flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-[0.75rem] font-bold cursor-pointer hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ${isMobile ? "flex-1 min-w-[120px]" : ""}`}
+                style={{ backgroundColor: tk.accentSoft, border: `1px solid ${tk.accent}`, color: tk.textPrimary }}
               >
                 <i className="ri-qr-scan-2-line text-base" />Scan QR
               </button>
               <button
                 onClick={() => setShowAddModal(true)}
-                className={`flex items-center justify-center gap-1.5 px-4 py-2.5 bg-violet-500 text-white border-none rounded-xl text-[0.75rem] font-bold cursor-pointer hover:bg-violet-600 hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ${isMobile ? "flex-1 min-w-[120px]" : ""}`}
+                className={`flex items-center justify-center gap-1.5 px-4 py-2.5 border-none rounded-xl text-[0.75rem] font-bold cursor-pointer hover:-translate-y-px active:scale-[0.97] transition-all duration-150 ${isMobile ? "flex-1 min-w-[120px]" : ""}`}
+                style={{ backgroundColor: tk.textPrimary, color: "#FFFFFF" }}
               >
                 <i className="ri-user-add-line text-base" />Add Student
               </button>
@@ -907,26 +909,26 @@ const StudentList = () => {
           )}
         </header>
 
-        {/* ── Progress bar ── */}
+        {/* Progress bar */}
         {!loading && totalStudents > 0 && (
-          <div className={`bg-white border border-black/[0.07] rounded-2xl ${isMobile ? "p-3.5 mb-4" : "p-5 mb-5"} flex items-center gap-4`}>
+          <div className={`bg-white rounded-2xl ${isMobile ? "p-3.5 mb-4" : "p-5 mb-5"} flex items-center gap-4`} style={{ border: `1px solid ${tk.cardBorder}` }}>
             <div className="flex-1">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-[0.7rem] font-semibold text-stone-400 tracking-[0.05em] uppercase">Completion</span>
-                <span className={`text-[0.9rem] font-bold ${pct === 100 ? "text-emerald-600" : "text-stone-900"}`}>{pct}%</span>
+                <span className="text-[0.7rem] font-semibold tracking-[0.05em] uppercase" style={{ color: tk.textMuted }}>Completion</span>
+                <span className="text-[0.9rem] font-bold" style={{ color: pct === 100 ? tk.success : tk.textPrimary }}>{pct}%</span>
               </div>
-              <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden border border-black/[0.06]">
+              <div className="h-1.5 rounded-full overflow-hidden border" style={{ backgroundColor: tk.metaBg, borderColor: tk.cardBorder }}>
                 <div
-                  className={`h-full rounded-full transition-all duration-700 ${pct === 100 ? "bg-emerald-500" : "bg-gradient-to-r from-violet-500 to-violet-400"}`}
-                  style={{ width: `${pct}%` }}
+                  className="h-full rounded-full transition-all duration-700"
+                  style={{ width: `${pct}%`, backgroundColor: pct === 100 ? tk.success : tk.accent }}
                 />
               </div>
             </div>
-            <div className="text-[0.72rem] font-semibold text-stone-400 whitespace-nowrap flex-shrink-0">{totalSubmitted}/{totalStudents}</div>
+            <div className="text-[0.72rem] font-semibold whitespace-nowrap flex-shrink-0" style={{ color: tk.textSecondary }}>{totalSubmitted}/{totalStudents}</div>
           </div>
         )}
 
-        {/* ── Filter Tabs + Search Bar ── */}
+        {/* Filters */}
         {!loading && students.length > 0 && (
           <>
             <FilterTabs
@@ -945,17 +947,17 @@ const StudentList = () => {
           </>
         )}
 
-        {/* ════════════ CONTENT AREA ════════════ */}
+        {/* Content list area */}
         {loading ? (
           isMobile ? (
             <div className="flex flex-col gap-2.5">{[1,2,3,4,5].map((n) => <SkeletonCard key={n} />)}</div>
           ) : (
-            <div className="bg-white border border-black/[0.07] rounded-[18px] overflow-hidden">
+            <div className="bg-white rounded-[18px] overflow-hidden" style={{ border: `1px solid ${tk.cardBorder}` }}>
               <table className="w-full border-collapse">
                 <thead>
-                  <tr className="border-b border-black/[0.06] bg-[#f9f8f5]">
+                  <tr className="border-b" style={{ borderColor: tk.cardBorder, backgroundColor: tk.metaBg }}>
                     {["Student","Enrollment","Class","Branch","Semester","Status","Action"].map((h) => (
-                      <th key={h} className="px-5 py-3 text-[0.6rem] font-bold tracking-[0.1em] uppercase text-stone-400 text-left">{h}</th>
+                      <th key={h} className="px-5 py-3 text-[0.6rem] font-bold tracking-[0.1em] uppercase text-left" style={{ color: tk.textMuted }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -964,14 +966,14 @@ const StudentList = () => {
             </div>
           )
         ) : filteredStudents.length === 0 ? (
-          <div className="bg-white border-2 border-dashed border-black/[0.10] rounded-[20px] text-center py-20 px-8">
-            <div className="w-14 h-14 rounded-full bg-violet-50 border border-violet-200 flex items-center justify-center mx-auto mb-4 text-violet-500">
-              <i className={`${searchQuery ? "ri-search-line" : statusFilter !== "all" ? "ri-filter-line" : "ri-user-search-line"} text-2xl`} />
+          <div className="bg-white border-2 border-dashed rounded-[20px] text-center py-20 px-8" style={{ borderColor: tk.accent }}>
+            <div className="w-14 h-14 rounded-full border flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: tk.accentSoft, borderColor: tk.accent }}>
+              <i className={`${searchQuery ? "ri-search-line" : statusFilter !== "all" ? "ri-filter-line" : "ri-user-search-line"} text-2xl`} style={{ color: tk.textPrimary }} />
             </div>
-            <h3 className="text-[1.05rem] font-bold text-stone-900 mb-1.5" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h3 className="text-[1.05rem] font-bold mb-1.5" style={{ fontFamily: "'Playfair Display', serif", color: tk.textPrimary }}>
               {searchQuery ? "No results found" : statusFilter !== "all" ? `No ${statusFilter} students` : "No student records"}
             </h3>
-            <p className="text-[0.78rem] text-stone-400">
+            <p className="text-[0.78rem]" style={{ color: tk.textSecondary }}>
               {searchQuery
                 ? `No students match "${searchQuery}". Try a different search.`
                 : statusFilter === "submitted" ? "No students have submitted this assignment yet."
@@ -979,11 +981,11 @@ const StudentList = () => {
                 : "No submissions have been recorded for this assignment yet."}
             </p>
             {(searchQuery || statusFilter !== "all") ? (
-              <button onClick={() => { setSearchQuery(""); setStatusFilter("all"); }} className="mt-3.5 px-4 py-2 bg-violet-50 text-violet-500 border border-violet-200 rounded-[9px] text-[0.76rem] font-bold cursor-pointer inline-flex items-center gap-1.5 hover:bg-violet-100 transition-colors">
+              <button onClick={() => { setSearchQuery(""); setStatusFilter("all"); }} className="mt-3.5 px-4 py-2 border rounded-[9px] text-[0.76rem] font-bold cursor-pointer inline-flex items-center gap-1.5 transition-colors" style={{ backgroundColor: tk.metaBg, borderColor: tk.cardBorder, color: tk.textPrimary }}>
                 <i className="ri-close-line" /> Clear filters
               </button>
             ) : (
-              <button onClick={() => setShowAddModal(true)} className="mt-3.5 px-4 py-2 bg-violet-500 text-white border-none rounded-[9px] text-[0.76rem] font-bold cursor-pointer inline-flex items-center gap-1.5 hover:bg-violet-600 transition-colors">
+              <button onClick={() => setShowAddModal(true)} className="mt-3.5 px-4 py-2 border-none rounded-[9px] text-[0.76rem] font-bold cursor-pointer inline-flex items-center gap-1.5 transition-colors" style={{ backgroundColor: tk.textPrimary, color: "#FFFFFF" }}>
                 <i className="ri-user-add-line" /> Add First Student
               </button>
             )}
@@ -991,7 +993,7 @@ const StudentList = () => {
         ) : isMobile ? (
           <MobileCardList students={filteredStudents} submittingId={submittingId} onSubmit={handleSubmit} onUnsubmit={handleUnsubmit} onOpenModal={openModal} />
         ) : (
-          <div className="bg-white border border-black/[0.07] rounded-[18px] overflow-hidden shadow-sm">
+          <div className="bg-white border rounded-[18px] overflow-hidden shadow-sm" style={{ borderColor: tk.cardBorder }}>
             <div className="overflow-x-auto">
               <table className="w-full border-collapse" style={{ tableLayout: "fixed", minWidth: 760 }}>
                 <colgroup>
@@ -1000,7 +1002,7 @@ const StudentList = () => {
                   <col style={{ width: "19%" }} />
                 </colgroup>
                 <thead>
-                  <tr className="bg-[#f9f8f5] border-b border-black/[0.06]">
+                  <tr className="border-b" style={{ backgroundColor: tk.metaBg, borderColor: tk.cardBorder }}>
                     {[
                       { label: "Student", icon: "ri-user-line" },
                       { label: "Enrollment", icon: "ri-hashtag" },
@@ -1010,7 +1012,7 @@ const StudentList = () => {
                       { label: "Status", icon: "ri-checkbox-circle-line" },
                       { label: "Action", icon: null, align: "right" },
                     ].map(({ label, icon, align }) => (
-                      <th key={label} className={`px-5 py-3 text-[0.6rem] font-bold tracking-[0.09em] uppercase text-stone-400 whitespace-nowrap ${align === "right" ? "text-right" : "text-left"}`}>
+                      <th key={label} className={`px-5 py-3 text-[0.6rem] font-bold tracking-[0.09em] uppercase whitespace-nowrap ${align === "right" ? "text-right" : "text-left"}`} style={{ color: tk.textMuted }}>
                         {icon && <i className={`${icon} text-[0.82rem] mr-1 align-[-1px]`} />}{label}
                       </th>
                     ))}
@@ -1023,18 +1025,18 @@ const StudentList = () => {
                 </tbody>
               </table>
             </div>
-            <div className="border-t border-black/[0.06] px-5 py-2.5 flex justify-between items-center gap-1.5">
+            <div className="border-t px-5 py-2.5 flex justify-between items-center gap-1.5" style={{ borderColor: tk.cardBorder }}>
               {statusFilter !== "all" && (
                 <div className="flex items-center gap-1.5">
-                  <span className={`text-[0.68rem] font-bold px-2 py-0.5 rounded-full ${statusFilter === "submitted" ? "bg-emerald-50 text-emerald-600 border border-emerald-200" : "bg-amber-50 text-amber-600 border border-amber-200"}`}>
+                  <span className="text-[0.68rem] font-bold px-2 py-0.5 rounded-full border" style={{ backgroundColor: statusFilter === "submitted" ? tk.successSoft : tk.metaBg, color: statusFilter === "submitted" ? tk.success : tk.textPrimary, borderColor: statusFilter === "submitted" ? "rgba(48,164,108,0.2)" : tk.cardBorder }}>
                     {statusFilter === "submitted" ? "Submitted" : "Pending"} filter active
                   </span>
-                  <button onClick={() => setStatusFilter("all")} className="text-[0.68rem] font-semibold text-stone-400 hover:text-stone-600 transition-colors cursor-pointer bg-transparent border-none">Clear</button>
+                  <button onClick={() => setStatusFilter("all")} className="text-[0.68rem] font-semibold hover:opacity-80 transition-opacity cursor-pointer bg-transparent border-none" style={{ color: tk.textMuted }}>Clear</button>
                 </div>
               )}
               <div className={`flex items-center gap-1.5 ${statusFilter === "all" ? "ml-auto" : ""}`}>
                 <i className="ri-list-check text-stone-400 text-[0.85rem]" />
-                <span className="text-[0.7rem] font-semibold text-stone-400">
+                <span className="text-[0.7rem] font-semibold" style={{ color: tk.textMuted }}>
                   {searchQuery || statusFilter !== "all" ? `${filteredStudents.length} of ${students.length} records` : `${students.length} records total`}
                 </span>
               </div>
@@ -1068,8 +1070,8 @@ const StudentList = () => {
 const MobileCardList = ({ students, submittingId, onSubmit, onUnsubmit, onOpenModal }) => (
   <div className="flex flex-col gap-2.5">
     <div className="flex items-center justify-between pb-2">
-      <span className="text-[0.65rem] font-bold text-stone-400 uppercase tracking-[0.08em]">{students.length} students</span>
-      <span className="text-[0.65rem] text-stone-400 font-medium flex items-center gap-1">
+      <span className="text-[0.65rem] font-bold uppercase tracking-[0.08em]" style={{ color: tk.textMuted }}>{students.length} students</span>
+      <span className="text-[0.65rem] font-medium flex items-center gap-1" style={{ color: tk.textMuted }}>
         <i className="ri-information-line text-[0.8rem]" />Tap name for full details
       </span>
     </div>
@@ -1079,31 +1081,29 @@ const MobileCardList = ({ students, submittingId, onSubmit, onUnsubmit, onOpenMo
   </div>
 );
 
-/* ════════════════════════════════
-   MOBILE STUDENT CARD
-════════════════════════════════ */
+/* ─── MOBILE STUDENT CARD ─── */
 const MobileStudentCard = ({ item, idx, submittingId, onSubmit, onUnsubmit, onOpenModal }) => {
   const submitted = item.status === "submitted";
   const isLoading = submittingId === item._id;
   return (
-    <div className="mobile-card bg-white border border-black/[0.07] rounded-2xl overflow-hidden shadow-sm" style={{ animationDelay: `${idx * 0.035}s` }}>
+    <div className="mobile-card bg-white rounded-2xl overflow-hidden shadow-sm" style={{ animationDelay: `${idx * 0.035}s`, border: `1px solid ${tk.cardBorder}` }}>
       <div className="flex items-center">
-        <button onClick={() => onOpenModal(item)} className="flex-1 flex items-center gap-3 px-3.5 py-3.5 bg-transparent border-none cursor-pointer text-left min-w-0 active:bg-violet-50/50 transition-colors duration-150">
+        <button onClick={() => onOpenModal(item)} className="flex-1 flex items-center gap-3 px-3.5 py-3.5 bg-transparent border-none cursor-pointer text-left min-w-0 active:bg-black/[0.02] transition-colors duration-150">
           <Avatar name={item.studentId?.name} size="lg" />
           <div className="min-w-0 flex-1">
-            <p className="m-0 text-[0.88rem] font-bold text-stone-900 truncate">{item.studentId?.name || "N/A"}</p>
+            <p className="m-0 text-[0.88rem] font-bold truncate" style={{ color: tk.textPrimary }}>{item.studentId?.name || "N/A"}</p>
             <div className="flex items-center gap-1.5 mt-1"><StatusBadge status={item.status} /></div>
           </div>
           <i className="ri-arrow-right-s-line text-base text-stone-400 flex-shrink-0 ml-auto" />
         </button>
-        <div className="w-px h-14 bg-black/[0.06] flex-shrink-0" />
+        <div className="w-px h-14 flex-shrink-0" style={{ backgroundColor: tk.cardBorder }} />
         <div className="px-3 flex-shrink-0">
           {!submitted ? (
-            <button onClick={() => onSubmit(item._id)} disabled={isLoading} className="inline-flex items-center gap-1 px-3.5 py-2 bg-violet-50 text-violet-500 border border-violet-200 rounded-xl text-[0.72rem] font-bold cursor-pointer whitespace-nowrap hover:bg-violet-100 active:scale-[0.97] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed">
+            <button onClick={() => onSubmit(item._id)} disabled={isLoading} className="inline-flex items-center gap-1 px-3.5 py-2 border rounded-xl text-[0.72rem] font-bold cursor-pointer whitespace-nowrap active:scale-[0.97] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed" style={{ backgroundColor: tk.accentSoft, borderColor: tk.accent, color: tk.textPrimary }}>
               {isLoading ? <><Spinner /> Saving…</> : <><i className="ri-check-line text-[0.9rem]" />Submit</>}
             </button>
           ) : (
-            <button onClick={() => onUnsubmit(item._id)} disabled={isLoading} className="inline-flex items-center gap-1 px-3.5 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-xl text-[0.72rem] font-bold cursor-pointer whitespace-nowrap hover:bg-emerald-100 active:scale-[0.97] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed">
+            <button onClick={() => onUnsubmit(item._id)} disabled={isLoading} className="inline-flex items-center gap-1 px-3.5 py-2 border rounded-xl text-[0.72rem] font-bold cursor-pointer whitespace-nowrap active:scale-[0.97] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed" style={{ backgroundColor: tk.successSoft, borderColor: "rgba(48,164,108,0.2)", color: tk.success }}>
               {isLoading ? <><Spinner /> Saving…</> : <><i className="ri-check-double-line text-[0.9rem]" />Done</>}
             </button>
           )}
@@ -1121,33 +1121,33 @@ const MobileDetailModal = ({ student, submittingId, onSubmit, onUnsubmit, onClos
   const isLoading = submittingId === student._id;
   return (
     <>
-      <div onClick={onClose} className="fixed inset-0 bg-black/55 backdrop-blur-[4px] z-[998]" style={{ animation: "fadeIn 0.2s ease" }} />
+      <div onClick={onClose} className="fixed inset-0 bg-black/40 backdrop-blur-[4px] z-[998]" style={{ animation: "fadeIn 0.2s ease" }} />
       <div
-        className="fixed bottom-0 left-0 right-0 z-[999] bg-white rounded-t-[22px] shadow-[0_-8px_40px_rgba(0,0,0,0.18)] max-h-[88vh] overflow-y-auto overflow-x-hidden"
+        className="fixed bottom-0 left-0 right-0 z-[999] bg-white rounded-t-[22px] shadow-[0_-8px_40px_rgba(0,0,0,0.08)] max-h-[88vh] overflow-y-auto overflow-x-hidden"
         style={{ paddingBottom: "calc(20px + env(safe-area-inset-bottom))", animation: "slideUp 0.3s cubic-bezier(0.34,1.3,0.64,1)" }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-center pt-3 pb-1"><div className="w-9 h-1 rounded-full bg-black/[0.12]" /></div>
-        <div className="flex items-center justify-between px-5 py-3 pb-4 border-b border-black/[0.06]">
+        <div className="flex items-center justify-between px-5 py-3 pb-4 border-b" style={{ borderColor: tk.cardBorder }}>
           <div className="flex items-center gap-3">
             <Avatar name={student.studentId?.name} size="lg" />
             <div>
-              <p className="m-0 text-base font-bold text-stone-900">{student.studentId?.name || "N/A"}</p>
-              <p className="mt-0.5 m-0 text-[0.68rem] text-stone-400 font-medium">Student Details</p>
+              <p className="m-0 text-base font-bold" style={{ color: tk.textPrimary }}>{student.studentId?.name || "N/A"}</p>
+              <p className="mt-0.5 m-0 text-[0.68rem] font-medium" style={{ color: tk.textMuted }}>Student Details</p>
             </div>
           </div>
-          <button onClick={onClose} className="w-9 h-9 rounded-full bg-black/[0.06] border-none flex items-center justify-center cursor-pointer text-stone-500 text-lg hover:bg-black/10 transition-colors">
+          <button onClick={onClose} className="w-9 h-9 rounded-full border-none flex items-center justify-center cursor-pointer text-lg hover:bg-black/10 transition-colors" style={{ backgroundColor: tk.metaBg, color: tk.textSecondary }}>
             <i className="ri-close-line" />
           </button>
         </div>
         <div className="px-5 pt-5 grid gap-2.5">
-          <div className={`border-2 rounded-2xl p-4 flex items-center justify-between ${submitted ? "bg-emerald-50 border-emerald-200" : "bg-amber-50 border-amber-200"}`}>
+          <div className="border-2 rounded-2xl p-4 flex items-center justify-between" style={{ backgroundColor: submitted ? tk.successSoft : tk.metaBg, borderColor: submitted ? "rgba(48,164,108,0.2)" : tk.cardBorder }}>
             <div>
-              <p className={`text-[0.62rem] font-bold uppercase tracking-[0.08em] mb-1 ${submitted ? "text-emerald-600" : "text-amber-600"}`}>Submission Status</p>
-              <p className={`m-0 text-base font-bold ${submitted ? "text-emerald-600" : "text-amber-600"}`}>{submitted ? "Submitted ✓" : "Pending"}</p>
+              <p className="text-[0.62rem] font-bold uppercase tracking-[0.08em] mb-1" style={{ color: submitted ? tk.success : tk.textPrimary }}>Submission Status</p>
+              <p className="m-0 text-base font-bold" style={{ color: submitted ? tk.success : tk.textPrimary }}>{submitted ? "Submitted ✓" : "Pending"}</p>
             </div>
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${submitted ? "bg-emerald-200/50" : "bg-amber-200/50"}`}>
-              <i className={`${submitted ? "ri-checkbox-circle-fill" : "ri-time-line"} text-2xl ${submitted ? "text-emerald-500" : "text-amber-500"}`} />
+            <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: submitted ? "rgba(48,164,108,0.15)" : tk.accentSoft }}>
+              <i className={`${submitted ? "ri-checkbox-circle-fill" : "ri-time-line"} text-2xl`} style={{ color: submitted ? tk.success : tk.accentBorder }} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2.5">
@@ -1157,11 +1157,11 @@ const MobileDetailModal = ({ student, submittingId, onSubmit, onUnsubmit, onClos
               { label: "Branch", value: student.studentId?.branch || "N/A", icon: "ri-git-branch-line" },
               { label: "Semester", value: student.studentId?.semester ? `Semester ${student.studentId.semester}` : "N/A", icon: "ri-calendar-event-line" },
             ].map(({ label, value, icon }) => (
-              <div key={label} className="bg-[#f9f8f5] border border-black/[0.06] rounded-xl p-3.5">
-                <p className="text-[0.62rem] font-bold uppercase tracking-[0.05em] text-stone-400 m-0 mb-1.5 flex items-center gap-1">
-                  <i className={`${icon} text-[0.75rem] text-violet-500`} />{label}
+              <div key={label} className="border rounded-xl p-3.5" style={{ backgroundColor: tk.metaBg, borderColor: tk.cardBorder }}>
+                <p className="text-[0.62rem] font-bold uppercase tracking-[0.05em] m-0 mb-1.5 flex items-center gap-1" style={{ color: tk.textMuted }}>
+                  <i className={`${icon} text-[0.75rem]`} style={{ color: tk.accentBorder }} />{label}
                 </p>
-                <p className="text-[0.84rem] font-semibold text-stone-900 m-0 truncate">{value}</p>
+                <p className="text-[0.84rem] font-semibold m-0 truncate" style={{ color: tk.textPrimary }}>{value}</p>
               </div>
             ))}
           </div>
@@ -1171,7 +1171,8 @@ const MobileDetailModal = ({ student, submittingId, onSubmit, onUnsubmit, onClos
             <button
               onClick={() => onSubmit(student._id)}
               disabled={isLoading}
-              className={`w-full py-3.5 px-4 bg-violet-500 text-white border-none rounded-2xl text-[0.85rem] font-bold cursor-pointer flex items-center justify-center gap-2 tracking-[0.02em] ${isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-violet-600 transition-colors"}`}
+              className={`w-full py-3.5 px-4 border-none rounded-2xl text-[0.85rem] font-bold cursor-pointer flex items-center justify-center gap-2 tracking-[0.02em] ${isLoading ? "opacity-70 cursor-not-allowed" : "hover:opacity-90 transition-opacity"}`}
+              style={{ backgroundColor: tk.textPrimary, color: "#FFFFFF" }}
             >
               {isLoading ? <><Spinner /> Saving…</> : <><i className="ri-check-double-line text-base" />Mark as Submitted</>}
             </button>
@@ -1179,12 +1180,13 @@ const MobileDetailModal = ({ student, submittingId, onSubmit, onUnsubmit, onClos
             <button
               onClick={() => onUnsubmit(student._id)}
               disabled={isLoading}
-              className={`w-full py-3.5 px-4 bg-transparent text-red-500 border-2 border-red-200 rounded-2xl text-[0.85rem] font-bold cursor-pointer flex items-center justify-center gap-2 ${isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-red-50 transition-colors"}`}
+              className={`w-full py-3.5 px-4 bg-transparent border-2 rounded-2xl text-[0.85rem] font-bold cursor-pointer flex items-center justify-center gap-2 ${isLoading ? "opacity-70 cursor-not-allowed" : "hover:bg-red-50 transition-colors"}`}
+              style={{ borderColor: tk.accentBorder, color: tk.accentBorder }}
             >
               {isLoading ? <><Spinner /> Saving…</> : <><i className="ri-close-circle-line text-base" />Unmark Submitted</>}
             </button>
           )}
-          <button onClick={onClose} className="w-full mt-2.5 py-3 px-4 bg-black/[0.04] text-stone-400 border border-black/[0.07] rounded-2xl text-[0.82rem] font-semibold cursor-pointer hover:bg-black/[0.07] transition-colors">
+          <button onClick={onClose} className="w-full mt-2.5 py-3 px-4 border rounded-2xl text-[0.82rem] font-semibold cursor-pointer hover:bg-black/[0.04] transition-colors" style={{ backgroundColor: tk.metaBg, borderColor: tk.cardBorder, color: tk.textPrimary }}>
             Close
           </button>
         </div>
@@ -1201,32 +1203,37 @@ const StudentRow = ({ item, idx, onSubmit, onUnsubmit, isSubmitting }) => {
   const submitted = item.status === "submitted";
   return (
     <tr
-      className="student-row border-b border-black/[0.06] transition-colors duration-150"
+      className="student-row border-b transition-colors duration-150"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{ background: hovered ? "rgba(124,106,247,0.03)" : "transparent", animationDelay: `${idx * 0.04}s` }}
+      style={{ 
+        borderColor: tk.cardBorder,
+        backgroundColor: hovered ? "rgba(212,163,115,0.04)" : "transparent", 
+        animationDelay: `${idx * 0.04}s` 
+      }}
     >
       <td className="px-5 py-3">
         <div className="flex items-center gap-2.5">
           <Avatar name={item.studentId?.name} />
-          <span className="text-[0.82rem] font-semibold text-stone-900 truncate">{item.studentId?.name || "N/A"}</span>
+          <span className="text-[0.82rem] font-semibold truncate" style={{ color: tk.textPrimary }}>{item.studentId?.name || "N/A"}</span>
         </div>
       </td>
       <td className="px-5 py-3">
-        <span className="font-mono text-[0.72rem] font-semibold text-stone-400 bg-[#f9f8f5] border border-black/[0.06] px-2 py-0.5 rounded-md tracking-[0.03em]">
+        <span className="font-mono text-[0.72rem] font-semibold border px-2 py-0.5 rounded-md tracking-[0.03em]" style={{ backgroundColor: tk.metaBg, borderColor: tk.cardBorder, color: tk.textPrimary }}>
           {item.studentId?.enrollment || "—"}
         </span>
       </td>
-      <td className="px-5 py-3 text-[0.78rem] text-stone-500">{item.studentId?.classs || "—"}</td>
-      <td className="px-5 py-3 text-[0.78rem] font-medium text-stone-900">{item.studentId?.branch || "—"}</td>
-      <td className="px-5 py-3 text-[0.78rem] text-stone-500">{item.studentId?.semester ? `Sem ${item.studentId.semester}` : "—"}</td>
+      <td className="px-5 py-3 text-[0.78rem]" style={{ color: tk.textSecondary }}>{item.studentId?.classs || "—"}</td>
+      <td className="px-5 py-3 text-[0.78rem] font-medium" style={{ color: tk.textPrimary }}>{item.studentId?.branch || "—"}</td>
+      <td className="px-5 py-3 text-[0.78rem]" style={{ color: tk.textSecondary }}>{item.studentId?.semester ? `Sem ${item.studentId.semester}` : "—"}</td>
       <td className="px-5 py-3"><StatusBadge status={item.status} /></td>
       <td className="px-5 py-3 text-right overflow-visible">
         {!submitted ? (
           <button
             onClick={() => onSubmit(item._id)}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-violet-500 text-white border-none rounded-[9px] text-[0.72rem] font-bold cursor-pointer whitespace-nowrap tracking-[0.02em] hover:bg-violet-600 hover:-translate-y-px active:scale-[0.97] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 border-none rounded-[9px] text-[0.72rem] font-bold cursor-pointer whitespace-nowrap tracking-[0.02em] hover:-translate-y-px active:scale-[0.97] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+            style={{ backgroundColor: tk.accent, color: tk.textPrimary }}
           >
             {isSubmitting ? <><Spinner />Saving…</> : <><i className="ri-check-line text-[0.85rem]" />Mark Submitted</>}
           </button>
@@ -1234,7 +1241,8 @@ const StudentRow = ({ item, idx, onSubmit, onUnsubmit, isSubmitting }) => {
           <button
             onClick={() => onUnsubmit(item._id)}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-red-500 text-white border-none rounded-[9px] text-[0.72rem] font-bold cursor-pointer whitespace-nowrap tracking-[0.02em] hover:bg-red-600 hover:-translate-y-px active:scale-[0.97] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+            className="inline-flex items-center gap-1.5 px-4 py-1.5 border rounded-[9px] text-[0.72rem] font-bold cursor-pointer whitespace-nowrap tracking-[0.02em] hover:-translate-y-px active:scale-[0.97] transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none"
+            style={{ backgroundColor: tk.metaBg, borderColor: tk.cardBorder, color: tk.textPrimary }}
           >
             {isSubmitting ? <><Spinner />Saving…</> : <><i className="ri-close-line text-[0.85rem]" />Unmark</>}
           </button>

@@ -71,33 +71,33 @@ const EditAssignment = () => {
   };
 
   const inputClass =
-    "w-full px-3 py-2 border border-zinc-200 bg-zinc-50 text-sm text-zinc-900 rounded-md outline-none placeholder-zinc-400 focus:border-zinc-900 focus:bg-white focus:ring-1 focus:ring-zinc-900 transition-all duration-150 shadow-sm";
+    "w-full px-3 py-2 border border-[#D4A373]/25 bg-[#FAEDCD]/40 text-sm text-[#4A443A] rounded-md outline-none placeholder:text-[#918A82] focus:border-[#CCD5AE] focus:bg-white focus:ring-1 focus:ring-[#CCD5AE] transition-all duration-150 shadow-sm";
 
   const labelClass = 
-    "text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-1 block";
+    "text-[11px] font-semibold text-[#918A82] uppercase tracking-wider mb-1 block";
 
   return (
-    <div className="h-[100dvh] w-full flex items-center justify-center bg-zinc-50 p-4 antialiased font-sans">
+    <div className="h-[100dvh] w-full flex items-center justify-center bg-[#FEFAE0] p-4 antialiased font-sans">
       {/* Outer Card */}
-      <div className="w-full max-w-2xl bg-white border border-zinc-200 shadow-xl rounded-xl flex flex-col overflow-hidden max-h-[92vh]">
+      <div className="w-full max-w-2xl bg-white border border-[#D4A373]/25 shadow-xl rounded-xl flex flex-col overflow-hidden max-h-[92vh]">
         
         {/* Top Accent Strip */}
-        <div className="h-1.5 w-full bg-zinc-950" />
+        <div className="h-1.5 w-full bg-[#D4A373]" />
 
         {/* Header Section */}
-        <header className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between bg-white shrink-0">
+        <header className="px-6 py-4 border-b border-[#D4A373]/15 flex items-center justify-between bg-white shrink-0">
           <div>
-            <p className="text-[10px] font-bold tracking-[0.15em] text-zinc-400 uppercase mb-0.5">
+            <p className="text-[10px] font-bold tracking-[0.15em] text-[#918A82] uppercase mb-0.5">
               Academic Administration Portal
             </p>
-            <h1 className="text-lg font-bold text-zinc-900 tracking-tight">
+            <h1 className="text-lg font-bold text-[#4A443A] tracking-tight">
               Edit Assignment Record
             </h1>
           </div>
           <button
             type="button"
             onClick={handleBack}
-            className="text-xs font-medium text-zinc-600 hover:text-zinc-900 border border-zinc-200 hover:border-zinc-400 bg-white px-3 py-1.5 rounded-lg shadow-sm transition-all duration-150 flex items-center gap-1"
+            className="text-xs font-medium text-[#6E675F] hover:text-[#4A443A] border border-[#D4A373]/25 hover:border-[#D4A373] bg-white px-3 py-1.5 rounded-lg shadow-sm transition-all duration-150 flex items-center gap-1"
           >
             <span>←</span> Back to Dashboard
           </button>
@@ -174,7 +174,7 @@ const EditAssignment = () => {
                   required
                   value={formData.semester}
                   onChange={handleChange}
-                  className={`${inputClass} cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%2371717a%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-[length:1.25rem] bg-[right_0.5rem_center] bg-no-repeat`}
+                  className={`${inputClass} cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%20fill%3D%22none%22%20stroke%3D%22%234A443A%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-[length:1.25rem] bg-[right_0.5rem_center] bg-no-repeat`}
                 >
                   <option value="" disabled hidden>Select Semester</option>
                   {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
@@ -202,7 +202,7 @@ const EditAssignment = () => {
             {/* Optional Description / Markdown Content Section */}
             <div>
               <label className={labelClass}>
-                Instructions & Description <span className="normal-case font-medium text-zinc-400 lowercase">(optional)</span>
+                Instructions & Description <span className="normal-case font-medium text-[#918A82] lowercase">(optional)</span>
               </label>
               <textarea
                 name="description"
@@ -216,8 +216,8 @@ const EditAssignment = () => {
           </div>
 
           {/* Action Footer Button Group Container */}
-          <div className="flex items-center justify-between border-t border-zinc-100 pt-4 mt-4 bg-white shrink-0">
-            <p className="text-[11px] text-zinc-400 font-medium">
+          <div className="flex items-center justify-between border-t border-[#D4A373]/15 pt-4 mt-4 bg-white shrink-0">
+            <p className="text-[11px] text-[#918A82] font-medium">
               Fields marked <span className="text-rose-500">*</span> are required.
             </p>
             <div className="flex items-center gap-2">
@@ -225,14 +225,14 @@ const EditAssignment = () => {
                 type="button"
                 disabled={loading}
                 onClick={handleBack}
-                className="px-4 py-2 text-xs font-semibold text-zinc-600 hover:text-zinc-900 border border-zinc-200 hover:bg-zinc-50 rounded-lg shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-xs font-semibold text-[#6E675F] hover:text-[#4A443A] border border-[#D4A373]/25 hover:bg-[#FAEDCD] rounded-lg shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-5 py-2 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-400 text-white text-xs font-bold tracking-wide rounded-lg shadow-md hover:shadow-lg transition-all flex items-center gap-2 min-w-[150px] justify-center"
+                className="px-5 py-2 bg-[#CCD5AE] hover:bg-[#b6bf96] disabled:bg-[#918A82] text-[#4A443A] text-xs font-bold tracking-wide rounded-lg shadow-md hover:shadow-lg transition-all flex items-center gap-2 min-w-[150px] justify-center"
               >
                 {loading ? (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -246,7 +246,7 @@ const EditAssignment = () => {
         </form>
 
         {/* Global Footer Subtext Wrapper */}
-        <div className="px-6 py-2.5 bg-zinc-50 border-t border-zinc-100 flex items-center justify-between text-[10px] text-zinc-400 font-medium shrink-0">
+        <div className="px-6 py-2.5 bg-[#FAEDCD]/50 border-t border-[#D4A373]/15 flex items-center justify-between text-[10px] text-[#918A82] font-medium shrink-0">
           <span>Academic Management System</span>
           <span>
             {new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}

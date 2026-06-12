@@ -134,32 +134,32 @@ const AddAssignment = () => {
   };
 
   const inputClass =
-    "w-full px-3 py-2 border border-zinc-200 bg-zinc-50 text-sm text-zinc-900 rounded-md outline-none placeholder-zinc-400 focus:border-zinc-900 focus:bg-white focus:ring-1 focus:ring-zinc-900 transition-all duration-150 shadow-sm";
+    "w-full px-3 py-2 border border-[#D4A373]/25 bg-[#FAEDCD]/40 text-sm text-[#4A443A] rounded-md outline-none placeholder:text-[#918A82] focus:border-[#CCD5AE] focus:bg-white focus:ring-1 focus:ring-[#CCD5AE] transition-all duration-150 shadow-sm";
 
-  const selectClass = `${inputClass} cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2371717a%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem] bg-[right_0.5rem_center] bg-no-repeat pr-8`;
+  const selectClass = `${inputClass} cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%234A443A%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem] bg-[right_0.5rem_center] bg-no-repeat pr-8`;
 
   const labelClass =
-    "text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-1 block";
+    "text-[11px] font-semibold text-[#918A82] uppercase tracking-wider mb-1 block";
 
   return (
-    <div className="h-[100dvh] w-full flex items-center justify-center bg-zinc-50 p-4 antialiased font-sans">
+    <div className="h-[100dvh] w-full flex items-center justify-center bg-[#FEFAE0] p-4 antialiased font-sans">
       {/* Outer Card */}
-      <div className="w-full max-w-2xl bg-white  border-black border-t-5 shadow-xl rounded-xl flex flex-col overflow-hidden max-h-[92vh]">
+      <div className="w-full max-w-2xl bg-white border-[#D4A373] border-t-5 shadow-xl rounded-xl flex flex-col overflow-hidden max-h-[92vh]">
 
         {/* Header Section */}
-        <header className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between bg-white shrink-0">
+        <header className="px-6 py-4 border-b border-[#D4A373]/15 flex items-center justify-between bg-white shrink-0">
           <div>
-            <p className="text-[10px] font-bold tracking-[0.15em] text-zinc-400 uppercase mb-0.5">
+            <p className="text-[10px] font-bold tracking-[0.15em] text-[#918A82] uppercase mb-0.5">
               Academic Administration Portal
             </p>
-            <h1 className="text-lg font-bold text-zinc-900 tracking-tight">
+            <h1 className="text-lg font-bold text-[#4A443A] tracking-tight">
               New Assignment Record
             </h1>
           </div>
           <button
             type="button"
             onClick={handleBack}
-            className="text-xs font-medium text-zinc-600 hover:text-zinc-900 border border-zinc-200 hover:border-zinc-400 bg-white px-3 py-1.5 rounded-lg shadow-sm transition-all duration-150 flex items-center gap-1 cursor-pointer"
+            className="text-xs font-medium text-[#6E675F] hover:text-[#4A443A] border border-[#D4A373]/25 hover:border-[#D4A373] bg-white px-3 py-1.5 rounded-lg shadow-sm transition-all duration-150 flex items-center gap-1 cursor-pointer"
           >
             <span>←</span> Back to Dashboard
           </button>
@@ -274,7 +274,7 @@ const AddAssignment = () => {
                       : ""
                   }`}
                 >
-                  <span className={formData.classs ? "" : "text-zinc-400"}>
+                  <span className={formData.classs ? "" : "text-[#918A82]"}>
                     {!formData.branch
                       ? "Select branch first"
                       : loadingOptions.sections
@@ -286,7 +286,7 @@ const AddAssignment = () => {
                 </button>
 
                 {sectionOpen && (
-                  <ul className="absolute z-10 mt-1 w-full bg-white border border-zinc-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                  <ul className="absolute z-10 mt-1 w-full bg-white border border-[#D4A373]/25 rounded-md shadow-lg max-h-60 overflow-y-auto">
                     {sections.map((section) => (
                       <li
                         key={section}
@@ -296,7 +296,7 @@ const AddAssignment = () => {
                           });
                           setSectionOpen(false);
                         }}
-                        className="px-4 py-2 hover:bg-indigo-50 cursor-pointer text-sm"
+                        className="px-4 py-2 hover:bg-[#E9EDC9] cursor-pointer text-sm text-[#4A443A]"
                       >
                         {section}
                       </li>
@@ -358,7 +358,7 @@ const AddAssignment = () => {
             <div>
               <label className={labelClass}>
                 Instructions & Description{" "}
-                <span className="normal-case font-medium text-zinc-400 lowercase">
+                <span className="normal-case font-medium text-[#918A82] lowercase">
                   (optional)
                 </span>
               </label>
@@ -374,8 +374,8 @@ const AddAssignment = () => {
           </div>
 
           {/* Action Footer */}
-          <div className="flex items-center justify-between border-t border-zinc-100 pt-4 mt-4 bg-white shrink-0">
-            <p className="text-[11px] text-zinc-400 font-medium">
+          <div className="flex items-center justify-between border-t border-[#D4A373]/15 pt-4 mt-4 bg-white shrink-0">
+            <p className="text-[11px] text-[#918A82] font-medium">
               Fields marked <span className="text-rose-500">*</span> are
               required.
             </p>
@@ -384,14 +384,14 @@ const AddAssignment = () => {
                 type="button"
                 disabled={loading}
                 onClick={handleBack}
-                className="px-4 py-2 text-xs font-semibold text-zinc-600 hover:text-zinc-900 border border-zinc-200 hover:bg-zinc-50 rounded-lg shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="px-4 py-2 text-xs font-semibold text-[#6E675F] hover:text-[#4A443A] border border-[#D4A373]/25 hover:bg-[#FAEDCD] rounded-lg shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="px-5 py-2 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-400 text-white text-xs font-bold tracking-wide rounded-lg shadow-md hover:shadow-lg transition-all flex items-center gap-2 min-w-[150px] justify-center cursor-pointer"
+                className="px-5 py-2 bg-[#CCD5AE] hover:bg-[#b6bf96] disabled:bg-[#918A82] text-[#4A443A] text-xs font-bold tracking-wide rounded-lg shadow-md hover:shadow-lg transition-all flex items-center gap-2 min-w-[150px] justify-center cursor-pointer"
               >
                 {loading ? (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -404,7 +404,7 @@ const AddAssignment = () => {
         </form>
 
         {/* Global Footer */}
-        <div className="px-6 py-2.5 bg-zinc-50 border-t border-zinc-100 flex items-center justify-between text-[10px] text-zinc-400 font-medium shrink-0">
+        <div className="px-6 py-2.5 bg-[#FAEDCD]/50 border-t border-[#D4A373]/15 flex items-center justify-between text-[10px] text-[#918A82] font-medium shrink-0">
           <span>Academic Management System</span>
           <span>
             {new Date().toLocaleDateString("en-IN", {
