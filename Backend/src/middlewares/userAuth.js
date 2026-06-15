@@ -5,7 +5,7 @@ import express from 'express'
 function userAuth(req,res,next){
     const {token} = req.cookies ;
     if(!token){
-        return res.status(400).json({
+        return res.status(401).json({
             success : false ,
             message : "Not Authorized Login again"
         })
@@ -17,7 +17,7 @@ function userAuth(req,res,next){
         if(decodedToken.id){
             req.userId = decodedToken.id;
         }else{
-            return res.status(400).json({
+            return res.status(401).json({
             success : false ,
             message : "Not Authorized Login again"
         })
@@ -27,9 +27,9 @@ function userAuth(req,res,next){
     } 
     catch (error) {
         console.log(error);
-        return res.status(500).json({
+        return res.status(401).json({
         success : false ,
-        message : "there is an error"
+        message : "Session expired or invalid. Please log in again."
         })
     }
 }

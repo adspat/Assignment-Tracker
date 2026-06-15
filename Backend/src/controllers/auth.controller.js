@@ -7,7 +7,7 @@ import bcrypt from 'bcrypt'
 // export async function register(req, res) {
 //   const { username, email, password } = req.body;
 //   if (!username || !email || !password) {
-//     return res.status(401).json({
+//     return res.status(400).json({
 //       success: false,
 //       message: "missing details",
 //     });
@@ -44,7 +44,7 @@ import bcrypt from 'bcrypt'
 //     res.cookie("token", token, {
 //       httpOnly: true,
 //       secure: true,
-//       sameSite: "strict",
+//       sameSite: "none",
 //       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
 //     });
 
@@ -121,7 +121,7 @@ export async function login(req, res) {
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     user.isLoggedIn = true;
@@ -141,10 +141,23 @@ export async function login(req, res) {
 
 export async function logout(req, res) {
   try {
+    const { token } = req.cookies;
+    if (token) {
+      try {
+        const decodedToken = jwt.verify(token, config.JWT_SECRET);
+        if (decodedToken && decodedToken.id) {
+          await userModel.findByIdAndUpdate(decodedToken.id, { isLoggedIn: false });
+        }
+      } catch (err) {
+        // Ignore token verification errors (e.g., expired token) during logout
+        console.log("Token verification failed during logout:", err.message);
+      }
+    }
+
     res.clearCookie("token", {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      sameSite: "none",
     });
     res.status(200).json({
       success : true,

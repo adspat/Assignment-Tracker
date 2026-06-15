@@ -32,7 +32,7 @@ export const addSubmissionByAssignment = async (req, res) => {
       message: "Submission created",
       submission,
     });
-  } catch (error) {  
+  } catch (error) {
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
@@ -40,7 +40,7 @@ export const addSubmissionByAssignment = async (req, res) => {
       });
     }
     res.status(500).json({
-      sucess: false,
+      success: false,
       message: "Error while creating submission",
     });
   }

@@ -30,7 +30,7 @@ export async function createAssignment(req, res) {
   }
   const cls = classs.toUpperCase();
   const br = branch.toUpperCase();
- 
+
   try {
 
 
@@ -45,13 +45,13 @@ export async function createAssignment(req, res) {
       branch: br,
       submissionDate,
     });
-    if(existingAssignment){
+    if (existingAssignment) {
       return res.status(400).json({
-        success:false,
-        message:"Assignment already exist"
+        success: false,
+        message: "Assignment already exist"
       })
     }
-    
+
     const newAssignment = await AssignmentModel.create({
       createdBy,
       title,
@@ -63,8 +63,8 @@ export async function createAssignment(req, res) {
       branch: br,
       submissionDate,
     });
-    
-  
+
+
     const students = await StudentModel.find({
       classs: cls,
       branch: br,
@@ -77,7 +77,7 @@ export async function createAssignment(req, res) {
         message: "Students not found",
       });
     }
-    
+
     const submissions = students.map((student) => ({
       studentId: student._id,
       assignmentId: newAssignment._id,
@@ -88,11 +88,11 @@ export async function createAssignment(req, res) {
     } catch (error) {
       console.log(error);
       return res.status(500).json({
-        success : false ,
-        message :"Failed to insert submision"
+        success: false,
+        message: "Failed to insert submision"
       })
     }
-    
+
     return res.status(201).json({
       success: true,
       message: "Assignment created successfully",
@@ -120,7 +120,7 @@ export async function assignmentFacultyWise(req, res) {
       createdBy,
     });
     if (assignments.length === 0) {
-      return res.status(404).json({
+      return res.status(400).json({
         success: false,
         message: "Assignments not found",
       });
@@ -168,7 +168,7 @@ export async function updateAssignment(req, res) {
 
   try {
     const assignment = await AssignmentModel.findById(id);
-    
+
     if (!assignment) {
       return res.status(404).json({
         success: false,
@@ -220,7 +220,7 @@ export async function deleteAssignment(req, res) {
 
   try {
     const assignment = await AssignmentModel.findById(id);
-    
+
     if (!assignment) {
       return res.status(404).json({
         success: false,

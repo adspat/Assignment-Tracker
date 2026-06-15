@@ -7,6 +7,10 @@ import submissionModel from '../model/submission.model.js';
 const VALID_SEMESTERS = [1, 2, 3, 4, 5, 6, 7, 8];
 const VALID_ROLES = ['faculty', 'admin'];
 
+function escapeRegex(text) {
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
 function normalizeStudentPayload(body) {
     return {
         name: body.name?.trim(),
@@ -99,9 +103,10 @@ export async function getAllStudents(req, res) {
         }
 
         if (search) {
+            const safeSearch = escapeRegex(search);
             filter.$or = [
-                { name: { $regex: search, $options: 'i' } },
-                { enrollment: { $regex: search, $options: 'i' } },
+                { name: { $regex: safeSearch, $options: 'i' } },
+                { enrollment: { $regex: safeSearch, $options: 'i' } },
             ];
         }
 
@@ -542,9 +547,10 @@ export async function getAllUsers(req, res) {
         const filter = {};
 
         if (search) {
+            const safeSearch = escapeRegex(search);
             filter.$or = [
-                { username: { $regex: search, $options: 'i' } },
-                { email: { $regex: search, $options: 'i' } },
+                { username: { $regex: safeSearch, $options: 'i' } },
+                { email: { $regex: safeSearch, $options: 'i' } },
             ];
         }
 
@@ -751,11 +757,12 @@ export async function getAllAssignments(req, res) {
         const filter = {};
 
         if (search) {
+            const safeSearch = escapeRegex(search);
             filter.$or = [
-                { title: { $regex: search, $options: 'i' } },
-                { subject: { $regex: search, $options: 'i' } },
-                { classs: { $regex: search, $options: 'i' } },
-                { branch: { $regex: search, $options: 'i' } },
+                { title: { $regex: safeSearch, $options: 'i' } },
+                { subject: { $regex: safeSearch, $options: 'i' } },
+                { classs: { $regex: safeSearch, $options: 'i' } },
+                { branch: { $regex: safeSearch, $options: 'i' } },
             ];
         }
 

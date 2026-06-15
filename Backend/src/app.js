@@ -1,4 +1,5 @@
 import express from 'express'
+import helmet from 'helmet';
 import authRouter from './routes/auth.route.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors'
@@ -10,6 +11,7 @@ import adminRouter from './routes/admin.route.js';
 import config from './config/config.js';
 const app = express();
 
+app.use(helmet());
 app.use(express.json());
 app.use(cors({origin : `${config.FRONTEND_URL}` ,credentials:true}));
 app.use(express.urlencoded({ extended: true }));
