@@ -4,6 +4,9 @@ dotenv.config();
 if(!process.env.MONGO_URI){
         throw new Error('MONGO_URI not found in environment variables');
 }
+if(!process.env.FRONTEND_URL){
+        throw new Error('Frontend Url is not present in env variables')
+}
 if(!process.env.JWT_SECRET){
         throw new Error('JWT_SECRET not found in environment variables');
 }
@@ -17,6 +20,10 @@ if(!process.env.SMTP_PASS){
 if(!process.env.SENDER_EMAIL){
         throw new Error('Sender email is not found');
 }
+
+if(!process.env.PORT){
+        throw new Error('Port is not defined in env variables');
+}
 const config = {
         MONGO_URI : process.env.MONGO_URI,
         JWT_SECRET : process.env.JWT_SECRET,
@@ -26,6 +33,8 @@ const config = {
         ADMIN_EMAIL: process.env.ADMIN_EMAIL || '',
         ADMIN_PASSWORD: process.env.ADMIN_PASSWORD || '',
         ADMIN_USERNAME: process.env.ADMIN_USERNAME || 'admin',
+        FRONTEND_URL :  process.env.FRONTEND_URL,
+        PORT : process.env.PORT,
 }
 
 export default config ;
