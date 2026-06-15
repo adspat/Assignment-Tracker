@@ -12,6 +12,7 @@ import config from './config/config.js';
 const app = express();
 
 app.use(helmet());
+app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cors({origin : `${config.FRONTEND_URL}` ,credentials:true}));
 app.use(express.urlencoded({ extended: true }));
