@@ -213,6 +213,127 @@ const FilterSelect = ({ label, value, onChange, children }) => {
   );
 };
 
+/* ─── Phone-only bottom navigation ─── */
+const MobileBottomNav = ({
+  filteredCount,
+  onMenu,
+  onAdd,
+  onFilters,
+}) => {
+  const navItems = [
+    {
+      label: "Menu",
+      icon: "ri-menu-4-line",
+      onClick: onMenu,
+    },
+    {
+      label: "New",
+      icon: "ri-add-circle-fill",
+      onClick: onAdd,
+      featured: true,
+    },
+    {
+      label: "Filters",
+      icon: "ri-equalizer-3-line",
+      onClick: onFilters,
+      badge: filteredCount,
+    },
+  ];
+
+  return (
+    <nav
+      aria-label="Dashboard mobile navigation"
+      style={{
+        position: "fixed",
+        left: 12,
+        right: 12,
+        bottom: "max(12px, env(safe-area-inset-bottom))",
+        zIndex: 18,
+        display: "grid",
+        gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+        gap: 6,
+        padding: "8px",
+        borderRadius: 18,
+        background: "rgba(255,255,255,0.92)",
+        border: `1px solid ${tk.cardBorder}`,
+        boxShadow:
+          "0 18px 48px rgba(74,68,58,0.18), 0 2px 10px rgba(74,68,58,0.08)",
+        backdropFilter: "blur(14px)",
+      }}
+    >
+      {navItems.map((item) => (
+        <button
+          key={item.label}
+          type="button"
+          onClick={item.onClick}
+          aria-label={item.label}
+          style={{
+            minWidth: 0,
+            height: 54,
+            border: item.featured
+              ? `1px solid ${tk.sidebarBorder}`
+              : "1px solid transparent",
+            borderRadius: 14,
+            background: item.featured ? tk.textPrimary : "transparent",
+            color: item.featured ? "#fff" : tk.textSecondary,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 3,
+            cursor: "pointer",
+            fontFamily: "'DM Sans', sans-serif",
+            WebkitTapHighlightColor: "transparent",
+            position: "relative",
+          }}
+        >
+          <i
+            className={item.icon}
+            style={{
+              fontSize: item.featured ? "1.35rem" : "1.15rem",
+              lineHeight: 1,
+              color: item.featured ? "#fff" : tk.textPrimary,
+            }}
+          />
+          <span
+            style={{
+              fontSize: "0.6rem",
+              fontWeight: 800,
+              lineHeight: 1,
+              letterSpacing: "0.01em",
+              color: item.featured ? "#fff" : tk.textSecondary,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {item.label}
+          </span>
+          {item.badge != null && (
+            <span
+              style={{
+                position: "absolute",
+                top: 7,
+                right: 12,
+                minWidth: 17,
+                height: 17,
+                padding: "0 5px",
+                borderRadius: 999,
+                background: tk.accentSoft,
+                border: `1px solid ${tk.accent}`,
+                color: tk.textPrimary,
+                fontSize: "0.55rem",
+                fontWeight: 800,
+                lineHeight: "15px",
+              }}
+            >
+              {item.badge > 99 ? "99+" : item.badge}
+            </span>
+          )}
+        </button>
+      ))}
+    </nav>
+  );
+};
+
 /* ════════════════════════════════════════════════════
    MAIN DASHBOARD
 ════════════════════════════════════════════════════ */
@@ -234,6 +355,7 @@ const Dashboard = () => {
   const headerRef = useRef(null);
   const sidebarRef = useRef(null);
   const overlayRef = useRef(null);
+  const filtersRef = useRef(null);
 
   /* ── Fetch ── */
   const fetchAssignments = async () => {
@@ -429,6 +551,10 @@ const Dashboard = () => {
     }
   };
 
+  const scrollToFilters = () => {
+    filtersRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   /* ── Loading state ── */
   if (loading) {
     return (
@@ -472,33 +598,42 @@ const Dashboard = () => {
   const SidebarContent = () => (
     <>
       <div>
-        <nav style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+        {isMobile && (
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: 10,
-              padding: "10px 14px",
-              borderRadius: 12,
-              background: "#fff",
-              border: `1px solid ${tk.accent}`,
-              color: tk.textPrimary,
-              fontSize: "0.82rem",
-              fontWeight: 700,
-              cursor: "pointer",
+              justifyContent: "flex-end",
+              marginBottom: 22,
             }}
           >
-            <i
-              className="ri-dashboard-3-line"
-              style={{ fontSize: "1rem", color: tk.textSecondary }}
-            />
-            Dashboard
+            <button
+              type="button"
+              onClick={closeSidebar}
+              aria-label="Close sidebar"
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 12,
+                background: "#fff",
+                border: "1px solid rgba(255,255,255,0.85)",
+                color: tk.textPrimary,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                boxShadow: "0 2px 8px rgba(74,68,58,0.08)",
+                WebkitTapHighlightColor: "transparent",
+              }}
+            >
+              <i className="ri-close-line" style={{ fontSize: "1.15rem" }} />
+            </button>
           </div>
-        </nav>
+        )}
 
         <div
           style={{
-            marginTop: 28,
+            marginTop: isMobile ? 0 : 28,
             padding: "14px 16px",
             borderRadius: 14,
             background: "rgba(255,255,255,0.4)",
@@ -765,7 +900,7 @@ const Dashboard = () => {
           maxWidth: "100vw",
           overflowX: "hidden",
           boxSizing: "border-box",
-          paddingBottom: !isDesktop ? 80 : undefined,
+          paddingBottom: isMobile ? 104 : !isDesktop ? 80 : undefined,
         }}
       >
         {/* ── MOBILE / TABLET TOP NAV BAR ── */}
@@ -780,7 +915,7 @@ const Dashboard = () => {
               padding: "12px 16px",
               display: "flex",
               alignItems: "center",
-              justifyContent: "space-between",
+              justifyContent: isMobile ? "center" : "space-between",
               backdropFilter: "blur(8px)",
               width: "100%",
               boxSizing: "border-box",
@@ -795,7 +930,7 @@ const Dashboard = () => {
                 background: "#fff",
                 border: `1.5px solid ${tk.cardBorder}`,
                 color: tk.textPrimary,
-                display: "flex",
+                display: isMobile ? "none" : "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
@@ -832,7 +967,7 @@ const Dashboard = () => {
                 background: tk.textPrimary,
                 border: "none",
                 color: "#fff",
-                display: "flex",
+                display: isMobile ? "none" : "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
@@ -948,6 +1083,7 @@ const Dashboard = () => {
           {/* Mobile/tablet filters — stacked card */}
           {!isDesktop && (
             <div
+              ref={filtersRef}
               style={{
                 background: "#fff",
                 border: `1.5px solid ${tk.cardBorder}`,
@@ -1151,6 +1287,15 @@ const Dashboard = () => {
           )}
         </div>
       </main>
+
+      {isMobile && (
+        <MobileBottomNav
+          filteredCount={filteredAssignments.length}
+          onMenu={() => setSidebarOpen(true)}
+          onAdd={() => navigate("/addAssignment")}
+          onFilters={scrollToFilters}
+        />
+      )}
 
       {/* ══ LOGOUT CONFIRMATION MODAL ══ */}
       {showLogoutConfirm && (
