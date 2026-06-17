@@ -78,7 +78,14 @@ const Admin = () => {
         }}
       >
         <div className="admin-sidebar__inner">
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 32 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              marginBottom: 32,
+            }}
+          >
             <div
               style={{
                 width: 36,
@@ -95,9 +102,15 @@ const Admin = () => {
               A
             </div>
             <div>
-              <p style={{ margin: 0, color: tk.textPrimary, fontWeight: 800, fontSize: "0.95rem" }}>AssiTrack</p>
-              <p style={{ margin: 0, color: tk.textSecondary, fontSize: "0.68rem", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                Admin Panel
+              <p
+                style={{
+                  margin: 0,
+                  color: tk.textPrimary,
+                  fontWeight: 800,
+                  fontSize: "0.95rem",
+                }}
+              >
+                AssiTrack
               </p>
             </div>
           </div>
@@ -136,12 +149,34 @@ const Admin = () => {
             })}
           </nav>
 
-          <div style={{ marginTop: 32, paddingTop: 20, borderTop: `1px solid ${tk.sidebarBorder}` }}>
-            <p style={{ margin: "0 0 4px", color: tk.textPrimary, fontSize: "0.82rem", fontWeight: 600 }}>
+          <div
+            style={{
+              marginTop: 32,
+              paddingTop: 20,
+              borderTop: `1px solid ${tk.sidebarBorder}`,
+            }}
+          >
+            <p
+              style={{
+                margin: "0 0 4px",
+                color: tk.textPrimary,
+                fontSize: "0.82rem",
+                fontWeight: 600,
+              }}
+            >
               {user?.name || "Admin"}
             </p>
-            <p style={{ margin: "0 0 16px", color: tk.textSecondary, fontSize: "0.72rem" }}>{user?.email}</p>
+            <p
+              style={{
+                margin: "0 0 16px",
+                color: tk.textSecondary,
+                fontSize: "0.72rem",
+              }}
+            >
+              {user?.email}
+            </p>
             <button
+              className="bg-[#f76605] text-white"
               type="button"
               onClick={handleLogout}
               style={{
@@ -149,8 +184,6 @@ const Admin = () => {
                 padding: "10px 14px",
                 borderRadius: 10,
                 border: `1px solid ${tk.sidebarBorder}`,
-                background: "transparent",
-                color: tk.textPrimary,
                 fontSize: "0.78rem",
                 fontWeight: 600,
                 cursor: "pointer",
@@ -160,7 +193,7 @@ const Admin = () => {
                 gap: 8,
               }}
             >
-              <i className="ri-logout-box-r-line" />
+              <i className="ri-logout-box-r-line " />
               Logout
             </button>
           </div>
@@ -174,7 +207,7 @@ const Admin = () => {
             position: "sticky",
             top: 0,
             zIndex: 50,
-            background: "rgba(254,250,224,0.92)",
+            background: "white",
             backdropFilter: "blur(12px)",
             borderBottom: `1px solid ${tk.cardBorder}`,
             padding: "14px 24px",
@@ -204,30 +237,16 @@ const Admin = () => {
               <i className="ri-menu-line" style={{ fontSize: "1.1rem" }} />
             </button>
             <div>
-              <p style={{ margin: 0, fontSize: "0.68rem", fontWeight: 700, color: tk.textMuted, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                Administration
-              </p>
-              <h1 style={{ margin: 0, fontFamily: "'Playfair Display', serif", fontSize: "1.2rem" }}>
-                {NAV_ITEMS.find((n) => n.id === activeTab)?.label}
+              <h1
+                style={{
+                  margin: 0,
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: "1.2rem",
+                }}
+              >
+                Admin Panel
               </h1>
             </div>
-          </div>
-
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "6px 12px",
-              borderRadius: 999,
-              background: tk.accentSoft,
-              color: tk.textPrimary,
-              fontSize: "0.72rem",
-              fontWeight: 700,
-            }}
-          >
-            <i className="ri-shield-keyhole-line" />
-            Super Admin
           </div>
         </header>
 
