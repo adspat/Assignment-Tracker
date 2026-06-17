@@ -658,7 +658,7 @@ const StudentList = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const { semester, classs, branch } = location.state || {};
+  const { title,semester, classs, branch } = location.state || {};
   const { assignmentId } = useParams();
   const isMobile = useIsMobile();
 
@@ -851,12 +851,11 @@ const StudentList = () => {
         {/* Page header */}
         <header className={`flex justify-between items-start flex-wrap ${isMobile ? "gap-3.5 mb-4 pb-4" : "gap-5 mb-7 pb-6"} border-b`} style={{ borderColor: tk.cardBorder }}>
           <div className="min-w-0">
-            <p className="text-[0.62rem] font-bold tracking-[0.12em] uppercase mb-1.5" style={{ color: tk.accentBorder }}>Assignment Submissions</p>
             <h1
               className={`${isMobile ? "text-[1.55rem]" : "text-[2rem]"} font-black tracking-tight leading-tight m-0`}
               style={{ fontFamily: "'Playfair Display', serif", color: tk.textPrimary }}
             >
-              Student<span style={{ color: tk.accentBorder }}> Records</span>
+             <span> {title}</span>
             </h1>
             {branch && (
               <p className="mt-2 text-[0.76rem] font-normal flex items-center gap-1.5 flex-wrap" style={{ color: tk.textSecondary }}>
@@ -870,7 +869,7 @@ const StudentList = () => {
           </div>
 
           {/* Stat pills */}
-          {!loading && totalStudents > 0 && (
+          {/* {!loading && totalStudents > 0 && (
             <div className={`flex ${isMobile ? "gap-2 w-full" : "gap-2.5"} flex-wrap`}>
               {[
                 { label: "Total", val: totalStudents, colorClass: tk.textPrimary, bgStyle: tk.metaBg, borderStyle: tk.cardBorder },
@@ -883,7 +882,7 @@ const StudentList = () => {
                 </div>
               ))}
             </div>
-          )}
+          )} */}
 
           {/* Action buttons */}
           {!loading && (

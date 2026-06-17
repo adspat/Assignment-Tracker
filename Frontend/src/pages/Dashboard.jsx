@@ -525,6 +525,7 @@ const Dashboard = () => {
   const handleCardClick = (assignment) => {
     navigate(`/dashboard/${assignment._id}`, {
       state: {
+        title:assignment.title,
         semester: assignment.semester,
         classs: assignment.classs,
         branch: assignment.branch,
