@@ -41,26 +41,26 @@ const useBreakpoint = () => {
 
 /* ─── Palette tokens updated to the new theme ─── */
 const tk = {
-  sidebar: "#D4A373", // 5. Rich Tan Accent for primary dashboard structures
-  sidebarBorder: "#b58759", // Deepened Tan for clean separation
-  accent: "#CCD5AE", // 1. Sage Green for key indicators, buttons, active focus
-  accentHover: "#b6bf96", // Darker version of Sage Green for interactive feel
-  accentSoft: "#E9EDC9", // 2. Olive Cream for badges and light structural highlights
-  accentBorder: "#CCD5AE", // Sage border linking
-  canvas: "#FEFAE0", // 3. Warm Soft Cream for core viewport backdrop
-  card: "#ffffff", // White base remains optimal for clean text readouts
-  cardBorder: "rgba(212,163,115,0.25)", // Softened Tan outline
-  cardHoverBorder: "#CCD5AE", // Shifts to solid Sage on focus
-  textPrimary: "#4A443A", // Deep dark charcoal-brown matches earthy theme perfectly
-  textSecondary: "#6E675F", // Medium dark text values
-  textMuted: "#918A82", // Soft, compliant text indicators
+  sidebar: "#09050f",
+  sidebarBorder: "#f76605",
+  accent: "#34473c",
+  accentHover: "#28382f",
+  accentSoft: "rgba(52,71,60,0.10)",
+  accentBorder: "#34473c",
+  canvas: "#ffffff",
+  card: "#ffffff",
+  cardBorder: "rgba(247,102,5,0.20)",
+  cardHoverBorder: "#f76605",
+  textPrimary: "#09050f",
+  textSecondary: "#34473c",
+  textMuted: "#6b7f74",
   danger: "#e5484d",
   dangerSoft: "rgba(229,72,77,0.08)",
   success: "#30a46c",
   successSoft: "rgba(48,164,108,0.10)",
-  tagBg: "#E9EDC9", // 2. Olive highlight backdrop
-  metaBg: "#FAEDCD", // 4. Sand color for distinct structural info panels
-  metaBorder: "rgba(212,163,115,0.15)",
+  tagBg: "rgba(52,71,60,0.08)",
+  metaBg: "rgba(247,102,5,0.06)",
+  metaBorder: "rgba(247,102,5,0.12)",
 };
 
 /* ─── Shared select style ─── */
@@ -438,8 +438,8 @@ const Dashboard = () => {
     if (!isDesktop && sidebarOpen && sidebarRef.current) {
       gsap.fromTo(
         sidebarRef.current,
-        { x: -280 },
-        { x: 0, duration: 0.3, ease: "power3.out" },
+        { x: 200 },
+        { x: 0, duration: 0.3},
       );
       if (overlayRef.current) {
         gsap.fromTo(
@@ -723,7 +723,7 @@ const Dashboard = () => {
             justifyContent: "center",
             gap: 8,
             padding: "11px 0",
-            background: tk.textPrimary,
+            background: tk.sidebarBorder,
             color: "#fff",
             border: "none",
             borderRadius: 12,
@@ -738,7 +738,7 @@ const Dashboard = () => {
             e.currentTarget.style.transform = "translateY(-1px)";
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = tk.textPrimary;
+            e.currentTarget.style.background = tk.sidebarBorder;
             e.currentTarget.style.transform = "translateY(0)";
           }}
         >
