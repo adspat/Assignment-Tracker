@@ -158,42 +158,41 @@ const AddAssignment = () => {
   };
 
   const baseField =
-    "w-full px-3.5 py-2.5 border bg-[#FAEDCD]/40 text-sm text-[#4A443A] rounded-lg outline-none placeholder:text-[#AFA89E] focus:bg-white focus:ring-2 transition-all duration-150 shadow-sm";
+    "w-full px-3.5 py-2.5 border bg-[#09050f]/5 text-sm text-[#09050f] rounded-lg outline-none placeholder:text-[#09050f]/40 focus:bg-white focus:ring-2 transition-all duration-150 shadow-sm";
 
   const fieldClass = (hasError) =>
     `${baseField} ${
       hasError
         ? "border-rose-300 focus:border-rose-400 focus:ring-rose-100"
-        : "border-[#D4A373]/25 focus:border-[#CCD5AE] focus:ring-[#CCD5AE]/40"
+        : "border-[#34473c]/25 focus:border-[#34473c] focus:ring-[#34473c]/20"
     }`;
 
   const selectClass = (hasError) =>
     `${fieldClass(
       hasError
-    )} cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%234A443A%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem] bg-[right_0.5rem_center] bg-no-repeat pr-8 disabled:cursor-not-allowed disabled:opacity-60`;
+    )} cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2309050f%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%2F%3E%3C%2%2Fsvg%3E')] bg-[length:1.25rem] bg-[right_0.5rem_center] bg-no-repeat pr-8 disabled:cursor-not-allowed disabled:opacity-60`;
 
   const labelClass =
-    "text-[11px] font-semibold text-[#918A82] uppercase tracking-wider mb-1.5 block";
+    "text-[11px] font-semibold text-[#09050f]/70 uppercase tracking-wider mb-1.5 block";
 
   const errorText = "text-[11px] text-rose-500 font-medium mt-1";
 
   return (
-    <div className="min-h-[100dvh] w-full flex items-center justify-center bg-[#FEFAE0] p-3 sm:p-6 antialiased font-sans">
+    <div className="min-h-[100dvh] w-full flex items-center justify-center bg-white p-3 sm:p-6 antialiased font-sans">
       {/* Outer Card */}
-      <div className="w-full max-w-2xl bg-white border-[#D4A373] border-t-4 sm:border-t-[6px] shadow-xl rounded-2xl flex flex-col overflow-hidden max-h-[96dvh]">
+      <div className="w-full max-w-2xl bg-white border-[#34473c] border-t-4 sm:border-t-[6px] shadow-xl rounded-2xl flex flex-col overflow-hidden max-h-[96dvh]">
 
         {/* Header Section */}
-        <header className="px-4 sm:px-6 py-4 border-b border-[#D4A373]/15 flex items-start sm:items-center justify-between gap-3 bg-white shrink-0">
+        <header className="px-4 sm:px-6 py-4 border-b border-[#34473c]/15 flex items-start sm:items-center justify-between gap-3 bg-white shrink-0">
           <div className="min-w-0">
-            
-            <h1 className="text-base  sm:text-lg font-bold text-[#4A443A] tracking-tight truncate">
+            <h1 className="text-base sm:text-lg font-bold text-[#09050f] tracking-tight truncate">
               New Assignment Record
             </h1>
           </div>
           <button
             type="button"
             onClick={handleBack}
-            className="shrink-0 text-xs font-medium text-[#6E675F] hover:text-[#4A443A] border border-[#D4A373]/25 hover:border-[#D4A373] bg-white px-2.5 sm:px-3 py-1.5 rounded-lg shadow-sm transition-all duration-150 flex items-center gap-1 cursor-pointer"
+            className="shrink-0 text-xs font-medium text-[#09050f]/80 hover:text-[#09050f] border border-[#34473c]/25 hover:border-[#34473c] bg-white px-2.5 sm:px-3 py-1.5 rounded-lg shadow-sm transition-all duration-150 flex items-center gap-1 cursor-pointer"
           >
             <i className="ri-arrow-left-line text-sm"></i>
             <span className="hidden sm:inline">Back to Dashboard</span>
@@ -354,7 +353,7 @@ const AddAssignment = () => {
                       : ""
                   }`}
                 >
-                  <span className={`truncate ${formData.classs ? "" : "text-[#AFA89E]"}`}>
+                  <span className={`truncate ${formData.classs ? "" : "text-[#09050f]/40"}`}>
                     {!formData.branch
                       ? "Select branch first"
                       : loadingOptions.sections
@@ -368,7 +367,7 @@ const AddAssignment = () => {
                 {sectionOpen && (
                   <ul
                     role="listbox"
-                    className="absolute z-10 mt-1 w-full bg-white border border-[#D4A373]/25 rounded-lg shadow-lg max-h-60 overflow-y-auto py-1"
+                    className="absolute z-10 mt-1 w-full bg-white border border-[#34473c]/25 rounded-lg shadow-lg max-h-60 overflow-y-auto py-1"
                   >
                     {sections.map((section) => (
                       <li
@@ -381,8 +380,8 @@ const AddAssignment = () => {
                           });
                           setSectionOpen(false);
                         }}
-                        className={`px-4 py-2 hover:bg-[#E9EDC9] cursor-pointer text-sm text-[#4A443A] ${
-                          formData.classs === section ? "bg-[#E9EDC9]/60 font-semibold" : ""
+                        className={`px-4 py-2 hover:bg-[#34473c]/10 cursor-pointer text-sm text-[#09050f] ${
+                          formData.classs === section ? "bg-[#34473c]/15 font-semibold" : ""
                         }`}
                       >
                         {section}
@@ -429,7 +428,7 @@ const AddAssignment = () => {
                 <label className={labelClass}>
                   Instructions & Description
                 </label>
-                <span className="text-[11px] text-[#AFA89E] font-medium mb-1.5">
+                <span className="text-[11px] text-[#09050f]/40 font-medium mb-1.5">
                   optional
                 </span>
               </div>
@@ -445,24 +444,23 @@ const AddAssignment = () => {
           </div>
 
           {/* Action Footer */}
-          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-[#D4A373]/15 pt-4 mt-4 bg-white shrink-0">
-            <p className="text-[11px] text-[#918A82] font-medium text-center sm:text-left">
-              Fields marked <span className="text-rose-500">*</span> are
-              required.
+          <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-[#34473c]/15 pt-4 mt-4 bg-white shrink-0">
+            <p className="text-[11px] text-[#09050f]/60 font-medium text-center sm:text-left">
+              Fields marked <span className="text-rose-500">*</span> are required.
             </p>
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 disabled={loading}
                 onClick={handleBack}
-                className="flex-1 sm:flex-none px-4 py-2.5 text-xs font-semibold text-[#6E675F] hover:text-[#4A443A] border border-[#D4A373]/25 hover:bg-[#FAEDCD] rounded-lg shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="flex-1 sm:flex-none px-4 py-2.5 text-xs font-semibold text-[#09050f]/80 hover:text-[#09050f] border border-[#34473c]/25 hover:bg-[#09050f]/5 rounded-lg shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 sm:flex-none px-5 py-2.5 bg-[#CCD5AE] hover:bg-[#b6bf96] disabled:bg-[#918A82] text-[#4A443A] text-xs font-bold tracking-wide rounded-lg shadow-md hover:shadow-lg transition-all flex items-center gap-2 min-w-[150px] justify-center cursor-pointer"
+                className="flex-1 sm:flex-none cursor-pointer px-5 py-2.5 bg-[#f76605] hover:bg-[#27352d] disabled:bg-[#09050f]/40 text-white text-xs font-bold tracking-wide rounded-lg shadow-md hover:shadow-lg transition-all flex items-center gap-2 min-w-[150px] justify-center cursor-pointer"
               >
                 {loading ? (
                   <>
