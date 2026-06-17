@@ -8,15 +8,15 @@ import { playScanErrorSound, playScanSuccessSound } from "../utils/scanSounds";
 const tk = {
   canvas: "#FFFFFF",          // Pure White base for main layout backdrops
   card: "#FFFFFF",            // Pure White background surface for modules
-  accent: "#CCD5AE",          // 1. Sage Green for primary confirmation accents & buttons
-  accentHover: "#b6bf96",     // Darker iteration of Sage Green for interactive actions
-  accentSoft: "#E9EDC9",      // 2. Olive Cream for active tags, badge fills, and structural markers
-  accentBorder: "#D4A373",    // 5. Rich Tan Accent for explicit outlines & focal framework links
-  cardBorder: "rgba(212,163,115,0.25)", // Softened Tan wire edges
-  textPrimary: "#4A443A",     // Charcoal-Brown ensures premium high-contrast readability
-  textSecondary: "#6E675F",   // Medium muted text accents
-  textMuted: "#918A82",       // Soft label subtext color values
-  metaBg: "#FAEDCD",          // 4. Sand color for distinct content info matrices
+  accent: "#F76605",          // 1. Vivid Orange for primary confirmation accents & buttons
+  accentHover: "#D65804",     // Darker iteration of the orange for interactive actions
+  accentSoft: "#FDE6D5",      // 2. Soft Orange tint for active tags, badge fills, and structural markers
+  accentBorder: "#34473C",    // 5. Deep Forest Green for explicit outlines & focal framework links
+  cardBorder: "rgba(52,71,60,0.25)", // Softened Green wire edges
+  textPrimary: "#09050F",     // Near-Black ensures premium high-contrast readability
+  textSecondary: "#4A4651",   // Medium muted text accents
+  textMuted: "#8B8791",       // Soft label subtext color values
+  metaBg: "#E8ECE9",          // 4. Pale Green-Gray for distinct content info matrices
   danger: "#e5484d",
   dangerSoft: "rgba(229,72,77,0.08)",
   success: "#30a46c",
@@ -292,7 +292,7 @@ const DownloadDropdown = ({ students, assignmentId, isMobile }) => {
     setOpen(false);
   };
   const options = [
-    { label: "All Students", icon: "ri-team-line", color: tk.textPrimary, bg: "hover:bg-[#FEFAE0]", action: () => triggerDownload(buildCSV(students), "all"), count: students.length },
+    { label: "All Students", icon: "ri-team-line", color: tk.textPrimary, bg: "hover:bg-[#FDE6D5]", action: () => triggerDownload(buildCSV(students), "all"), count: students.length },
     { label: "Submitted Only", icon: "ri-checkbox-circle-line", color: tk.success, bg: "hover:bg-emerald-50", action: () => triggerDownload(buildCSV(students.filter((s) => s.status === "submitted")), "submitted"), count: students.filter((s) => s.status === "submitted").length },
     { label: "Pending Only", icon: "ri-time-line", color: tk.accentBorder, bg: "hover:bg-amber-50", action: () => triggerDownload(buildCSV(students.filter((s) => s.status !== "submitted")), "pending"), count: students.filter((s) => s.status !== "submitted").length },
   ];
@@ -1208,7 +1208,7 @@ const StudentRow = ({ item, idx, onSubmit, onUnsubmit, isSubmitting }) => {
       onMouseLeave={() => setHovered(false)}
       style={{ 
         borderColor: tk.cardBorder,
-        backgroundColor: hovered ? "rgba(212,163,115,0.04)" : "transparent", 
+        backgroundColor: hovered ? "rgba(247,102,5,0.05)" : "transparent", 
         animationDelay: `${idx * 0.04}s` 
       }}
     >
