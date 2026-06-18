@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
 import { AppContent } from "../context/AppContext";
 import { toast } from "react-toastify";
+import QRScannerModal from "../components/QRScannerModal";
+import { playScanErrorSound, playScanSuccessSound } from "../utils/scanSounds";
 
 /* ─── Google Fonts injection ─── */
 const fontLink = document.createElement("link");
@@ -357,6 +359,13 @@ const Dashboard = () => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  /* ── QR Scanner State ── */
+  const [scanningAssignmentId, setScanningAssignmentId] = useState(null);
+  const [scannerError, setScannerError] = useState("");
+  const [scannerSuccess, setScannerSuccess] = useState("");
+  const [qrProcessing, setQrProcessing] = useState(false);
+  const successClearTimerRef = useRef(null);
+
   const navigate = useNavigate();
   const { isMobile, isTablet, isDesktop } = useBreakpoint();
 
@@ -578,6 +587,70 @@ const Dashboard = () => {
         branch: assignment.branch,
       },
     });
+  };
+
+  /* ── QR Scanner Logic ── */
+  const showScannerFeedback = (type, message) => {
+    if (successClearTimerRef.current) {
+      clearTimeout(successClearTimerRef.current);
+    }
+    if (type === "success") {
+      setScannerError("");
+      setScannerSuccess(message);
+      playScanSuccessSound();
+    } else {
+      setScannerSuccess("");
+      setScannerError(message);
+      playScanErrorSound();
+    }
+    successClearTimerRef.current = setTimeout(() => {
+      setScannerSuccess("");
+      setScannerError("");
+    }, 2800);
+  };
+
+  useEffect(() => () => {
+    if (successClearTimerRef.current) clearTimeout(successClearTimerRef.current);
+  }, []);
+
+  const handleQRScan = async (scannedText) => {
+    if (!scannedText || !scanningAssignmentId) return;
+    const normalised = scannedText.trim().toLowerCase();
+    
+    setQrProcessing(true);
+    try {
+      const res = await API.get(`/api/submission/${scanningAssignmentId}`);
+      if (!res.data || !res.data.success) throw new Error("Failed to fetch submissions");
+      
+      const submissions = res.data.data;
+      const student = submissions.find(
+        (s) => s.studentId?.enrollment?.trim().toLowerCase() === normalised
+      );
+
+      if (!student) {
+        showScannerFeedback("error", `Enrollment "${scannedText}" not found in this assignment.`);
+        return;
+      }
+
+      if (student.status === "submitted") {
+        showScannerFeedback("error", `${student.studentId?.name || scannedText} is already submitted.`);
+        return;
+      }
+
+      const { data } = await API.put(`/api/submission/submit/${student._id}`, {});
+      if (data.success) {
+        showScannerFeedback("success", `${student.studentId?.name || scannedText} marked as submitted`);
+      } else {
+        showScannerFeedback("error", data.message || "Failed to update submission.");
+      }
+    } catch (error) {
+      showScannerFeedback(
+        "error",
+        error.response?.data?.message || error.message || "Failed to update submission."
+      );
+    } finally {
+      setQrProcessing(false);
+    }
   };
 
   const closeSidebar = () => {
@@ -1329,6 +1402,7 @@ const Dashboard = () => {
                   onCardClick={handleCardClick}
                   onEdit={handleEditAssignment}
                   onDelete={handleDeleteAssignment}
+                  onScanClick={(id) => setScanningAssignmentId(id)}
                 />
               ))}
             </div>
@@ -1484,6 +1558,21 @@ const Dashboard = () => {
         </div>
       )}
 
+      {/* ══ QR SCANNER MODAL ══ */}
+      {scanningAssignmentId && (
+        <QRScannerModal
+          onClose={() => {
+            setScanningAssignmentId(null);
+            setScannerError("");
+            setScannerSuccess("");
+          }}
+          onScan={handleQRScan}
+          isProcessing={qrProcessing}
+          error={scannerError}
+          successMessage={scannerSuccess}
+        />
+      )}
+
     </div>
   );
 };
@@ -1498,6 +1587,7 @@ const AssignmentCard = ({
   onCardClick,
   onEdit,
   onDelete,
+  onScanClick,
 }) => {
   const [hovered, setHovered] = useState(false);
 
@@ -1564,8 +1654,40 @@ const AssignmentCard = ({
           {a.title}
         </h3>
 
-        {/* Kebab menu */}
-        <div style={{ position: "relative", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "4px", flexShrink: 0 }}>
+          {/* Scan QR Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onScanClick(a._id);
+            }}
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 8,
+              background: "transparent",
+              border: "none",
+              color: tk.accent,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              transition: "all 0.15s",
+              fontSize: "1.1rem",
+            }}
+            title="Scan QR Code"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = tk.accentSoft;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "transparent";
+            }}
+          >
+            <i className="ri-qr-scan-2-line" />
+          </button>
+
+          {/* Kebab menu */}
+          <div style={{ position: "relative" }}>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -1673,6 +1795,7 @@ const AssignmentCard = ({
               </button>
             </div>
           )}
+        </div>
         </div>
       </div>
 
