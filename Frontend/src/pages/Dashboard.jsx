@@ -340,9 +340,18 @@ const MobileBottomNav = ({
 const Dashboard = () => {
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedSession, setSelectedSession] = useState("ALL");
-  const [selectedSemester, setSelectedSemester] = useState("ALL");
-  const [selectedClass, setSelectedClass] = useState("ALL");
+  
+  /* ── State initialized directly from localStorage cache ── */
+  const [selectedSession, setSelectedSession] = useState(() => {
+    return localStorage.getItem("filter_session") || "ALL";
+  });
+  const [selectedSemester, setSelectedSemester] = useState(() => {
+    return localStorage.getItem("filter_semester") || "ALL";
+  });
+  const [selectedClass, setSelectedClass] = useState(() => {
+    return localStorage.getItem("filter_class") || "ALL";
+  });
+
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [openMenuId, setOpenMenuId] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -356,6 +365,19 @@ const Dashboard = () => {
   const sidebarRef = useRef(null);
   const overlayRef = useRef(null);
   const filtersRef = useRef(null);
+
+  /* ── Sync active filters to storage cache whenever they change ── */
+  useEffect(() => {
+    localStorage.setItem("filter_session", selectedSession);
+  }, [selectedSession]);
+
+  useEffect(() => {
+    localStorage.setItem("filter_semester", selectedSemester);
+  }, [selectedSemester]);
+
+  useEffect(() => {
+    localStorage.setItem("filter_class", selectedClass);
+  }, [selectedClass]);
 
   /* ── Fetch ── */
   const fetchAssignments = async () => {
@@ -489,6 +511,12 @@ const Dashboard = () => {
       const { data } = await API.post("/auth/logout", {});
       if (data.success) {
         toast.success("Logout Success");
+        
+        // Optional: clear filters on true layout logout context
+        localStorage.removeItem("filter_session");
+        localStorage.removeItem("filter_semester");
+        localStorage.removeItem("filter_class");
+
         setIsLoggedIN(false);
         navigate("/");
       }
@@ -936,7 +964,7 @@ const Dashboard = () => {
                 justifyContent: "center",
                 cursor: "pointer",
                 fontSize: "1.1rem",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+                boxSizing: "0 1px 4px rgba(0,0,0,0.06)",
                 flexShrink: 0,
               }}
             >
@@ -1733,6 +1761,7 @@ const AssignmentCard = ({
             : deadline.toLocaleDateString(undefined, {
                 month: "short",
                 day: "numeric",
+                year: "numeric",
                 year: "numeric",
               })}
         </span>
