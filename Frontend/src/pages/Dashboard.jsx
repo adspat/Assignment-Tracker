@@ -379,6 +379,21 @@ const Dashboard = () => {
     localStorage.setItem("filter_class", selectedClass);
   }, [selectedClass]);
 
+  /* ── Restore Scroll position after loading finishes ── */
+  useEffect(() => {
+    if (!loading) {
+      const cachedScrollY = localStorage.getItem("dashboard_scroll_y");
+      if (cachedScrollY) {
+        // Wrap in a tiny timeout to ensure the DOM layout and cards render completely before shifting focus
+        const timer = setTimeout(() => {
+          window.scrollTo(0, parseInt(cachedScrollY, 10));
+          localStorage.removeItem("dashboard_scroll_y"); // Clean up key after restoration
+        }, 80);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [loading]);
+
   /* ── Fetch ── */
   const fetchAssignments = async () => {
     try {
@@ -512,10 +527,10 @@ const Dashboard = () => {
       if (data.success) {
         toast.success("Logout Success");
         
-        // Optional: clear filters on true layout logout context
         localStorage.removeItem("filter_session");
         localStorage.removeItem("filter_semester");
         localStorage.removeItem("filter_class");
+        localStorage.removeItem("dashboard_scroll_y");
 
         setIsLoggedIN(false);
         navigate("/");
@@ -547,10 +562,14 @@ const Dashboard = () => {
 
   const handleEditAssignment = (assignment) => {
     setOpenMenuId(null);
+    /* Cache the exact layout scroll marker position right before switching pages */
+    localStorage.setItem("dashboard_scroll_y", window.scrollY.toString());
     navigate(`/edit-assignment/${assignment._id}`, { state: { assignment } });
   };
 
   const handleCardClick = (assignment) => {
+    /* Cache the exact layout scroll marker position right before switching pages */
+    localStorage.setItem("dashboard_scroll_y", window.scrollY.toString());
     navigate(`/dashboard/${assignment._id}`, {
       state: {
         title:assignment.title,
@@ -1376,7 +1395,7 @@ const Dashboard = () => {
               <i className="ri-close-line" />
             </button>
 
-            <div style={{ textAlign: "center", marginBottom: 24 }}>
+            <div style={{ textAlignment: "center", marginBottom: 24 }}>
               <div
                 style={{
                   width: 56,
@@ -1761,7 +1780,6 @@ const AssignmentCard = ({
             : deadline.toLocaleDateString(undefined, {
                 month: "short",
                 day: "numeric",
-                year: "numeric",
                 year: "numeric",
               })}
         </span>
