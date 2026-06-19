@@ -528,7 +528,7 @@ const Dashboard = () => {
 
   /* ── Handlers ── */
   const { setIsLoggedIN, user } = useContext(AppContent);
-
+ 
   const handleLogout = async () => {
     setIsLoggingOut(true);
     try {
